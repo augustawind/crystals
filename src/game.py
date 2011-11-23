@@ -1,66 +1,33 @@
 """game.py"""
+import random
+
 import pyglet
-from pyglet.text.layout import TextLayout
-from pyglet.text.document import FormattedDocument, UnformattedDocument
 from pyglet.window import key, mouse
 
 import data
-
-class MainMenu:
-
-    def __init__(self, game_window):
-        self.game_window = game_window
-
-        self.document = FormattedDocument(
-            '<<< ??? >>>\n\n' +
-            '(n) new game\n' +
-            '(l) load game\n' +
-            '(q) quit')
-        self.document.set_style(0, len(self.document.text),
-                dict(font_name='monospace', color=(255, 255, 255, 255)))
-        self.document.set_paragraph_style(0, 2, dict(font_size=36))
-        self.document.set_paragraph_style(1, 4, dict(font_size=18))
-
-        self.layout = TextLayout(self.document, 200, 200, multiline=True)
-        self.layout.x = (self.game_window.width // 2) - \
-            (self.layout.width // 2)
-        self.layout.y = (self.game_window.height // 2) - \
-            (self.layout.height // 2)
-
-    def on_draw(self):
-        self.game_window.clear()
-        self.draw()
-
-    def on_key_press(self, symbol, modifiers):
-        if symbol in (key.Q, key.ESCAPE):
-            self.game_window.quit()
-        elif symbol == key.N:
-            self.game_window.new_game()
-        elif symbol == key.L:
-            self.game_window.load_game()
-
-    def activate(self):
-        self.game_window.on_key_press = self.on_key_press
-        self.game_window.on_draw = self.on_draw
-
-    def draw(self):
-        self.layout.draw()
+import interface
 
 class Game(pyglet.window.Window):
     """The main application class. Runs the game!"""
 
     def __init__(self):
-        super(Game, self).__init__(640, 680, caption='<<< ??? >>>',
+        super(Game, self).__init__(640, 680, caption='CRYSTALS',
             resizable=False)
 
         # main menu
-        self.main_menu = MainMenu(self)
+        self.main_menu = interface.MainMenu(self)
         # world
         self.world = None
         # combat
         self.combat = None
         # hero
         self.hero = None
+
+        # base clock delay
+        self.base_delay = 0.5
+
+        # added clock delays
+        self.wander_delay = 0.5
 
     def update_mode(self, mode):
         {'mainmenu': self.main_menu.activate,
@@ -76,6 +43,10 @@ class Game(pyglet.window.Window):
 
     def quit(self):
         pyglet.app.exit()
+
+    def schedule_interval(self, function, delay):
+        pyglet.clock.schedule_interval(self.update_characters,
+            self.base_delay + delay)
 
     def run(self):
         """Run the game."""
@@ -100,9 +71,45 @@ class Game(pyglet.window.Window):
                 self.world.step_entity(self.hero, 0, 1)
             elif symbol == key.L:
                 self.world.step_entity(self.hero, 1, 0)
+            elif symbol == key.Y:
+                self.world.step_entity(self.hero, -1, 1)
+            elif symbol == key.U:
+                self.world.step_entity(self.hero, 1, 1)
+            elif symbol == key.B:
+                self.world.step_entity(self.hero, -1, -1)
+            elif symbol == key.N:
+                self.world.step_entity(self.hero, 1, -1)
 
         self.on_draw = on_draw
         self.on_key_press = on_key_press
+
+        self.schedule_interval(self.update_characters, self.wander_delay)
+
+    def _choose_wander_dir(self, axes, x_dirs, y_dirs):
+        axis = axes[0]
+        if axis == 'x':
+            x_dir = x_dirs.pop()
+            y_dir = 0
+        else:
+            x_dir = 0 
+            y_dir = y_dirs.pop()
+        if not x_dirs:
+            axes.remove('x')
+        elif not y_dirs:
+            axes.remove('y')
+        return x_dir, y_dir
+
+    def update_characters(self, dt):
+        for character in self.world.get_characters():
+            if character is self.hero:
+                continue
+
+            axes = sorted(['x', 'y'], key=lambda x: random.random())
+            x_dirs = sorted([-1, 1], key=lambda x: random.random())
+            y_dirs = sorted([-1, 1], key=lambda x: random.random())
+            x_dir, y_dir = self._choose_wander_dir(axes, x_dirs, y_dirs)
+            while not self.world.step_entity(character, x_dir, y_dir):
+                x_dir, y_dir = self._choose_wander_dir(axes, x_dirs, y_dirs)
 
 if __name__ == '__main__':
     game = Game()
