@@ -1,4 +1,5 @@
 """world - methods for world generation and manipulation"""
+import logging
 
 from pyglet.sprite import Sprite
 from pyglet.graphics import Batch, OrderedGroup
@@ -9,17 +10,21 @@ TILE_HEIGHT = 24
 class Entity(Sprite):
     """A tangible thing. Populates Rooms."""
 
-    def __init__(self, name, walkable, image):
+    def __init__(self, name, walkable, image, interactable=None):
         super(Entity, self).__init__(image)
 
         self.name = name
         self.walkable = walkable
+        self.interactable = interactable
 
     def get_name(self):
         return self.name
 
     def is_walkable(self):
         return self.walkable
+
+    def get_interactable(self):
+        return self.interactable
 
 class Portal:
     """A set of coordinates that is connected to a Room. When an Entity is
@@ -64,12 +69,24 @@ class Room:
                     self._init_entity(entity, x, y)
 
     def _init_entity(self, entity, x, y):
+        logging.debug('{}._init_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+
         entity.batch = self.batch
         self._update_entity(entity, x, y)
         self.entities[str(entity)].append(entity)
+        
+        logging.debug('{}.entities[{}][-1] is now {}'.format(
+            self.name, str(entity), entity.get_name()))
 
     def _update_entity(self, entity, x, y):
+        logging.debug('{}._update_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+
         entity.set_position(x * TILE_WIDTH, y * TILE_HEIGHT)
+
+    def get_entities(self, x, y):
+        return [e for e in self._map[y][x]]
 
     def get_terrain(self):
         return self.entities['Terrain']
@@ -91,38 +108,67 @@ class Room:
         self.portals.extend(portals)
 
     def _place_entity(self, entity, x, y):
+        logging.debug('{}._place_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+
         if (0 <= x < self.width and 0 <= y < self.height and
                 self.is_walkable(x, y)):
+            logging.debug('{}._place_entity ==> in bounds and walkable'.format(
+                self.name))
             self._map[y][x].append(entity)
+            logging.debug(
+                '{}._place_entity ==> _map[{}][{}][-1] is now {}'.format(
+                    self.name, y, x, self._map[y][x][-1]))
             return True
         else:
+            logging.debug(
+                '{}._place_entity ==> out of bounds or not walkable'.format(
+                    self.name))
             return False
 
     def add_entity(self, entity, x, y):
+        logging.debug('{}.add_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+
         if self._place_entity(entity, x, y):
             self._init_entity(entity, x, y)
+            logging.debug('{}.add_entity ==> entity added'.format(self.name))
             return True
         else:
+            logging.debug('{}.add_entity ==> entity couldnt be added'.format(
+                self.name))
             return False
 
     def insert_entity(self, entity, x, y, z=0):
         self._map[y][x].insert(z, entity)
 
     def remove_entity(self, entity, x, y):
+        logging.debug('{}.remove_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+        
         self._map[y][x].remove(entity)
      
     def delete_entity(self, entity, x, y):
+        logging.debug('{}.delete_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), x, y))
+
         self.remove_entity(entity, x, y)
         self.entities[str(entity)].remove(entity)
+        
+        logging.debug('{} in {}.entities is {}'.format(
+            entity.get_name(), self.name, entity in self.entities))
 
     def pop_entity(self, x, y, z=-1):
         return self._map[y][x].pop(z)
 
     def move_entity(self, entity, new_x, new_y):
+        logging.debug('{}.move_entity({}, x={}, y={})'.format(
+            self.name, entity.get_name(), new_x, new_y)) 
+        
         if self._place_entity(entity, new_x, new_y):
+            old_x, old_y = self.get_coords(entity)
+            self.remove_entity(entity, old_x, old_y)
             self._update_entity(entity, new_x, new_y)
-            x, y = self.get_coords(entity)
-            self.remove_entity(entity, x, y)
             return True
         else:
             return False
@@ -173,6 +219,12 @@ class World:
 
     def get_portal(self, x, y):
         return self.current_room.get_portal(x, y)
+
+    def get_interactable(self, x, y):
+        for entity in self.current_room.get_entities(x, y):
+            interactable = entity.get_interactable()
+            if interactable:
+                return interactable
     
     def get_coords(self, entity):
         return self.current_room.get_coords(entity)
@@ -190,21 +242,12 @@ class World:
         self.current_room.pop_entity(x, y, z)
     
     def move_entity(self, entity, new_x, new_y):
-        if entity.get_name() == 'Hero':
-            print new_x, new_y
         if self.current_room.move_entity(entity, new_x, new_y):
-            if entity.get_name() == 'Hero':
-                print self.get_coords(entity)
             portal = self.get_portal(new_x, new_y)
             if portal:
                 self.portal_entity(entity, portal)
-                print self.get_coords(entity)
-            if entity.get_name() == 'Hero':
-                print
             return True
         else:
-            if entity.get_name() == 'Hero':
-                print
             return False
 
     def step_entity(self, entity, x_step, y_step):
@@ -212,7 +255,10 @@ class World:
         return self.move_entity(entity, x + x_step, y + y_step)
 
     def portal_entity(self, entity, portal):
-        self.current_room.deletee_entity_entity(entity, *portal.get_coords())
+        logging.debug('{}.portal_entity({}, {})'.format(
+            'World', entity.get_name(), portal.get_room().name))
+        
+        self.current_room.delete_entity(entity, *portal.get_coords())
         old_room = self.current_room
         self.current_room = portal.get_room()
         recieving_portal = self.current_room.get_portal_from_room(
@@ -222,4 +268,3 @@ class World:
     
     def draw(self):
         self.current_room.draw()
-                

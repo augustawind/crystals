@@ -4,9 +4,9 @@ from stats.character import MIN_ATTRS, MAX_ATTRS, MAX_LIFE, MIN_ENERGY, MAX_INV
 class Character(Entity):
     """An intelligent Entity."""
 
-    def __init__(self, name, image, lvl=1, attrs=MIN_ATTRS, life=MAX_LIFE,
-            energy=MIN_ENERGY, inv=[], team=None):
-        super(Character, self).__init__(name, False, image)
+    def __init__(self, name, image, interactable, lvl=1, attrs=MIN_ATTRS,
+            life=MAX_LIFE, energy=MIN_ENERGY, inv=[], team=None):
+        super(Character, self).__init__(name, False, image, interactable)
         
         self.lvl = lvl
         self.attrs = attrs
@@ -14,7 +14,8 @@ class Character(Entity):
         self.energy = energy
         self.inv = inv
 
-        self.direction = 1
+        self.dir_x = 1
+        self.dir_y = 0
 
     def __str__(self):
         return 'Character' 
@@ -60,12 +61,19 @@ class Character(Entity):
     def remove_item(self, item):
         self.inv.remove(item)
 
+    def get_direction(self):
+        return self.dir_x, self.dir_y
+
+    def set_direction(self, x, y):
+        self.dir_x = x
+        self.dir_y = y
+
 class Hero(Character):
 
     def __init__(self, image):
-        super(Hero, self).__init__('Hero', image)
+        super(Hero, self).__init__('Hero', image, None)
 
 class Wildman(Character):
 
-    def __init__(self, image):
-        super(Wildman, self).__init__('Wildman', image)
+    def __init__(self, image, interactable):
+        super(Wildman, self).__init__('Wildman', image, interactable)

@@ -7,6 +7,7 @@ import pyglet.resource
 import world
 import terrain
 import character
+import interaction
 
 pyglet.resource.path = ['data', 'data/img', 'data/world']
 pyglet.resource.reindex()
@@ -24,6 +25,15 @@ class ImageLoader(dict):
                     os.path.join(directory, filename))
 
 images = ImageLoader()
+
+def load_interactable(item_dict):
+    name = item_dict['interact-object']
+    count = int(item_dict['interact-count'])
+
+    if name == 'TextInteractable':
+        text = item_dict['interact-text']
+        return getattr(interaction, name)(count, text)
+        
 
 def load_room(room_dir, default_map_key, default_image_key, hero=None):
     """Returns a world.Room instance, given the name of the directory containing
@@ -86,7 +96,8 @@ def load_room(room_dir, default_map_key, default_image_key, hero=None):
             char = hero(image)
             hero = char
         else:
-            char = getattr(character, section)(image)
+            interactable = load_interactable(dict(char_parser.items(section)))
+            char = getattr(character, section)(image, interactable)
 
         x = char_parser.getint(section, 'x')
         y = char_parser.getint(section, 'y')

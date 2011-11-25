@@ -1,7 +1,35 @@
-from pyglet.text.layout import TextLayout
+from pyglet.text.layout import TextLayout, IncrementalTextLayout
 from pyglet.text.document import FormattedDocument, UnformattedDocument
-
 from pyglet.window import key, mouse
+from pyglet.graphics import OrderedGroup
+
+INTERFACE_GROUP = OrderedGroup(99)
+
+class MessageBox:
+
+    def __init__(self, game_window):
+        self.game_window = game_window
+
+        self.message_str = '==> '
+        self.document = UnformattedDocument(
+            self.message_str + 'Welcome!')
+        self.document.set_style(0, 0,
+                dict(font_name='monospace', font_size=12,
+                    color=(255, 255, 255, 255)))
+        
+        self.layout = IncrementalTextLayout(self.document,
+            self.game_window.width, 100, multiline=True,
+            group=INTERFACE_GROUP)
+        self.layout.x = 0
+        self.layout.y = 500
+
+    def print_message(self, text):
+        self.document.insert_text(len(self.document.text), 
+            '\\\n' + self.message_str + text)
+        self.layout.ensure_line_visible(-1)
+
+    def draw(self):
+        self.layout.draw()
 
 class MainMenu:
 
@@ -27,7 +55,7 @@ class MainMenu:
 
     def on_draw(self):
         self.game_window.clear()
-        self.draw()
+        self.layout.draw()
 
     def on_key_press(self, symbol, modifiers):
         if symbol in (key.Q, key.ESCAPE):
@@ -40,6 +68,3 @@ class MainMenu:
     def activate(self):
         self.game_window.on_key_press = self.on_key_press
         self.game_window.on_draw = self.on_draw
-
-    def draw(self):
-        self.layout.draw()
