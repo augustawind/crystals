@@ -18,10 +18,16 @@ class MessageBox:
                     color=(255, 255, 255, 255)))
         
         self.layout = IncrementalTextLayout(self.document,
-            self.game_window.width, 100, multiline=True,
+            self.game_window.width, 96, multiline=True,
             group=INTERFACE_GROUP)
         self.layout.x = 0
-        self.layout.y = 500
+        self.layout.y = 0
+
+    def get_width(self):
+        return self.layout.width
+
+    def get_height(self):
+        return self.layout.height
 
     def print_message(self, text):
         self.document.insert_text(len(self.document.text), 

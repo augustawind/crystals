@@ -36,7 +36,8 @@ def load_interactable(item_dict):
         
 
 def load_room(room_dir, default_map_key, default_image_key,
-        default_terrain_parser, default_character_parser, starting_room=None):
+        default_terrain_parser, default_character_parser, offset_x, offset_y,
+        starting_room=None):
     """Returns a world.Room instance, given the name of the directory containing
     config files for the Room. All files must be present. If relevant data is
     not present in image-key.ini and map-key.ini, `default_image_key` and
@@ -128,7 +129,7 @@ def load_room(room_dir, default_map_key, default_image_key,
         ordered_entities[2].append(character_obj)
 
     # return `Room` instance, list of entities, and `Hero` instance if appl.
-    room = world.Room(name, width, height, room_map)
+    room = world.Room(name, width, height, offset_x, offset_y, room_map)
     if starting_room:
         return room, ordered_entities, hero
     else:
@@ -150,7 +151,7 @@ def load_portals(room_dir, rooms):
 
     return portals
 
-def load_world():
+def load_world(offset_x, offset_y):
     """Return a `world.World` instance from data in the 'data/world' directory.
     """
     # load resources ----------------------------------------------------------
@@ -176,11 +177,11 @@ def load_world():
     for room_dir in os.listdir(os.path.join('data', 'world', 'rooms')):
         if room_dir == starting_room_name:
             room, entities, hero = load_room(room_dir, map_key, image_key,
-                terrain_parser, character_parser, True)
+                terrain_parser, character_parser, offset_x, offset_y, True)
             starting_room = room
         else:
             room, entities = load_room(room_dir, map_key, image_key,
-                terrain_parser, character_parser)
+                terrain_parser, character_parser, offset_x, offset_y)
         rooms[room_dir] = room
 
         for i in range(len(entities)):

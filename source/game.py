@@ -58,7 +58,7 @@ class Game(pyglet.window.Window):
     # -------------------------------------------------------------------------
 
     def new_game(self):
-        self.world = data.load_world()
+        self.world = data.load_world(0, self.message_box.get_height())
         self.hero = self.world.get_hero()
 
         self.update_mode('world')
@@ -75,8 +75,8 @@ class Game(pyglet.window.Window):
     def activate_world_mode(self):
         def on_draw():
             self.clear()
-            self.world.draw()
             self.message_box.draw()
+            self.world.draw()
 
         def on_key_press(symbol, modifiers):
             """World mode controls. User can move Hero to interact with other
