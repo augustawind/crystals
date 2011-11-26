@@ -1,2 +1,0 @@
-INF_USES = 0
-MAX_USES = 99
