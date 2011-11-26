@@ -45,7 +45,9 @@ class WorldLoader:
         self.character_parser = ConfigParser()
         self.character_parser.read(os.path.join(self.root_dir, 'character.ini'))
 
-    def load_interactable(self, item_dict):
+    # internal interface ------------------------------------------------------
+
+    def _load_interactable(self, item_dict):
         name = item_dict['interact-object']
         count = int(item_dict['interact-count'])
 
@@ -53,7 +55,7 @@ class WorldLoader:
             text = item_dict['interact-text']
             return getattr(interaction, name)(count, text)
 
-    def load_room(self, room_dir, starting_room=False):
+    def _load_room(self, room_dir, starting_room=False):
         """Returns a world.Room instance, given the name of the directory
         containing config files for the Room. All files must be present. If
         relevant data is not present in image-key.ini and map-key.ini,
@@ -133,10 +135,10 @@ class WorldLoader:
                 # get `Interactable` object for non-player character
                 if character_parser.has_option(
                         character_name, 'interact-object'):
-                    interactable = self.load_interactable(
+                    interactable = self._load_interactable(
                         dict(character_parser.items(character_name)))
                 else:
-                    interactable = self.load_interactable(
+                    interactable = self._load_interactable(
                         dict(self.character_parser.items(character_name)))
                 # instantiate non-player character
                 character_obj = character.Character(
@@ -156,7 +158,7 @@ class WorldLoader:
         else:
             return room, ordered_entities
 
-    def load_portals(self, room_dir):
+    def _load_portals(self, room_dir):
         """Return list of `world.Portal` instances for a room,
         generated from data in 'portal-key.ini'."""
         portal_key = ConfigParser()
@@ -172,6 +174,8 @@ class WorldLoader:
 
         return portals
 
+    # public interface --------------------------------------------------------
+
     def load_world(self):
         """Return a `world.World` instance from data in the 'data/world'
         directory."""
@@ -181,10 +185,10 @@ class WorldLoader:
         ordered_entities = [[], [], []]
         for room_dir in os.listdir(os.path.join('data', 'world', 'rooms')):
             if room_dir == starting_room_name:
-                room, entities, hero = self.load_room(room_dir, True)
+                room, entities, hero = self._load_room(room_dir, True)
                 starting_room = room
             else:
-                room, entities = self.load_room(room_dir)
+                room, entities = self._load_room(room_dir)
             self.rooms[room_dir] = room
 
             for i in range(len(entities)):
@@ -192,7 +196,7 @@ class WorldLoader:
 
         # add portals to rooms ------------------------------------------------
         for room_name, room in self.rooms.items():
-            portals = self.load_portals(room_name)
+            portals = self._load_portals(room_name)
             room.add_portals(*portals)
 
         # return `world.World` instance ---------------------------------------
