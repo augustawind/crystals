@@ -27,7 +27,7 @@ class Game(pyglet.window.Window):
 
         self.base_delay = 0.125
         self.wander_frequency = 0.05
-        self.key_pressed = (None, None)
+        self.queued_input = None
 
         # dict of argument tuples for calls to Interactable.interact,
         # indexed by str(Interactable)
@@ -36,11 +36,11 @@ class Game(pyglet.window.Window):
 
         # keyboard controls
         self.movement_keys = {
-            'up': key.UP,
-            'down': key.DOWN,
-            'left': key.LEFT,
-            'right': key.RIGHT}
-        self.interact_key = key.SPACE
+            'up': key.MOTION_UP,
+            'down': key.MOTION_DOWN,
+            'left': key.MOTION_LEFT,
+            'right': key.MOTION_RIGHT}
+        self.interact_key = ' '
 
     # application logic
     # -------------------------------------------------------------------------
@@ -79,44 +79,44 @@ class Game(pyglet.window.Window):
             self.message_box.draw()
             self.world.draw()
 
-        def on_key_press(symbol, modifiers):
+        def on_text_motion(motion):
             """World mode controls. User can move Hero to interact with other
             Entities in World, initiate Combat, and access the pause menu."""
-            self.key_pressed = (symbol, modifiers)
+            self.queued_input = motion
 
-        def on_key_release(symbol, modifiers):
-            self.key_pressed = (None, None)
+        def on_text(text):
+            self.queued_input = text
 
         self.on_draw = on_draw
-        self.on_key_press = on_key_press
-        self.on_key_release = on_key_release
+        self.on_text_motion = on_text_motion
+        self.on_text = on_text
 
         pyglet.clock.schedule_interval(self.update_characters, self.base_delay)
 
     def update_characters(self, dt):
         for character in self.world.get_characters():
             if character is self.hero:
-                symbol, modifiers = self.key_pressed
-                if symbol in self.movement_keys.values():
-                    self.hero_move(symbol)
-                elif symbol == self.interact_key:
+                if self.queued_input in self.movement_keys.values():
+                    self.hero_move()
+                elif self.queued_input == self.interact_key:
                     self.hero_interact()
+                self.queued_input = None
             else:
                 self.npc_wander(character)
 
     # hero methods
     # -------------------------------------------------------------------------
 
-    def hero_move(self, symbol):
+    def hero_move(self):
         x = 0
         y = 0
-        if symbol == self.movement_keys['left']:
+        if self.queued_input == self.movement_keys['left']:
             x = -1
-        if symbol == self.movement_keys['down']:
+        if self.queued_input == self.movement_keys['down']:
             y = -1
-        if symbol == self.movement_keys['up']:
+        if self.queued_input == self.movement_keys['up']:
             y = 1
-        if symbol == self.movement_keys['right']:
+        if self.queued_input == self.movement_keys['right']:
             x = 1
 
         self.world.step_hero(x, y)

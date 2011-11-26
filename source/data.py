@@ -26,9 +26,7 @@ class ImageLoader(dict):
 
 class WorldLoader:
 
-    def __init__(self, offset_x, offset_y):
-        self.offset_x = offset_x
-        self.offset_y = offset_y
+    def __init__(self):
         self.images = ImageLoader()
         self.rooms = {}
         self.root_dir = os.path.join('data', 'world')
@@ -151,8 +149,7 @@ class WorldLoader:
             ordered_entities[2].append(character_obj)
 
         # return `Room` instance, list of entities, and `Hero` instance if appl.
-        room = world.Room(
-            name, width, height, self.offset_x, self.offset_y, room_map)
+        room = world.Room(name, width, height, room_map)
         if starting_room:
             return room, ordered_entities, hero
         else:
