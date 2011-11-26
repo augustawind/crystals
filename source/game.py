@@ -58,7 +58,8 @@ class Game(pyglet.window.Window):
     # -------------------------------------------------------------------------
 
     def new_game(self):
-        self.world = data.load_world(0, self.message_box.get_height())
+        world_loader = data.WorldLoader(0, self.message_box.get_height())
+        self.world = world_loader.load_world()
         self.hero = self.world.get_hero()
 
         self.update_mode('world')
