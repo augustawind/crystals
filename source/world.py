@@ -6,6 +6,12 @@ from pyglet.graphics import Batch, OrderedGroup
 
 TILE_WIDTH = 24
 TILE_HEIGHT = 24
+OFFSET_COLS = 0
+OFFSET_ROWS = 2
+VIEWPORT_ROWS = 15
+VIEWPORT_COLS = 15
+VIEWPORT = dict(x1=OFFSET_COLS, x2=OFFSET_COLS + VIEWPORT_COLS,
+                y1=OFFSET_ROWS, y2=OFFSET_ROWS + VIEWPORT_ROWS)
 
 class Entity(Sprite):
     """A tangible thing. Populates Rooms."""
@@ -46,16 +52,16 @@ class Room:
     """A 3-dimensional grid that contains Entities and Portals to other Rooms.
     Populates a World."""
 
-    def __init__(self, name, width, height, offset_x, offset_y,
-            _map=[], portals=[]):
+    def __init__(self, name, width, height, _map=[], portals=[]):
         self.name = name
         self.width = width
-        self.offset_x = offset_x
-        self.offset_y = offset_y
         self.height = height
         self.portals = portals
 
         self.batch = Batch()
+
+        self.pan_x = 0
+        self.pan_y = 0
 
         self.entities = {'Character': [], 'Item': [], 'Terrain': []}
 
@@ -64,14 +70,36 @@ class Room:
             self._init_entities()
         else:
             self._map = [[[] for x in width] for y in height]
-    
+
     def draw(self):
         self.batch.draw()
+
+    def pan_camera(self, x, y):
+        self.pan_x += x
+        self.pan_y += y
+        self._update_viewport()
+
+    def center_camera(self, entity):
+        x, y = self.get_coords(entity)
+        self.pan_x = x - (VIEWPORT_COLS / 2)
+        self.pan_y = y - (VIEWPORT_ROWS / 2)
+        self._update_viewport()
 
     def add_portals(self, *portals):
         self.portals.extend(portals)
 
     # internal methods --------------------------------------------------------
+
+    def _update_viewport(self):
+        for y in range(len(self._map)):
+            for x in range(len(self._map[y])):
+                for entity in self._map[y][x]:
+                    self._update_entity(entity, x, y)
+                    if (VIEWPORT['x1'] <= x-self.pan_x < VIEWPORT['x2'] and
+                            VIEWPORT['y1'] <= y-self.pan_y < VIEWPORT['y2']):
+                        entity.batch = self.batch
+                    else:
+                        entity.batch = None
 
     def _init_entities(self):
         for y in range(len(self._map)):
@@ -83,7 +111,6 @@ class Room:
         logging.debug('{}._init_entity({}, x={}, y={})'.format(
             self.name, entity.get_name(), x, y))
 
-        entity.batch = self.batch
         self._update_entity(entity, x, y)
         self.entities[str(entity)].append(entity)
         
@@ -94,12 +121,13 @@ class Room:
         logging.debug('{}._update_entity({}, x={}, y={})'.format(
             self.name, entity.get_name(), x, y))
 
-        x_coord = (x * TILE_WIDTH) + self.offset_x
-        y_coord = (y * TILE_HEIGHT) + self.offset_y
+        x_coord = (x + VIEWPORT['x1'] - self.pan_x) * TILE_WIDTH
+        y_coord = (y + VIEWPORT['y1'] - self.pan_y) * TILE_HEIGHT
 
         logging.debug('{}._update_entity ==> x={}, y={}'.format(self.name,
             x_coord, y_coord))
         entity.set_position(x_coord, y_coord)
+
 
     def _place_entity(self, entity, x, y):
         logging.debug('{}._place_entity({}, x={}, y={})'.format(
@@ -141,8 +169,8 @@ class Room:
         logging.debug('{}.get_coords({})'.format(
             self.name, entity.get_name()))
 
-        x_coord = (entity.x - self.offset_x) / TILE_WIDTH
-        y_coord = (entity.y - self.offset_y) / TILE_HEIGHT
+        x_coord = (entity.x / TILE_WIDTH) - VIEWPORT['x1'] + self.pan_x
+        y_coord = (entity.y / TILE_HEIGHT) - VIEWPORT['y1'] + self.pan_y
         logging.debug('{}.get_coords ==> x={}, y={}'.format(self.name,
             x_coord, y_coord))
         return x_coord, y_coord
@@ -205,7 +233,7 @@ class Room:
         
         if self._place_entity(entity, new_x, new_y):
             old_x, old_y = self.get_coords(entity)
-            logging.debug('{}.move_entity ==> old_x = {}, old_y = {}'.format(
+            logging.debug('{}.move_entity ==> old_x={}, old_y={}'.format(
                 self.name, old_x, old_y))
             self.remove_entity(entity, old_x, old_y)
             self._update_entity(entity, new_x, new_y)
@@ -228,6 +256,8 @@ class World:
             self.render_groups.append(OrderedGroup(i))
             for entity in ordered_entities[i]:
                 entity.group = self.render_groups[-1]
+
+        self.current_room.center_camera(self.hero)
 
     def draw(self):
         self.current_room.draw()
@@ -292,6 +322,10 @@ class World:
         x, y = self.get_coords(entity)
         return self.move_entity(entity, x + x_step, y + y_step)
 
+    def step_hero(self, x_step, y_step):
+        if self.step_entity(self.hero, x_step, y_step):
+            self.current_room.pan_camera(x_step, y_step)
+
     def portal_entity(self, entity, portal):
         logging.debug('{}.portal_entity({}, {})'.format(
             'World', entity.get_name(), portal.get_room().name))
@@ -303,3 +337,4 @@ class World:
             old_room)
         x, y = recieving_portal.get_coords()
         self.add_entity(entity, x, y)
+        self.current_room.center_camera(entity)

@@ -58,7 +58,7 @@ class Game(pyglet.window.Window):
     # -------------------------------------------------------------------------
 
     def new_game(self):
-        world_loader = data.WorldLoader(0, self.message_box.get_height())
+        world_loader = data.WorldLoader()
         self.world = world_loader.load_world()
         self.hero = self.world.get_hero()
 
@@ -119,7 +119,7 @@ class Game(pyglet.window.Window):
         if symbol == self.movement_keys['right']:
             x = 1
 
-        self.world.step_entity(self.hero, x, y)
+        self.world.step_hero(x, y)
         self.hero.set_direction(x, y)
 
     def hero_interact(self):
