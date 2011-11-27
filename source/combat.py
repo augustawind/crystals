@@ -1,23 +1,53 @@
 """combat.py"""
 
-from stats import COMBAT
+from stats.combat import *
 
+class Battle:
 
-def hunt(world, attacker, foes):
-    pass
+    def __init__(self, game_window):
+        self.game_window = game_window
 
-def attack(attacker, defender):
-    if not COMBAT.attack_hits(attacker, defender):
-        return 'miss'
-    damage = COMBAT.get_damage(attacker, defender)
-    if not defender.mod_life(-damage):
-        return 'fail'
-    return 'hit'
+        self.allies = []
+        self.enemies = []
+        self.rotation = []
 
-def battle(world, *fighters):
-    for attacker in COMBAT.get_rotation(fighters):
-        foes = [f for f in fighters if f.get_team() is not attacker.get_team()]
-        action, args = ai.get_action(world, attacker, foes)
-        BATTLE_ACTIONS[action](*args)
+    def start(self, allies, enemies):
+        self.allies = allies
+        self.enemies = enemies
 
-BATTLE_ACTIONS = {'hunt': hunt, 'attack': attack}
+    def start_round(self):
+        self.rotation = iter(get_rotation(self.allies + self.enemies))
+
+    def next(self):
+        if self.is_battle_over():
+            return False
+
+        try:
+            actor = self.rotation.next() 
+        except StopIteration:
+            self.start_round()
+            actor = self.rotation.next()
+        while not actor.is_alive():
+            try:
+                actor = self.rotation.next() 
+            except StopIteration:
+                self.start_round()
+                actor = self.rotation.next()
+
+        if actor in self.allies:
+            pass # get action from player
+        else:
+            pass # determine enemy action
+
+        return True
+
+    def is_battle_over(self):
+        return bool(self.allies and self.enemies)
+
+    def get_winner(self):
+        if not self.enemies:
+            winner = self.allies
+        else:
+            winner = self.enemies
+
+        return winner
