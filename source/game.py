@@ -25,7 +25,7 @@ class Game(pyglet.window.Window):
         self.hero = None
 
         # world mode variables ------------------------------------------------
-        self.base_delay = 0.125
+        self.base_delay = 0.1
         self.wander_frequency = 0.05
         self.queued_input = None
 
