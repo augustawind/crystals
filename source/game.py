@@ -17,6 +17,7 @@ class Game(pyglet.window.Window):
             resizable=False)
 
         self.main_menu = interface.MainMenu(self)
+        self.pause_menu = interface.PauseMenu(self)
         self.message_box = interface.MessageBox(self)
 
         self.world = None
@@ -24,7 +25,6 @@ class Game(pyglet.window.Window):
         self.hero = None
 
         # world mode variables ------------------------------------------------
-
         self.base_delay = 0.125
         self.wander_frequency = 0.05
         self.queued_input = None
@@ -41,18 +41,15 @@ class Game(pyglet.window.Window):
             'left': key.MOTION_LEFT,
             'right': key.MOTION_RIGHT}
         self.interact_key = ' '
+        self.pause_key = key.ENTER
 
     # application logic
     # -------------------------------------------------------------------------
 
     def run(self):
         """Run the game."""
-        self.update_mode('mainmenu')
+        self.main_menu.activate()
         pyglet.app.run()
-
-    def update_mode(self, mode):
-        {'mainmenu': self.main_menu.activate,
-            'world': self.activate_world_mode}[mode]()
 
     # main menu mode methods
     # -------------------------------------------------------------------------
@@ -62,7 +59,7 @@ class Game(pyglet.window.Window):
         self.world = world_loader.load_world()
         self.hero = self.world.get_hero()
 
-        self.update_mode('world')
+        self.activate_world_mode()
 
     def load_game(self):
         pass
@@ -87,11 +84,20 @@ class Game(pyglet.window.Window):
         def on_text(text):
             self.queued_input = text
 
+        def on_key_press(symbol, modifiers):
+            if symbol == self.pause_key:
+                self.activate_pause_menu()
+
         self.on_draw = on_draw
         self.on_text_motion = on_text_motion
         self.on_text = on_text
+        self.on_key_press = on_key_press
 
         pyglet.clock.schedule_interval(self.update_characters, self.base_delay)
+
+    def activate_pause_menu(self):
+        pyglet.clock.unschedule(self.update_characters)
+        self.pause_menu.activate()
 
     def update_characters(self, dt):
         for character in self.world.get_characters():
