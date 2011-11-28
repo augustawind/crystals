@@ -1,4 +1,5 @@
-"""combat.py"""
+"""combat.py - classes for executing and rendering combat"""
+
 from random import random
 
 from stats.combat import *

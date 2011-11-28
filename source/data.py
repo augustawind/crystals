@@ -1,4 +1,5 @@
-"""data.py"""
+"""data.py - classes for loading world, image, and sound data"""
+
 import os
 from ConfigParser import ConfigParser
 

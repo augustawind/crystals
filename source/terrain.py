@@ -1,4 +1,4 @@
-"""terrain.py"""
+"""terrain.py - entities that make up the static part of the world"""
 
 from world import Entity
 

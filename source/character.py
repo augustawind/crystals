@@ -1,4 +1,5 @@
-"""character.py"""
+"""character.py - intelligent entities that interact with the world"""
+
 from world import Entity
 
 ATTRS = ['str', 'end', 'agl', 'dex', 'wil', 'int']

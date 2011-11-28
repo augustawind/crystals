@@ -1,4 +1,5 @@
-"""interface.py"""
+"""interface.py - game menus, menu input, and text"""
+
 from pyglet.text.layout import TextLayout, IncrementalTextLayout
 from pyglet.text.document import FormattedDocument, UnformattedDocument
 from pyglet.window import key, mouse

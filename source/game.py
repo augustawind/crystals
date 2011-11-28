@@ -1,4 +1,5 @@
-"""game.py"""
+"""game.py - top-level application logic"""
+
 import random
 import logging
 import sys

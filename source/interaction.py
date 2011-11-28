@@ -1,4 +1,4 @@
-"""interaction.py"""
+"""interaction.py - interaction between the player and other world entities"""
 
 class Interactable(object):
 

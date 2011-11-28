@@ -1,4 +1,5 @@
-"""world - methods for world generation and manipulation"""
+"""world.py - world layout, world rendering, and entity placement"""
+
 import logging
 
 from pyglet.sprite import Sprite

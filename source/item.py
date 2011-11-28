@@ -1,4 +1,5 @@
-"""item.py"""
+"""item.py - entities that can be acquired and evoked by characters"""
+
 from world import Entity
 
 INF_USES = 0
