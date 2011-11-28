@@ -1,6 +1,8 @@
 """item.py"""
-
 from world import Entity
+
+INF_USES = 0
+MAX_USES = 99
 
 class Item(Entity):
     

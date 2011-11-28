@@ -1,5 +1,14 @@
+"""character.py"""
 from world import Entity
-from stats.character import MIN_ATTRS, MAX_ATTRS, MAX_LIFE, MIN_ENERGY, MAX_INV
+
+ATTRS = ['str', 'end', 'agl', 'dex', 'wil', 'int']
+MIN_ATTRS = dict((a, 1) for a in ATTRS)
+MAX_ATTRS = dict((a, 99) for a in ATTRS)
+
+MAX_LIFE = 99
+MIN_ENERGY = 99
+
+MAX_INV = 10
 
 class Character(Entity):
     """An intelligent Entity."""
