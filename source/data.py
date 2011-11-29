@@ -37,7 +37,10 @@ class WorldLoader:
         self.bg_name = ''
         self.bg_image = None
 
-        # load configuration defaults
+        # load configuration defaults--
+        # When a room config file is called upon and data is not present,
+        # the data will be obtained from these parsers instead. Only
+        # 'world-key.ini' is required to exist.
         self.world_key = ConfigParser()
         self.world_key.read(os.path.join(self.root_dir, 'world-key.ini'))
         self.map_key = ConfigParser()
@@ -49,7 +52,8 @@ class WorldLoader:
         self.character_parser = ConfigParser()
         self.character_parser.read(os.path.join(self.root_dir, 'character.ini'))
 
-    # internal interface ------------------------------------------------------
+    # internal interface 
+    # -------------------------------------------------------------------------
 
     def _load_interactable(self, item_dict):
         name = item_dict['interact-object']
@@ -61,10 +65,8 @@ class WorldLoader:
 
     def _load_room(self, room_dir, starting_room=False):
         """Returns a world.Room instance, given the name of the directory
-        containing config files for the Room. All files must be present. If
-        relevant data is not present in image-key.ini and map-key.ini,
-        `default_image_key` and `default_map_key` will be searched,
-        respectively."""
+        containing config files for the Room. terrain.ini, character.ini, and
+        item.ini may be absent if sufficient defaults were provided."""
 
         # load resources ------------------------------------------------------
         map_file = pyglet.resource.file(
@@ -197,7 +199,8 @@ class WorldLoader:
 
         return portals
 
-    # public interface --------------------------------------------------------
+    # public interface
+    # -------------------------------------------------------------------------
 
     def load_world(self):
         """Return a `world.World` instance from data in the 'data/world'

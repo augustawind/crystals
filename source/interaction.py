@@ -1,10 +1,14 @@
 """interaction.py - interaction between the player and other world entities"""
+import abc
 
 class Interactable(object):
+
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, count):
         self.count = count
 
+    @abc.abstractmethod
     def interact(self):
         if self.count == -1:
             return True

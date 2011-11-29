@@ -78,21 +78,8 @@ class Room:
     def draw(self):
         self.batch.draw()
 
-    def pan_camera(self, x, y):
-        self.pan_x += x
-        self.pan_y += y
-        self._update_viewport()
-
-    def center_camera(self, entity):
-        x, y = self.get_coords(entity)
-        self.pan_x = x - (VIEWPORT_COLS / 2)
-        self.pan_y = y - (VIEWPORT_ROWS / 2)
-        self._update_viewport()
-
-    def add_portals(self, *portals):
-        self.portals.extend(portals)
-
-    # internal methods --------------------------------------------------------
+    # internal methods
+    # -------------------------------------------------------------------------
 
     def _update_viewport(self):
         for y in range(len(self._map)):
@@ -152,8 +139,10 @@ class Room:
                     self.name))
             return False
 
-    # "get" methods -----------------------------------------------------------
+    # public methods
+    # -------------------------------------------------------------------------
 
+    # "get" methods -----------------------------------------------------------
     def is_walkable(self, x, y):
         return all([e.is_walkable() for e in self._map[y][x]])
 
@@ -191,7 +180,6 @@ class Room:
                 return portal
 
     # adding entities ---------------------------------------------------------
-
     def add_entity(self, entity, x, y):
         logging.debug('{}.add_entity({}, x={}, y={})'.format(
             self.name, entity.get_name(), x, y))
@@ -209,7 +197,6 @@ class Room:
         self._map[y][x].insert(z, entity)
 
     # removing entities -------------------------------------------------------
-
     def remove_entity(self, entity, x, y):
         logging.debug('{}.remove_entity({}, x={}, y={})'.format(
             self.name, entity.get_name(), x, y))
@@ -230,7 +217,6 @@ class Room:
         return self._map[y][x].pop(z)
 
     # moving entities ---------------------------------------------------------
-
     def move_entity(self, entity, new_x, new_y):
         logging.debug('{}.move_entity({}, x={}, y={})'.format(
             self.name, entity.get_name(), new_x, new_y)) 
@@ -244,6 +230,21 @@ class Room:
             return True
         else:
             return False
+
+    # camera placement --------------------------------------------------------
+    def pan_camera(self, x, y):
+        self.pan_x += x
+        self.pan_y += y
+        self._update_viewport()
+
+    def center_camera(self, entity):
+        x, y = self.get_coords(entity)
+        self.pan_x = x - (VIEWPORT_COLS / 2)
+        self.pan_y = y - (VIEWPORT_ROWS / 2)
+        self._update_viewport()
+
+    def add_portals(self, *portals):
+        self.portals.extend(portals)
 
 class World:
     """A collection of rooms that should be connected to each other by portals.
@@ -275,7 +276,6 @@ class World:
         self.current_room.draw()
 
     # "get" methods -----------------------------------------------------------
-
     def is_walkable(self, x, y):
         return self.current_room.is_walkable(x, y)
 
@@ -304,7 +304,6 @@ class World:
         return self.current_room.get_coords(entity)
 
     # adding entities ---------------------------------------------------------
-    
     def add_entity(self, entity, x, y):
         self.current_room.add_entity(entity, x, y)
     
@@ -312,7 +311,6 @@ class World:
         self.current_room.add_entity(entity, x, y, z)
 
     # removing entities -------------------------------------------------------
-    
     def remove_entity(self, entity, x, y):
         self.current_room.remove_entity(entity, x, y)
     
@@ -320,7 +318,6 @@ class World:
         self.current_room.pop_entity(x, y, z)
 
     # moving entities ---------------------------------------------------------
-    
     def move_entity(self, entity, new_x, new_y):
         if self.current_room.move_entity(entity, new_x, new_y):
             portal = self.get_portal(new_x, new_y)

@@ -1,4 +1,5 @@
 """interface.py - game menus, menu input, and text"""
+from abc import ABCMeta
 
 import pyglet
 from pyglet.text.layout import TextLayout, IncrementalTextLayout
@@ -14,6 +15,10 @@ FONT_TERMINUS = 'Terminus'
 DEFAULT_FONT = FONT_RUNESCAPE_UF
 
 class Menu(object):
+    """When activated, displays a list of options with corresponding keyboard
+    keys and handles corresponding key presses."""
+    
+    __metaclass__ = ABCMeta
 
     def __init__(self, game_window):
         self.game_window = game_window
@@ -33,6 +38,57 @@ class Menu(object):
         self.game_window.on_text_motion = lambda motion: None
         self.game_window.on_draw = self.on_draw
         self.game_window.on_key_press = self.on_key_press
+
+class TwoPanelMenu(Menu):
+    """A Menu with two vertical panels. Submenus appear on the right panel, and
+    the content on each panel slides to the left when a submenu is accessed
+    from a submenu."""
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self, game_window, width, height, margin, padding):
+        super(TwoPanelMenu, self).__init__(game_window)
+
+        self.width = width
+        self.height = height
+        self.margin = margin
+        self.padding = padding
+
+        self.blank_document = UnformattedDocument('')
+
+        # layout --------------------------------------------------------------
+        self.panel_left = TextLayout(self.blank_document,
+            (self.width / 2) - (self.margin * 2),
+            self.height - (self.margin * 2),
+            multiline=True, batch=self.batch)
+        self.panel_left.anchor_x = 'left'
+        self.panel_left.anchor_y = 'top'
+        self.panel_left.x = self.padding / 2
+        self.panel_left.y = self.height - (self.padding / 2)
+
+        self.panel_right = TextLayout(self.blank_document,
+            (self.width / 2) - (self.margin * 2),
+            self.height - (self.margin * 2),
+            multiline=True, batch=self.batch)
+        self.panel_right.anchor_x = 'left'
+        self.panel_right.anchor_y = 'top'
+        self.panel_right.x = (self.width / 2) + (self.padding / 2)
+        self.panel_right.y = self.height - (self.padding / 2)
+
+        # primitives ----------------------------------------------------------
+        self.border = self.batch.add_indexed(6, GL_LINES, None,
+            [0, 2, 2, 5, 0, 3, 3, 5, 1, 4],
+            ('v2i',
+            (margin, margin,
+            width / 2, margin,
+            width - margin, margin,
+            margin, height - margin,
+            width / 2, height - margin,
+            width - margin, height - margin)))
+
+    def update_layout(self, document_left, document_right):
+        self.panel_left.document = document_left
+        self.panel_right.document = document_right
 
 class MainMenu(Menu):
 
@@ -69,52 +125,6 @@ class MainMenu(Menu):
         self.layout.y = (self.game_window.height // 2) - \
             (self.layout.height // 2)
 
-class TwoPanelMenu(Menu):
-
-    def __init__(self, game_window, width, height, margin, padding):
-        super(TwoPanelMenu, self).__init__(game_window)
-
-        self.blank_document = UnformattedDocument('')
-
-        self.width = width
-        self.height = height
-        self.margin = margin
-        self.padding = padding
-
-        # primitives ----------------------------------------------------------
-        self.border = self.batch.add_indexed(6, GL_LINES, None,
-            [0, 2, 2, 5, 0, 3, 3, 5, 1, 4],
-            ('v2i',
-            (margin, margin,
-            width / 2, margin,
-            width - margin, margin,
-            margin, height - margin,
-            width / 2, height - margin,
-            width - margin, height - margin)))
-
-        # layout --------------------------------------------------------------
-        self.panel_left = TextLayout(self.blank_document,
-            (self.width / 2) - (self.margin * 2),
-            self.height - (self.margin * 2),
-            multiline=True, batch=self.batch)
-        self.panel_left.anchor_x = 'left'
-        self.panel_left.anchor_y = 'top'
-        self.panel_left.x = self.padding / 2
-        self.panel_left.y = self.height - (self.padding / 2)
-
-        self.panel_right = TextLayout(self.blank_document,
-            (self.width / 2) - (self.margin * 2),
-            self.height - (self.margin * 2),
-            multiline=True, batch=self.batch)
-        self.panel_right.anchor_x = 'left'
-        self.panel_right.anchor_y = 'top'
-        self.panel_right.x = (self.width / 2) + (self.padding / 2)
-        self.panel_right.y = self.height - (self.padding / 2)
-
-    def update_layout(self, document_left, document_right):
-        self.panel_left.document = document_left
-        self.panel_right.document = document_right
-
 class PauseMenu(TwoPanelMenu):
 
     def __init__(self, game_window):
@@ -122,7 +132,8 @@ class PauseMenu(TwoPanelMenu):
             game_window.width, game_window.height, 10, 50)
 
         self.main_options = {
-            key.ENTER: game_window.activate_world_mode}
+            key.ENTER: game_window.activate_world_mode,
+            key.S: pyglet.app.exit()}
         self.options = self.main_options
 
         # content -------------------------------------------------------------

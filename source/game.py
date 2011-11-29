@@ -25,7 +25,7 @@ class Game(pyglet.window.Window):
         self.combat = None
         self.hero = None
 
-        # world mode variables ------------------------------------------------
+        # application variables -----------------------------------------------
         self.base_delay = 0.1
         self.wander_frequency = 0.05
         self.queued_input = None
@@ -44,15 +44,12 @@ class Game(pyglet.window.Window):
         self.interact_key = ' '
         self.pause_key = key.ENTER
 
-    # application logic
-    # -------------------------------------------------------------------------
-
     def run(self):
         """Run the game."""
         self.main_menu.activate()
         pyglet.app.run()
 
-    # main menu mode methods
+    # main menu methods
     # -------------------------------------------------------------------------
 
     def new_game(self):
@@ -111,9 +108,7 @@ class Game(pyglet.window.Window):
             else:
                 self.npc_wander(character)
 
-    # hero methods
-    # -------------------------------------------------------------------------
-
+    # hero methods ------------------------------------------------------------
     def hero_move(self):
         x = 0
         y = 0
@@ -137,9 +132,7 @@ class Game(pyglet.window.Window):
             args = self.interact_args[str(interactable)]
             interactable.interact(*args)
 
-    # npc methods
-    # -------------------------------------------------------------------------
-
+    # npc methods -------------------------------------------------------------
     def _choose_wander_dir(self, axes, x_dirs, y_dirs):
         axis = axes[0]
         if axis == 'x':
