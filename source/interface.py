@@ -7,9 +7,6 @@ from pyglet.text.document import FormattedDocument, UnformattedDocument
 from pyglet.window import key, mouse
 from pyglet.gl import GL_LINES
 
-pyglet.font.add_file('data/font/runescape_uf.ttf')
-pyglet.font.add_file('data/font/terminus.ttf')
-
 FONT_RUNESCAPE_UF = 'Runescape UF'
 FONT_TERMINUS = 'Terminus'
 DEFAULT_FONT = FONT_RUNESCAPE_UF

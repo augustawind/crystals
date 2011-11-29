@@ -10,8 +10,15 @@ import terrain
 import character
 import interaction
 
-pyglet.resource.path = ['data', 'data/image', 'data/world']
+# set pyglet resource path
+pyglet.resource.path = ['data',
+    os.path.join('data', 'image'),
+    os.path.join('data', 'world')]
 pyglet.resource.reindex()
+
+# add local fonts to pyglet.font
+pyglet.font.add_file('data/font/runescape_uf.ttf')
+pyglet.font.add_file('data/font/terminus.ttf')
 
 class ImageLoader(dict):
     """A dictionary of game images."""
