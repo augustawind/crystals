@@ -55,7 +55,7 @@ class Game(pyglet.window.Window):
     def new_game(self):
         world_loader = data.WorldLoader()
         self.world = world_loader.load_world()
-        self.hero = self.world.get_hero()
+        self.hero = self.world.hero
 
         self.activate_world_mode()
 
@@ -122,10 +122,10 @@ class Game(pyglet.window.Window):
             x = 1
 
         self.world.step_hero(x, y)
-        self.hero.set_direction(x, y)
+        self.hero.direction = (x, y)
 
     def hero_interact(self):
-        x_dir, y_dir = self.hero.get_direction()
+        x_dir, y_dir = self.hero.direction
         x, y = self.world.get_coords(self.hero)
         interactable = self.world.get_interactable(x + x_dir, y + y_dir)
         if interactable:
@@ -157,7 +157,7 @@ class Game(pyglet.window.Window):
                 x_dir, y_dir = self._choose_wander_dir(axes, x_dirs, y_dirs)
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG, stream=sys.stdout,
+    logging.basicConfig(level=logging.WARNING, stream=sys.stdout,
         format='%(levelname)s:%(message)s')
 
     game = Game()

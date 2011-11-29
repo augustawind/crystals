@@ -1,5 +1,5 @@
 """interface.py - game menus, menu input, and text"""
-from abc import ABCMeta
+import abc
 
 import pyglet
 from pyglet.text.layout import TextLayout, IncrementalTextLayout
@@ -18,7 +18,7 @@ class Menu(object):
     """When activated, displays a list of options with corresponding keyboard
     keys and handles corresponding key presses."""
     
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, game_window):
         self.game_window = game_window
@@ -44,7 +44,7 @@ class TwoPanelMenu(Menu):
     the content on each panel slides to the left when a submenu is accessed
     from a submenu."""
 
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, game_window, width, height, margin, padding):
         super(TwoPanelMenu, self).__init__(game_window)
