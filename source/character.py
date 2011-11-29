@@ -81,4 +81,4 @@ class Character(Entity):
 class Hero(Character):
 
     def __init__(self, image):
-        super(Hero, self).__init__('Hero', image, None)
+        super(Hero, self).__init__('hero', image, None)

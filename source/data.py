@@ -20,9 +20,10 @@ class ImageLoader(dict):
         """Load images and index them by filename for dict-style access."""
         root = os.path.join('data', 'image')
         for directory in os.listdir(root):
+            self[directory] = {}
             for filename in os.listdir(os.path.join(root, directory)):
-                name = directory + '.' + filename.rsplit('.', 1)[0]
-                self[name] = pyglet.resource.image(
+                name = filename.rsplit('.', 1)[0]
+                self[directory][name] = pyglet.resource.image(
                     os.path.join(directory, filename))
 
 class WorldLoader:
@@ -31,6 +32,10 @@ class WorldLoader:
         self.images = ImageLoader()
         self.rooms = {}
         self.root_dir = os.path.join('data', 'world')
+
+        self.bg_symbol = '.'
+        self.bg_name = ''
+        self.bg_image = None
 
         # load configuration defaults
         self.world_key = ConfigParser()
@@ -81,13 +86,31 @@ class WorldLoader:
         width = map_key.getint('params', 'width')
         height = map_key.getint('params', 'height')
 
+        # load background info ------------------------------------------------
+        if map_key.has_option('params', 'background'):
+            bg_name = map_key.get('params', 'background')
+        else:
+            bg_name = self.bg_name
+        if image_key.has_option('terrain', bg_name):
+            bg_image_name = image_key.get('terrain', bg_name)
+        else:
+            bg_image_name = self.image_key.get('terrain', bg_name)
+        bg_image = self.images['terrain'][bg_image_name]
+
         # construct room map --------------------------------------------------
-        ordered_entities = [[], [], []]
+        ordered_entities = [[] for i in range(4)]
         room_map = []
         for row in map_file:
             room_map.append([])
             for symbol in row.strip():
-                room_map[-1].append([])
+                # add background entity to cell
+                bg_obj = terrain.Terrain(bg_name, True, bg_image)
+                room_map[-1].append([bg_obj])
+                ordered_entities[0].append(bg_obj)
+
+                # move on to next cell if background symbol encountered
+                if symbol == self.bg_symbol:
+                    continue
 
                 # get terrain name
                 if map_key.has_option('terrain', symbol):
@@ -108,12 +131,14 @@ class WorldLoader:
                     image_name = image_key.get('terrain', terrain_name)
                 else:
                     image_name = self.image_key.get('terrain', terrain_name)
-                image = self.images['terrain.' + image_name]
+                image = self.images['terrain'][image_name]
 
                 # instantiate terrain object and add to room
                 terrain_obj = terrain.Terrain(terrain_name, walkable, image)
                 room_map[-1][-1].append(terrain_obj)
-                ordered_entities[0].append(terrain_obj)
+                ordered_entities[1].append(terrain_obj)
+
+        room_map.reverse()
         map_file.close()
 
         # add characters to room ----------------------------------------------
@@ -123,10 +148,10 @@ class WorldLoader:
                 image_name = image_key.get('character', character_name)
             else:
                 image_name = self.image_key.get('character', character_name)
-            image = self.images['character.' + image_name]
+            image = self.images['character'][image_name]
 
             # determine whether character is Hero or not
-            if character_name == 'Hero' and starting_room:
+            if character_name == 'hero' and starting_room:
                 # instantiate Hero
                 character_obj = character.Hero(image)
                 hero = character_obj
@@ -147,7 +172,7 @@ class WorldLoader:
             x = character_parser.getint(character_name, 'x')
             y = character_parser.getint(character_name, 'y')
             room_map[y][x].append(character_obj)
-            ordered_entities[2].append(character_obj)
+            ordered_entities[3].append(character_obj)
 
         # return `Room` instance, list of entities, and `Hero` instance if appl.
         room = world.Room(name, width, height, room_map)
@@ -177,10 +202,14 @@ class WorldLoader:
     def load_world(self):
         """Return a `world.World` instance from data in the 'data/world'
         directory."""
+        # load background info ------------------------------------------------
+        self.bg_name = self.map_key.get('params', 'background')
+        bg_image_name = self.image_key.get('terrain', self.bg_name)
+
         # load rooms ----------------------------------------------------------
         starting_room_name = self.world_key.get('params', 'starting_room')
 
-        ordered_entities = [[], [], []]
+        ordered_entities = [[] for i in range(4)]
         for room_dir in os.listdir(os.path.join('data', 'world', 'rooms')):
             if room_dir == starting_room_name:
                 room, entities, hero = self._load_room(room_dir, True)

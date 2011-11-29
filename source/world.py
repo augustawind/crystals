@@ -4,13 +4,16 @@ import logging
 
 from pyglet.sprite import Sprite
 from pyglet.graphics import Batch, OrderedGroup
+from pyglet.gl import *
+
+glEnable(GL_TEXTURE_2D)
 
 TILE_WIDTH = 24
 TILE_HEIGHT = 24
 OFFSET_COLS = 0
 OFFSET_ROWS = 2
-VIEWPORT_ROWS = 15
-VIEWPORT_COLS = 15
+VIEWPORT_ROWS = 16
+VIEWPORT_COLS = 16
 VIEWPORT = dict(x1=OFFSET_COLS, x2=OFFSET_COLS + VIEWPORT_COLS,
                 y1=OFFSET_ROWS, y2=OFFSET_ROWS + VIEWPORT_ROWS)
 
@@ -251,13 +254,21 @@ class World:
         self.current_room = starting_room
         self.hero = hero
 
-        # add entities to render groups
+        # add entities to render groups and scale images
         self.render_groups = []
         for i in range(len(ordered_entities)):
             self.render_groups.append(OrderedGroup(i))
             for entity in ordered_entities[i]:
                 entity.group = self.render_groups[-1]
 
+                # scale image (texture manipulation is to avoid bluriness)
+                texture = entity.image.get_texture()
+                glBindTexture(GL_TEXTURE_2D, texture.id)
+                texture.width = TILE_WIDTH
+                texture.height = TILE_HEIGHT
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+
+        # center camera on the hero
         self.current_room.center_camera(self.hero)
 
     def draw(self):

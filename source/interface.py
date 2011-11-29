@@ -1,18 +1,23 @@
 """interface.py - game menus, menu input, and text"""
 
+import pyglet
 from pyglet.text.layout import TextLayout, IncrementalTextLayout
 from pyglet.text.document import FormattedDocument, UnformattedDocument
 from pyglet.window import key, mouse
-from pyglet.graphics import OrderedGroup, Batch
 from pyglet.gl import GL_LINES
 
-INTERFACE_GROUP = OrderedGroup(99)
+pyglet.font.add_file('data/font/runescape_uf.ttf')
+pyglet.font.add_file('data/font/terminus.ttf')
+
+FONT_RUNESCAPE_UF = 'Runescape UF'
+FONT_TERMINUS = 'Terminus'
+DEFAULT_FONT = FONT_RUNESCAPE_UF
 
 class Menu(object):
 
     def __init__(self, game_window):
         self.game_window = game_window
-        self.batch = Batch()
+        self.batch = pyglet.graphics.Batch()
 
         self.options = {}
 
@@ -42,15 +47,17 @@ class MainMenu(Menu):
         # content -------------------------------------------------------------
         self.document = FormattedDocument(
             u'CRY\u00A7TAL\u00A7\n\n' +
-            u'(n) new game\n' +
-            u'(l) load game\n' +
-            u'(q) quit')
+            u'(n) NEW GAME\n' +
+            u'(l) LOAD GAME\n' +
+            u'(q) QUIT')
 
         # style ---------------------------------------------------------------
         self.document.set_style(0, len(self.document.text),
-                dict(font_name='monospace', color=(255, 255, 255, 255)))
-        self.document.set_paragraph_style(0, 2, dict(font_size=36))
-        self.document.set_paragraph_style(1, 4, dict(font_size=18))
+                dict(font_name=DEFAULT_FONT, color=(255, 255, 255, 255)))
+        self.document.set_style(3, 4, dict(font_name=FONT_TERMINUS))
+        self.document.set_style(7, 8, dict(font_name=FONT_TERMINUS))
+        self.document.set_paragraph_style(0, 2, dict(font_size=64))
+        self.document.set_paragraph_style(1, 4, dict(font_size=24))
 
         # layout --------------------------------------------------------------
         self.layout = TextLayout(self.document,
@@ -126,7 +133,7 @@ class PauseMenu(TwoPanelMenu):
             '(s) Suspend\n\n')
 
         # style ---------------------------------------------------------------
-        style = dict(font_name='monospace', font_size=16,
+        style = dict(font_name=DEFAULT_FONT, font_size=24,
                     color=(255, 255, 255, 255))
         self.main_document.set_style(0, 0, style)
 
@@ -157,7 +164,7 @@ class CombatMenu(TwoPanelMenu):
             '(p) Crystal\n')
 
         # style ---------------------------------------------------------------
-        style = dict(font_name='monospace', font_size=12,
+        style = dict(font_name=DEFAULT_FONT, font_size=12,
                     color=(255, 255, 255, 255))
         self.main_document.set_style(0, 0, style)
 
@@ -190,16 +197,15 @@ class MessageBox:
     def __init__(self, game_window):
         self.game_window = game_window
 
-        self.message_str = '==> '
+        self.message_str = '>>> '
         self.document = UnformattedDocument(
             self.message_str + 'Welcome!')
         self.document.set_style(0, 0,
-                dict(font_name='monospace', font_size=12,
+                dict(font_name=DEFAULT_FONT, font_size=12,
                     color=(255, 255, 255, 255)))
         
         self.layout = IncrementalTextLayout(self.document,
-            self.game_window.width, 96, multiline=True,
-            group=INTERFACE_GROUP)
+            self.game_window.width, 96, multiline=True)
         self.layout.x = 0
         self.layout.y = 0
 
