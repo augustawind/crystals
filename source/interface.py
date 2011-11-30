@@ -8,10 +8,13 @@ from pyglet.window import key, mouse
 from pyglet.gl import GL_LINES
 
 from world import VIEWPORT, TILE_SIZE
+from data import ImageLoader
 
 FONT_RUNESCAPE_UF = 'Runescape UF'
 FONT_TERMINUS = 'Terminus'
 DEFAULT_FONT = FONT_RUNESCAPE_UF
+
+images = ImageLoader()
 
 class Menu(object):
     """When activated, displays a list of options with corresponding keyboard
@@ -95,6 +98,9 @@ class MainMenu(Menu):
     def __init__(self, game_window):
         super(MainMenu, self).__init__(game_window)
 
+        self.groups = [pyglet.graphics.OrderedGroup(0),
+            pyglet.graphics.OrderedGroup(1)] 
+
         self.options = {
             key.N: game_window.new_game,
             key.L: game_window.load_game,
@@ -102,28 +108,28 @@ class MainMenu(Menu):
 
         # content -------------------------------------------------------------
         self.document = FormattedDocument(
-            u'CRY\u00A7TAL\u00A7\n\n' +
-            u'(n) NEW GAME\n' +
-            u'(l) LOAD GAME\n' +
-            u'(q) QUIT')
+            u'(N) NEW GAME\n' +
+            u'(L) LOAD GAME\n' +
+            u'(Q) QUIT')
 
         # style ---------------------------------------------------------------
         self.document.set_style(0, len(self.document.text),
-                dict(font_name=DEFAULT_FONT, color=(255, 255, 255, 255)))
-        self.document.set_style(3, 4, dict(font_name=FONT_TERMINUS))
-        self.document.set_style(7, 8, dict(font_name=FONT_TERMINUS))
-        self.document.set_paragraph_style(0, 2, dict(font_size=64))
-        self.document.set_paragraph_style(1, 4, dict(font_size=24))
+                dict(font_name=DEFAULT_FONT, font_size=24,
+                    color=(255, 255, 255, 255)))
 
         # layout --------------------------------------------------------------
-        self.layout = TextLayout(self.document,
-            game_window.width / 2, game_window.height,
-            multiline=True, batch=self.batch)
+        self.layout = TextLayout(self.document, width=game_window.width,
+            multiline=True, batch=self.batch, group=self.groups[1])
         self.layout.content_valign = 'center'
-        self.layout.x = (self.game_window.width // 2) - \
-            (self.layout.width // 2)
-        self.layout.y = (self.game_window.height // 2) - \
-            (self.layout.height // 2)
+        self.layout.x = 16
+        self.layout.y = 16
+
+        # background image ----------------------------------------------------
+        image = images['interface']['album-cover']
+        image.width = game_window.width
+        image.height = game_window.height
+        self.bg_image = pyglet.sprite.Sprite(image,
+            batch=self.batch, group=self.groups[0])
 
 class PauseMenu(TwoPanelMenu):
     """A menu that can be accessed in world mode to view relevant in-game

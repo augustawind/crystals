@@ -9,13 +9,17 @@ from pyglet.window import key, mouse
 
 import data
 import interface
+from world import \
+    VIEWPORT_ROWS, VIEWPORT_COLS, OFFSET_ROWS, OFFSET_COLS, TILE_SIZE
 
 class Game(pyglet.window.Window):
     """The main application class. Runs the game!"""
 
     def __init__(self):
-        super(Game, self).__init__(640, 680, caption='CRYSTALS',
-            resizable=False)
+        super(Game, self).__init__(
+            (VIEWPORT_COLS + OFFSET_COLS) * TILE_SIZE,
+            (VIEWPORT_ROWS + OFFSET_ROWS) * TILE_SIZE,
+            caption='CRYSTALS', resizable=False)
 
         self.main_menu = interface.MainMenu(self)
         self.pause_menu = interface.PauseMenu(self)
