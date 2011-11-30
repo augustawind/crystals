@@ -15,7 +15,8 @@ class Character(Entity):
     """An intelligent Entity."""
 
     def __init__(self, name, image, interactable, level=1, attrs=MIN_ATTRS,
-            life=MAX_LIFE, energy=MIN_ENERGY, inventory=[], team=None):
+            life=MAX_LIFE, energy=MIN_ENERGY, inventory=[], team=None,
+            x_range=-1, y_range=-1):
         super(Character, self).__init__(name, False, image, interactable)
         
         self._level = level
@@ -23,6 +24,11 @@ class Character(Entity):
         self._life = life
         self._energy = energy
         self._inventory = inventory
+
+        self._x_range = x_range
+        self._y_range = y_range 
+        self._tether_x = 0
+        self._tether_y = 0
 
         self._xdir = 1
         self._ydir = 0
@@ -45,6 +51,14 @@ class Character(Entity):
     @property
     def inventory(self):
         return self._inventory
+
+    @property
+    def x_range(self):
+        return self._x_range
+
+    @property
+    def y_range(self):
+        return self._y_range
 
     def is_alive(self):
         return self.life > 0
@@ -82,6 +96,19 @@ class Character(Entity):
 
     def remove_item(self, item):
         self._inventory.remove(item)
+
+    def set_tether(self, x, y):
+        self._tether_x = x
+        self._tether_y = y
+
+    def is_in_range(self, x, y):
+        """Return True if (x, y) is between the character's tether and
+        (x_range, y_range) for each direction."""
+        return (
+            ((self._x_range == -1) or (self._tether_x - self._x_range <= x <=
+                self._tether_x + self._x_range)) and
+            ((self._y_range == -1) or (self._tether_y - self._y_range <= y <=
+                self._tether_y + self._y_range)))
 
 class Hero(Character):
 

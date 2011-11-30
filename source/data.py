@@ -181,6 +181,9 @@ class WorldLoader:
                 character_obj = character.Hero(image)
                 hero = character_obj
             else:
+                # get movement ranges
+                x_range = character_parser.getint(character_name, 'x-range')
+                y_range = character_parser.getint(character_name, 'y-range')
                 # get `Interactable` object for non-player character
                 if character_parser.has_option(
                         character_name, 'interact-object'):
@@ -191,7 +194,8 @@ class WorldLoader:
                         dict(self.character_parser.items(character_name)))
                 # instantiate non-player character
                 character_obj = character.Character(
-                    character_name, image, interactable)
+                    character_name, image, interactable,
+                    x_range=x_range, y_range=y_range)
 
             # add character to map and entities list
             x = character_parser.getint(character_name, 'x')

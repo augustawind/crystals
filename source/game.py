@@ -27,7 +27,7 @@ class Game(pyglet.window.Window):
 
         # application variables -----------------------------------------------
         self.base_delay = 0.1
-        self.wander_frequency = 0.05
+        self.wander_frequency = 0.2
         self.queued_input = None
 
         # dict of argument tuples for calls to Interactable.interact,
@@ -149,12 +149,14 @@ class Game(pyglet.window.Window):
 
     def npc_wander(self, character):
         if random.random() < self.wander_frequency:
-            axes = sorted(['x', 'y'], key=lambda x: random.random())
-            x_dirs = sorted([-1, 1], key=lambda x: random.random())
-            y_dirs = sorted([-1, 1], key=lambda x: random.random())
-            x_dir, y_dir = self._choose_wander_dir(axes, x_dirs, y_dirs)
-            while not self.world.step_entity(character, x_dir, y_dir):
-                x_dir, y_dir = self._choose_wander_dir(axes, x_dirs, y_dirs)
+            axis = random.choice(('x', 'y'))
+            if axis == 'x':
+                x_dir = random.choice((-1, 1))
+                y_dir = 0
+            else:
+                y_dir = random.choice((-1, 1))
+                x_dir = 0
+            self.world.step_entity(character, x_dir, y_dir)
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.WARNING, stream=sys.stdout,

@@ -94,17 +94,6 @@ class Room:
     # internal methods
     # -------------------------------------------------------------------------
 
-    def _update_viewport(self):
-        for y in range(len(self._map)):
-            for x in range(len(self._map[y])):
-                for entity in self._map[y][x]:
-                    self._update_entity(entity, x, y)
-                    if (VIEWPORT['x1'] <= x-self.pan_x < VIEWPORT['x2'] and
-                            VIEWPORT['y1'] <= y-self.pan_y < VIEWPORT['y2']):
-                        entity.batch = self.batch
-                    else:
-                        entity.batch = None
-
     def _init_entities(self):
         for y in range(len(self._map)):
             for x in range(len(self._map[y])):
@@ -113,6 +102,9 @@ class Room:
 
     def _init_entity(self, entity, x, y):
         self._update_entity(entity, x, y)
+        if str(entity) == 'Character':
+            print entity.name, 'tether', self.get_coords(entity)
+            entity.set_tether(*self.get_coords(entity))
         self.entities[str(entity)].append(entity)
 
     def _update_entity(self, entity, x, y):
@@ -121,13 +113,26 @@ class Room:
 
         entity.set_position(x_coord, y_coord)
 
+        if (VIEWPORT['x1'] <= x - self.pan_x < VIEWPORT['x2'] and
+                VIEWPORT['y1'] <= y - self.pan_y < VIEWPORT['y2']):
+            entity.batch = self.batch
+        else:
+            entity.batch = None
+
+    def _update_entities(self):
+        for y in range(len(self._map)):
+            for x in range(len(self._map[y])):
+                for entity in self._map[y][x]:
+                    self._update_entity(entity, x, y)
+
     def _place_entity(self, entity, x, y):
         if (0 <= x < self.width and 0 <= y < self.height and
                 self.is_walkable(x, y)):
+            if str(entity) == 'Character' and not entity.is_in_range(x, y):
+                return False
             self._map[y][x].append(entity)
             return True
-        else:
-            return False
+        return False
 
     # public methods
     # -------------------------------------------------------------------------
@@ -208,13 +213,13 @@ class Room:
     def pan_camera(self, x, y):
         self.pan_x += x
         self.pan_y += y
-        self._update_viewport()
+        self._update_entities()
 
     def center_camera(self, entity):
         x, y = self.get_coords(entity)
         self.pan_x = x - (VIEWPORT_COLS / 2)
         self.pan_y = y - (VIEWPORT_ROWS / 2)
-        self._update_viewport()
+        self._update_entities()
 
 class World:
     """A collection of rooms that should be connected to each other by portals.
