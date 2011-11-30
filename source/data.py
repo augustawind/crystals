@@ -62,6 +62,22 @@ class WorldLoader:
     # internal interface 
     # -------------------------------------------------------------------------
 
+    def _load_portals(self, room_dir):
+        """Return list of `world.Portal` instances for a room,
+        generated from data in 'portal-key.ini'."""
+        portal_key = ConfigParser()
+        portal_key.read(os.path.join(
+            'data', 'world', 'rooms', room_dir, 'portal-key.ini'))
+
+        portals = []
+        for portal_name in portal_key.sections():
+            x = portal_key.getint(portal_name, 'x')
+            y = portal_key.getint(portal_name, 'y')
+            dest = portal_key.get(portal_name, 'dest')
+            portals.append(world.Portal(x, y, portal_name, dest))
+
+        return portals
+
     def _load_interactable(self, item_dict):
         name = item_dict['interact-object']
         count = int(item_dict['interact-count'])
@@ -183,28 +199,15 @@ class WorldLoader:
             room_map[y][x].append(character_obj)
             ordered_entities[3].append(character_obj)
 
+        # add portals to room -------------------------------------------------
+        portals = self._load_portals(room_dir)
+
         # return `Room` instance, list of entities, and `Hero` instance if appl.
-        room = world.Room(name, width, height, room_map)
+        room = world.Room(name, width, height, room_map, portals)
         if starting_room:
             return room, ordered_entities, hero
         else:
             return room, ordered_entities
-
-    def _load_portals(self, room_dir):
-        """Return list of `world.Portal` instances for a room,
-        generated from data in 'portal-key.ini'."""
-        portal_key = ConfigParser()
-        portal_key.read(os.path.join(
-            'data', 'world', 'rooms', room_dir, 'portal-key.ini'))
-
-        portals = []
-        for room_name in portal_key.sections():
-            x = portal_key.getint(room_name, 'x')
-            y = portal_key.getint(room_name, 'y')
-            room = self.rooms[room_name]
-            portals.append(world.Portal(x, y, room))
-
-        return portals
 
     # public interface
     # -------------------------------------------------------------------------
@@ -226,15 +229,11 @@ class WorldLoader:
                 starting_room = room
             else:
                 room, entities = self._load_room(room_dir)
+
             self.rooms[room_dir] = room
 
             for i in range(len(entities)):
                 ordered_entities[i].extend(entities[i])
-
-        # add portals to rooms ------------------------------------------------
-        for room_name, room in self.rooms.items():
-            portals = self._load_portals(room_name)
-            room.add_portals(*portals)
 
         # return `world.World` instance ---------------------------------------
         return world.World(self.rooms, starting_room, hero, ordered_entities)

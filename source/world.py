@@ -8,8 +8,7 @@ from pyglet.gl import *
 
 glEnable(GL_TEXTURE_2D)
 
-TILE_WIDTH = 24
-TILE_HEIGHT = 24
+TILE_SIZE = 24
 OFFSET_COLS = 0
 OFFSET_ROWS = 2
 VIEWPORT_ROWS = 16
@@ -40,14 +39,31 @@ class Portal:
     moved into the coordinates of a portal, it is transported to the connected
     Room by World."""
     
-    def __init__(self, x, y, room):
+    def __init__(self, x, y, name, dest):
         self._x = x
         self._y = y
-        self.room = room
+        self._name = name
+        self._dest_room, self._dest_portal = dest.split('.')
     
     @property
     def coords(self):
         return self._x, self._y
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def dest_room(self):
+        return self._dest_room
+
+    @property
+    def dest_portal(self):
+        return self._dest_portal
+
+    @property
+    def dest(self):
+        return self._dest_room, self._dest_portal
         
 class Room:
     """A 3-dimensional grid that contains Entities and Portals to other Rooms.
@@ -57,7 +73,7 @@ class Room:
         self.name = name
         self.width = width
         self.height = height
-        self.portals = portals
+        self._portals = portals
 
         self.batch = Batch()
 
@@ -100,8 +116,8 @@ class Room:
         self.entities[str(entity)].append(entity)
 
     def _update_entity(self, entity, x, y):
-        x_coord = (x + VIEWPORT['x1'] - self.pan_x) * TILE_WIDTH
-        y_coord = (y + VIEWPORT['y1'] - self.pan_y) * TILE_HEIGHT
+        x_coord = (x + VIEWPORT['x1'] - self.pan_x) * TILE_SIZE
+        y_coord = (y + VIEWPORT['y1'] - self.pan_y) * TILE_SIZE
 
         entity.set_position(x_coord, y_coord)
 
@@ -116,7 +132,14 @@ class Room:
     # public methods
     # -------------------------------------------------------------------------
 
+    @property
+    def portals(self):
+        return self._portals
+
     # get methods -------------------------------------------------------------
+    def get_map(self):
+        return self._map.copy()
+
     def get_terrain(self):
         return self.entities['Terrain']
 
@@ -133,19 +156,20 @@ class Room:
         return [e for e in self._map[y][x]]
 
     def get_coords(self, entity):
-        x_coord = (entity.x / TILE_WIDTH) - VIEWPORT['x1'] + self.pan_x
-        y_coord = (entity.y / TILE_HEIGHT) - VIEWPORT['y1'] + self.pan_y
+        x_coord = (entity.x / TILE_SIZE) - VIEWPORT['x1'] + self.pan_x
+        y_coord = (entity.y / TILE_SIZE) - VIEWPORT['y1'] + self.pan_y
         return x_coord, y_coord
 
     def get_portal(self, x, y):
-        for portal in self.portals:
+        for portal in self._portals:
             px, py = portal.coords
             if (px == x) and (py == y):
                 return portal
     
     def get_portal_from_room(self, room):
-        for portal in self.portals:
-            if portal.room is room:
+        for portal in self._portals:
+            if (portal.dest_room == room.name and
+                    portal.dest_portal in [p.name for p in room.portals]):
                 return portal
 
     # adding entities ---------------------------------------------------------
@@ -192,9 +216,6 @@ class Room:
         self.pan_y = y - (VIEWPORT_ROWS / 2)
         self._update_viewport()
 
-    def add_portals(self, *portals):
-        self.portals.extend(portals)
-
 class World:
     """A collection of rooms that should be connected to each other by portals.
     """
@@ -212,8 +233,8 @@ class World:
                 # scale image (texture manipulation is to avoid bluriness)
                 texture = entity.image.get_texture()
                 glBindTexture(GL_TEXTURE_2D, texture.id)
-                texture.width = TILE_WIDTH
-                texture.height = TILE_HEIGHT
+                texture.width = TILE_SIZE
+                texture.height = TILE_SIZE
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
         # center camera on the hero
@@ -265,7 +286,7 @@ class World:
     def move_entity(self, entity, new_x, new_y):
         if self._current_room.move_entity(entity, new_x, new_y):
             portal = self.get_portal(new_x, new_y)
-            if portal:
+            if portal and (entity is self.hero):
                 self.portal_entity(entity, portal)
             return True
         else:
@@ -280,14 +301,12 @@ class World:
             self._current_room.pan_camera(x_step, y_step)
 
     def portal_entity(self, entity, portal):
-        logging.debug('{}.portal_entity({}, {})'.format(
-            'World', entity.name, portal.room.name))
-        
         self._current_room.delete_entity(entity, *portal.coords)
-        old_room = self._current_room
-        self._current_room = portal.room
-        recieving_portal = self._current_room.get_portal_from_room(
-            old_room)
-        x, y = recieving_portal.coords
+        from_room = self._current_room
+        to_room = self._rooms[portal.dest_room]
+        to_portal = to_room.get_portal_from_room(from_room)
+
+        self._current_room = to_room
+        x, y = to_portal.coords
         self.add_entity(entity, x, y)
         self._current_room.center_camera(entity)

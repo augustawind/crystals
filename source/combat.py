@@ -3,8 +3,16 @@
 from random import random
 
 from stats.combat import *
+from world import Room
 
-class Battle:
+
+class BattleGrid(Room):
+
+    def __init__(self, room):
+        super(BattleGrid, self).__init__('combat', width=9, height=9) 
+        
+
+class Battle(object):
 
     def __init__(self, battle_menu):
         self.menu = battle_menu

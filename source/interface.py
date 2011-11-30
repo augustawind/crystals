@@ -7,6 +7,8 @@ from pyglet.text.document import FormattedDocument, UnformattedDocument
 from pyglet.window import key, mouse
 from pyglet.gl import GL_LINES
 
+from world import VIEWPORT, TILE_SIZE
+
 FONT_RUNESCAPE_UF = 'Runescape UF'
 FONT_TERMINUS = 'Terminus'
 DEFAULT_FONT = FONT_RUNESCAPE_UF
@@ -88,6 +90,7 @@ class TwoPanelMenu(Menu):
         self.panel_right.document = document_right
 
 class MainMenu(Menu):
+    """The menu that first greets the user when she runs the game."""
 
     def __init__(self, game_window):
         super(MainMenu, self).__init__(game_window)
@@ -123,6 +126,9 @@ class MainMenu(Menu):
             (self.layout.height // 2)
 
 class PauseMenu(TwoPanelMenu):
+    """A menu that can be accessed in world mode to view relevant in-game
+    information, make certain changes to characters and items, and quit the
+    game."""
 
     def __init__(self, game_window):
         super(PauseMenu, self).__init__(game_window,
@@ -149,6 +155,8 @@ class PauseMenu(TwoPanelMenu):
         self.update_layout(self.main_document, self.blank_document)
 
 class CombatMenu(TwoPanelMenu):
+    """The menu that is displayed in combat, allowing the player to make
+    decisions about what her team will do."""
 
     def __init__(self, game_window):
         super(CombatMenu, self).__init__(game_window,
@@ -200,11 +208,39 @@ class CombatMenu(TwoPanelMenu):
         #self.player_action = 'crystal'
         raise NotImplementedError('Evoking crystals has not been implemented')
 
+class WorldFrame:
+
+    def __init__(self):
+        self.batch = pyglet.graphics.Batch()
+
+        # primitives ----------------------------------------------------------
+        x1 = VIEWPORT['x1'] * TILE_SIZE
+        y1 = VIEWPORT['y1'] * TILE_SIZE
+        x2 = VIEWPORT['x2'] * TILE_SIZE
+        y2 = VIEWPORT['y2'] * TILE_SIZE
+        self.border = self.batch.add_indexed(4, GL_LINES, None,
+            [0, 1, 0, 2, 1, 2, 1, 3],
+            ('v2i', (x1, y1,
+                     x1, y2,
+                     x2, y1,
+                     x2, y2)))
+
+    def draw(self):
+        self.batch.draw()
+
 class MessageBox:
+    """Displays messages from the world in world mode. All textual information
+    that is given to the player in world mode is done so through MessageBox."""
 
     def __init__(self, game_window):
         self.game_window = game_window
 
+        self.batch = pyglet.graphics.Batch()
+
+        margin = 8
+        padding = 16
+
+        # content -------------------------------------------------------------
         self.message_str = '>>> '
         self.document = UnformattedDocument(
             self.message_str + 'Welcome!')
@@ -212,15 +248,30 @@ class MessageBox:
                 dict(font_name=DEFAULT_FONT, font_size=12,
                     color=(255, 255, 255, 255)))
         
+        # layout --------------------------------------------------------------
+        width = ((VIEWPORT['x2'] - VIEWPORT['x1']) * TILE_SIZE) - (padding * 2)
+        height = 96 - (padding * 2)
         self.layout = IncrementalTextLayout(self.document,
-            self.game_window.width, 96, multiline=True)
-        self.layout.x = 0
-        self.layout.y = 0
+            width, height, multiline=True, batch=self.batch)
+        self.layout.anchor_x = 'left'
+        self.layout.anchor_y = 'bottom'
+        self.layout.x = padding
+        self.layout.y = padding
 
-    def get_width(self):
+        # primitives ----------------------------------------------------------
+        self.batch.add_indexed(4, GL_LINES, None,
+            [0, 1, 0, 2, 1, 3, 2, 3],
+            ('v2i', (margin, margin,
+                     margin, height - margin,
+                     width - margin, margin,
+                     width - margin, height - margin)))
+
+    @property
+    def width(self):
         return self.layout.width
 
-    def get_height(self):
+    @property
+    def height(self):
         return self.layout.height
 
     def print_message(self, text):
@@ -229,4 +280,4 @@ class MessageBox:
         self.layout.ensure_line_visible(-1)
 
     def draw(self):
-        self.layout.draw()
+        self.batch.draw()

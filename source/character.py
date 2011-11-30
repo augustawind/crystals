@@ -46,6 +46,17 @@ class Character(Entity):
     def inventory(self):
         return self._inventory
 
+    def is_alive(self):
+        return self.life > 0
+
+    def get_direction(self):
+        return self._xdir, self._xdir
+
+    def set_direction(self, xydir):
+        self._xdir, self._ydir = xydir
+
+    direction = property(get_direction, set_direction)
+
     def get_attr(self, attr=None):
         if not attr:
             return self._attrs.copy()
@@ -71,14 +82,6 @@ class Character(Entity):
 
     def remove_item(self, item):
         self._inventory.remove(item)
-
-    def get_direction(self):
-        return self._xdir, self._xdir
-
-    def set_direction(self, xydir):
-        self._xdir, self._ydir = xydir
-
-    direction = property(get_direction, set_direction)
 
 class Hero(Character):
 
