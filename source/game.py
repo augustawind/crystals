@@ -26,8 +26,8 @@ class Game(pyglet.window.Window):
         self.hero = None
 
         # application variables -----------------------------------------------
-        self.base_delay = 0.1
-        self.wander_frequency = 0.2
+        self.base_delay = 0.001
+        self.wander_frequency = 0.05
         self.queued_input = None
 
         # dict of argument tuples for calls to Interactable.interact,
@@ -122,31 +122,16 @@ class Game(pyglet.window.Window):
             x = 1
 
         self.world.step_hero(x, y)
-        self.hero.direction = (x, y)
 
     def hero_interact(self):
-        x_dir, y_dir = self.hero.direction
+        xdir, ydir = self.hero.direction
         x, y = self.world.get_coords(self.hero)
-        interactable = self.world.get_interactable(x + x_dir, y + y_dir)
+        interactable = self.world.get_interactable(x + xdir, y + ydir)
         if interactable:
             args = self.interact_args[str(interactable)]
             interactable.interact(*args)
 
     # npc methods -------------------------------------------------------------
-    def _choose_wander_dir(self, axes, x_dirs, y_dirs):
-        axis = axes[0]
-        if axis == 'x':
-            x_dir = x_dirs.pop()
-            y_dir = 0
-        else:
-            x_dir = 0 
-            y_dir = y_dirs.pop()
-        if not x_dirs and 'x' in axes:
-            axes.remove('x')
-        elif not y_dirs and 'y' in axes:
-            axes.remove('y')
-        return x_dir, y_dir
-
     def npc_wander(self, character):
         if random.random() < self.wander_frequency:
             axis = random.choice(('x', 'y'))

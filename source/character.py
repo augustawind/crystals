@@ -63,13 +63,13 @@ class Character(Entity):
     def is_alive(self):
         return self.life > 0
 
-    def get_direction(self):
+    @property 
+    def direction(self):
         return self._xdir, self._xdir
 
-    def set_direction(self, xydir):
-        self._xdir, self._ydir = xydir
-
-    direction = property(get_direction, set_direction)
+    def set_direction(self, xdir, ydir):
+        self._xdir = xdir
+        self._ydir = ydir
 
     def get_attr(self, attr=None):
         if not attr:

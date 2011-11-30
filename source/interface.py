@@ -258,14 +258,6 @@ class MessageBox:
         self.layout.x = padding
         self.layout.y = padding
 
-        # primitives ----------------------------------------------------------
-        self.batch.add_indexed(4, GL_LINES, None,
-            [0, 1, 0, 2, 1, 3, 2, 3],
-            ('v2i', (margin, margin,
-                     margin, height - margin,
-                     width - margin, margin,
-                     width - margin, height - margin)))
-
     @property
     def width(self):
         return self.layout.width

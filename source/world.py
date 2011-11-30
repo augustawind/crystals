@@ -299,7 +299,11 @@ class World:
 
     def step_entity(self, entity, x_step, y_step):
         x, y = self.get_coords(entity)
-        return self.move_entity(entity, x + x_step, y + y_step)
+        moved = self.move_entity(entity, x + x_step, y + y_step)
+        if moved:
+            if str(entity) == 'Character':
+                entity.set_direction(x_step, y_step)
+        return moved
 
     def step_hero(self, x_step, y_step):
         if self.step_entity(self.hero, x_step, y_step):
