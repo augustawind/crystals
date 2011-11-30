@@ -147,10 +147,10 @@ class PauseMenu(TwoPanelMenu):
 
         # content -------------------------------------------------------------
         self.main_document = UnformattedDocument(
-            '(p) Party\n\n' +
-            '(i) Inventory\n\n' +
-            '(j) Journal\n\n' +
-            '(s) Suspend\n\n')
+            '(P) Party\n\n' +
+            '(I) Inventory\n\n' +
+            '(J) Journal\n\n' +
+            '(S) Suspend\n\n')
 
         # style ---------------------------------------------------------------
         style = dict(font_name=DEFAULT_FONT, font_size=24,
@@ -276,8 +276,10 @@ class MessageBox:
 
     def print_message(self, text):
         doc_len = len(self.document.text)
+        # document only registers newlines if there are two
         self.document.insert_text(doc_len, 
             '\n\n' + self.message_str + text)
+        # delete the extra newline
         self.document.delete_text(doc_len, doc_len + 1)
         self.layout.ensure_line_visible(-1)
 
