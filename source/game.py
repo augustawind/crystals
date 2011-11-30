@@ -124,11 +124,16 @@ class Game(pyglet.window.Window):
         self.world.step_hero(x, y)
 
     def hero_interact(self):
+        print 'game.hero_interact'
         xdir, ydir = self.hero.direction
+        print 'xdir={}, ydir={}'.format(xdir, ydir)
         x, y = self.world.get_coords(self.hero)
+        print 'hero_x={}, hero_y={}'.format(x, y)
         interactable = self.world.get_interactable(x + xdir, y + ydir)
+        print 'interactable={}'.format(interactable)
         if interactable:
             args = self.interact_args[str(interactable)]
+            print 'interact_args={}'.format(args)
             interactable.interact(*args)
 
     # npc methods -------------------------------------------------------------

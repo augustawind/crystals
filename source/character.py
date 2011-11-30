@@ -65,7 +65,7 @@ class Character(Entity):
 
     @property 
     def direction(self):
-        return self._xdir, self._xdir
+        return self._xdir, self._ydir
 
     def set_direction(self, xdir, ydir):
         self._xdir = xdir
