@@ -242,11 +242,13 @@ class MessageBox:
 
         # content -------------------------------------------------------------
         self.message_str = '>>> '
-        self.document = UnformattedDocument(
+        self.document = FormattedDocument(
             self.message_str + 'Welcome!')
-        self.document.set_style(0, 0,
-                dict(font_name=DEFAULT_FONT, font_size=12,
-                    color=(255, 255, 255, 255)))
+
+        # style ---------------------------------------------------------------
+        self.style = dict(font_name=DEFAULT_FONT, font_size=12,
+            color=(255, 255, 255, 255))
+        self.document.set_paragraph_style(0, 1, self.style)
         
         # layout --------------------------------------------------------------
         width = ((VIEWPORT['x2'] - VIEWPORT['x1']) * TILE_SIZE) - (padding * 2)
@@ -267,8 +269,10 @@ class MessageBox:
         return self.layout.height
 
     def print_message(self, text):
-        self.document.insert_text(len(self.document.text), 
-            '\\\n' + self.message_str + text)
+        doc_len = len(self.document.text)
+        self.document.insert_text(doc_len, 
+            '\n\n' + self.message_str + text)
+        self.document.delete_text(doc_len, doc_len + 1)
         self.layout.ensure_line_visible(-1)
 
     def draw(self):
