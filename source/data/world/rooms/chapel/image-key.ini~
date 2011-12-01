@@ -1,8 +1,8 @@
 [terrain]
 wall-horiz = wall-horiz-red
 wall-vert = wall-vert-red
-floor-a = floor-a-red
-floor-b = floor-b-red
+floor-a = floor-a-grey
+floor-b = floor-b-grey
 stairs-down = stairs-down-red
 stairs-up = stairs-up-red
 
