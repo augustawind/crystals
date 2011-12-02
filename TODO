@@ -3,21 +3,7 @@ TODO
 - add credits option to main menu
     - credits screen features julian wass, oryx, dustin, and charley
 
-- implement features, another subclass of entity
-    - features are essentially interactable terrain
-    - Feature class defined in feature.py
-
 - restructure data/world system
-    - remove image-key.ini and map-key.ini
-    - specify images and symbols in character.ini, terrain.ini, feature.ini,
-        and item.ini files
-    - specify map parameters in map.ini 
-        - eliminate background parameter
-        - possibly eliminate width and height params?
-    - replace map with map-0.txt, map-1.txt...map-n.txt
-        - ascending map files specify overlayed maps
-    - eliminate x and y parameters from entity.ini files -- all positioning
-        must be specified in the map-n files
     - restructure parameter inheritence
         - inheritance is specified by prepending the parent section name to
             the child section name with a period, i.e. [parent.child]
@@ -28,28 +14,18 @@ TODO
         - inheritance chains are possible, i.e. [section0.section1...sectionN]
         - the parser searches the closest parent section when a parameter
             is missing from the child section
+    - possible move symbol specification to entity config files
+        - this would allow for case-sensitive symbols, but would be
+            cumbersome to navigate (maybe)
 
 - restructure world code
-    - create package world
-        - move world.Room to file room.py in package folder
-        - move world.World to __init__.py
-        - update imports
     - separate world graphics code from world data code by abstracting
         graphics into a subclass of data
 
-- restructure entity code
-    - create package entity
-        - move character.py, terrain.py, and item.py to package folder
-        - create file feature.py in package folder
-        - move world.Entity to __init__.py
-        - update imports
-
 - restructure interaction system
-    - change Interactable to Interaction
-    - add order parameter to Interaction, specifying the relative order in
-        which the Interaction is executed
-    - implemented in entities like so:
-        - entity.interactions = [Interaction0, Interaction1,...,InteractionN]
+    - change order parameter to sequence
+    - add new order paramater that specifies the index of how many times
+        you must interact with the character for it to trigger
     - define built-in subclasses
         - TalkInteraction
             - initiates dialog
@@ -66,5 +42,3 @@ TODO
         - MetaInteraction
             - changes this or another entity's Interaction 
         ...
-    - update data/world system
-    - update interaction code in game.py
