@@ -89,7 +89,7 @@ class WorldLoader:
             order = int(args[2])
 
             if _type == 'text':
-                text = args[2].replace('\n', ' ')
+                text = args[3].replace('\n', ' ')
                 interactions.append(
                     interaction.TextInteraction(count, order, text))
         return interactions
