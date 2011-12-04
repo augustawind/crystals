@@ -37,9 +37,16 @@ class World:
         return self._current_room.get_portal(x, y)
 
     def get_interactions(self, x, y):
-        for entity in self._current_room.get_entities(x, y):
+        print 'world.get_interactions'
+        for entity in reversed(self._current_room.get_entities(x, y)):
+            print entity.name, 
             if entity.interactable:
+                print 'is interactable'
+                print
                 return entity.iter_interactions()
+            print 'is not interactable'
+        print 'no interactable entities'
+        print
     
     def get_coords(self, entity):
         return self._current_room.get_coords(entity)

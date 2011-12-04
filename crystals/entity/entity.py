@@ -3,10 +3,11 @@ from pyglet.sprite import Sprite
 class Entity(Sprite):
     """A tangible thing. Populates Rooms."""
 
-    def __init__(self, name, walkable, image, group, interactions=[],
+    def __init__(self, ref, name, walkable, image, group, interactions=[],
             x_range=0, y_range=0):
         super(Entity, self).__init__(image, group=group)
 
+        self._ref = ref
         self._name = name
         self._walkable = walkable
         self._interactions = interactions
@@ -15,6 +16,10 @@ class Entity(Sprite):
 
         self._tether_x = 0
         self._tether_y = 0
+
+    @property
+    def ref(self):
+        return self._ref
 
     @property
     def name(self):
@@ -27,9 +32,17 @@ class Entity(Sprite):
     @property
     def interactable(self):
         return bool(self._interactions)
+
+    def set_interactions(self, interactions):
+        print '{}.set_interactions'.format(self.name)
+        print '\tinteractions={}'.format([str(i) for i in interactions])
+        print 'before, {}._interactions ='.format(self.name), self._interactions
+        self._interactions = interactions
+        print 'after, {}._interactions ='.format(self.name), self._interactions
+        print
     
     def iter_interactions(self):
-        return iter(sorted(self._interactions, key=lambda x: x.order))
+        return iter(sorted(self._interactions, key=lambda x: x.sequence))
 
     def set_tether(self, x, y):
         self._tether_x = x

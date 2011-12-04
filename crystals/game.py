@@ -35,7 +35,8 @@ class Game(pyglet.window.Window):
         # dict of argument tuples for calls to Interactable.interact,
         # indexed by str(Interactable)
         self.interact_args = {
-            'text': (self.message_box, )}
+            'text': (self.message_box, ),
+            'talk': (self.message_box, )}
 
         # keyboard controls
         self.movement_keys = {
@@ -126,13 +127,16 @@ class Game(pyglet.window.Window):
         self.world.step_hero(x, y)
 
     def hero_interact(self):
+        print 'game.hero_interact'
         xdir, ydir = self.hero.direction
         x, y = self.world.get_coords(self.hero)
         interactions = self.world.get_interactions(x + xdir, y + ydir)
+        print 'interactions =', interactions
         if interactions:
             for interaction in interactions:
                 args = self.interact_args[str(interaction)]
                 interaction.interact(*args)
+        print
 
     # npc methods -------------------------------------------------------------
     def npc_wander(self, character):

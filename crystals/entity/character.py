@@ -14,10 +14,10 @@ MAX_inventory = 10
 class Character(Entity):
     """An intelligent Entity."""
 
-    def __init__(self, name, image, x_range=-1, y_range=-1, interactions=[],
+    def __init__(self, ref, name, image, x_range=-1, y_range=-1, interactions=[],
             level=1, attrs=MIN_ATTRS, life=MAX_LIFE, energy=MIN_ENERGY,
             inventory=[], team=None, group=None):
-        super(Character, self).__init__(name, False, image, group,
+        super(Character, self).__init__(ref, name, False, image, group,
             interactions, x_range=x_range, y_range=y_range)
         
         self._level = level
@@ -96,4 +96,4 @@ class Character(Entity):
 class Hero(Character):
 
     def __init__(self, image):
-        super(Hero, self).__init__('hero', image)
+        super(Hero, self).__init__('hero', 'hero', image)

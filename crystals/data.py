@@ -78,22 +78,6 @@ class WorldLoader:
         else:
             return default_parser
 
-    def _load_interactions(self, item_dict):
-        interactions = []
-        for i in range(len([j for j in item_dict.keys()
-                if j.startswith('interact-')])):
-            args  = [s.strip() for s in
-                item_dict['interact-' + str(i)].strip().split(':')]
-            _type = args[0]
-            count = int(args[1])
-            order = int(args[2])
-
-            if _type == 'text':
-                text = args[3].replace('\n', ' ')
-                interactions.append(
-                    interaction.TextInteraction(count, order, text))
-        return interactions
-
     def _load_terrain(self, terrain_parser, ref):
         # get walkable
         parser = self._choose_parser(
@@ -103,27 +87,21 @@ class WorldLoader:
         return {'walkable': walkable}
 
     def _load_item(self, item_parser, ref):
-        pass
+        return {}
 
     def _load_feature(self, feature_parser, ref):
-        pass
+        return {}
 
     def _load_character(self, character_parser, ref):
-        # get interactions
-        parser = self._choose_parser(character_parser,
-            self.parsers['character'], ref, 'interact-type')
-        interactions = self._load_interactions(
-            dict(parser.items(ref)))
-
-        return {'interactions': interactions}
+        return {}
 
     def _load_hero(self, image):
         return character.Hero(image)
 
     def _load_entity(self, entity_parser, section, ref, group):
-        kwargs = {'group': group}
+        kwargs = {'ref': ref, 'group': group}
 
-        # get name
+        # get name (optional; if none provided, `ref` will be used)
         parser = self._choose_parser(entity_parser,
             self.parsers[section], ref, 'name')
         if parser.has_option(ref, 'name'):
@@ -146,7 +124,7 @@ class WorldLoader:
         if ref == 'hero':
             return self._load_hero(kwargs['image'])
 
-        # get movement ranges (sometimes optional)
+        # get movement ranges (optional)
         parser = self._choose_parser(entity_parser,
             self.parsers[section], ref, 'x-range')
         if parser.has_option(ref, 'x-range'):
@@ -159,8 +137,44 @@ class WorldLoader:
         # get section-specific arguments
         kwargs.update(self._entity_args_loaders[section](entity_parser, ref))
 
-        # return entity object
-        return eval(section + '.' + section.title())(**kwargs)
+        # instantiate entity
+        entity = eval(section + '.' + section.title())(**kwargs)
+
+        # add interactions to entity if applicable
+        if section in ('character', 'feature'):
+            parser = entity_parser
+            if (not parser.has_section(entity.ref) or
+                not any([option.startswith('interact-')
+                    for option in parser.options(entity.ref)])):
+                parser = self.parsers[section]
+            entity.set_interactions(self._load_interactions(
+                dict(parser.items(entity.ref)), entity))
+
+        return entity
+
+    def _load_interactions(self, item_dict, entity):
+        interactions = []
+        for i in range(len([j for j in item_dict.keys()
+                if j.startswith('interact-')])):
+            args  = [s.strip() for s in
+                item_dict['interact-' + str(i)].strip().split(':')]
+            _type = args[0]
+            count = int(args[1])
+            order = int(args[2])
+            sequence = int(args[3])
+
+            if _type == 'text':
+                text = args[4].replace('\n', ' ')
+                interactions.append(
+                    interaction.TextInteraction(count, order, sequence, text))
+            elif _type == 'talk':
+                speaker = entity
+                text = args[4].replace('\n', ' ')
+                interactions.append(
+                    interaction.TalkInteraction(count, order, sequence, text,
+                        speaker))
+                
+        return interactions
 
     def _load_portals(self, room_dir):
         """Return list of `world.Portal` instances for a room,
@@ -208,10 +222,6 @@ class WorldLoader:
                     ordered_groups[s].append(OrderedGroup(j +
                         sum([len(ordered_groups[self.sections[i-k]])
                             for k in range(1, i + 1)])))
-        #parsers['terrain'].read(os.path.join(room_path, 'terrain.ini'))
-        #parsers['feature'].read(os.path.join(room_path, 'feature.ini'))
-        #parsers['item'].read(os.path.join(room_path, 'item.ini'))
-        #parsers['character'].read(os.path.join(room_path, 'character.ini'))
 
         # get basic parameters ------------------------------------------------
         name = room_dir
@@ -222,6 +232,7 @@ class WorldLoader:
         room_map = [[[] for x in range(width)] for y in range(height)]
 
         # add entities --------------------------------------------------------
+        interact_entities = []
         for section, files in map_files.items():
             for i in range(len(files)):
                 map_file = files[i]
@@ -240,16 +251,18 @@ class WorldLoader:
                         ref = parser.get(section, symbol)
                         
                         # instantiate entity
-                        entity_obj = self._load_entity(parsers[section],
+                        entity = self._load_entity(parsers[section],
                             section, ref, ordered_groups[section][i])
                         if ref == 'hero':
-                            hero = entity_obj
-                        room_map[y][x].append(entity_obj)
+                            hero = entity
+
+                        # add entity to map
+                        room_map[y][x].append(entity)
                 map_file.close()
 
         # remove bluriness from scaled images
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        # reverse room_map
+        # reverse map
         room_map.reverse()
 
         # add portals to room -------------------------------------------------
@@ -271,13 +284,12 @@ class WorldLoader:
         # load rooms ----------------------------------------------------------
         starting_room_name = self.parsers['map'].get('params', 'starting_room')
 
-        ordered_entities = [[] for i in range(4)]
         for room_dir in os.listdir(self.room_path):
             if room_dir == starting_room_name:
                 room, hero = self._load_room(room_dir, True)
                 starting_room = room
             else:
-                room, entities = self._load_room(room_dir)
+                room = self._load_room(room_dir)
 
             self.rooms[room_dir] = room
 
