@@ -6,16 +6,16 @@ from stats.combat import *
 from world import Room
 
 
-class BattleGrid(Room):
+class CombatGrid(Room):
 
     def __init__(self, room):
         super(BattleGrid, self).__init__('combat', width=9, height=9) 
         
 
-class Battle(object):
+class Combat(object):
 
-    def __init__(self, battle_menu):
-        self.menu = battle_menu
+    def __init__(self, menu):
+        self.menu = menu
 
         self.allies = []
         self.enemies = []

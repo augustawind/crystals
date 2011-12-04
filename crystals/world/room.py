@@ -39,7 +39,7 @@ class Room:
     """A 3-dimensional grid that contains Entities and Portals to other Rooms.
     Populates a World."""
 
-    def __init__(self, name, width, height, _map=[], portals=[]):
+    def __init__(self, name, width, height, _map, portals):
         self.name = name
         self.width = width
         self.height = height
@@ -138,10 +138,10 @@ class Room:
             if (px == x) and (py == y):
                 return portal
     
-    def get_portal_from_room(self, room):
+    def get_recieving_portal(self, from_room, from_portal):
         for portal in self._portals:
-            if (portal.dest_room == room.name and
-                    portal.dest_portal in [p.name for p in room.portals]):
+            if (portal.dest_room == from_room.name and
+                    portal.dest_portal == from_portal.name):
                 return portal
 
     # adding entities ---------------------------------------------------------

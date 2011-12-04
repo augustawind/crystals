@@ -52,12 +52,22 @@ class WorldLoader:
         # the data will be obtained from these parsers instead. Only
         # 'world.ini' is required to exist.
         self.parsers = self._get_empty_parser_dict()
-        self.parsers['map'].read(os.path.join(self.path, 'map.ini'))
+        self.parsers['world'] = ConfigParser()
+        self.parsers['world'].read(os.path.join(self.path, 'world.ini'))
         self.parsers['terrain'].read(os.path.join(self.path, 'terrain.ini'))
         self.parsers['feature'].read(os.path.join(self.path, 'feature.ini'))
         self.parsers['item'].read(os.path.join(self.path, 'item.ini'))
         self.parsers['character'].read(
             os.path.join(self.path, 'character.ini'))
+
+        # load default symbol index
+        self.symbols = {}
+        for section in self.sections:
+            parser = self.parsers[section]
+            for ref in parser.sections():
+                if parser.has_option(ref, 'symbol'):
+                    symbol = parser.get(ref, 'symbol')
+                    self.symbols[symbol] = ref
 
         self._entity_args_loaders = {
             'terrain': self._load_terrain,
@@ -70,7 +80,7 @@ class WorldLoader:
 
     def _get_empty_parser_dict(self):
         return dict((parser_name, ConfigParser()) for parser_name in
-            self.sections + ['map'])
+            self.sections)
 
     def _choose_parser(self, parser, default_parser, section, option):
         if parser.has_option(section, option):
@@ -208,6 +218,7 @@ class WorldLoader:
                     os.path.join(room_path, filename), 'r'))
             
         parsers = self._get_empty_parser_dict()
+        parsers['map'] = ConfigParser()
         parsers['map'].read(os.path.join(room_path, 'map.ini'))
         
         ordered_groups = dict((s, []) for s in self.sections)
@@ -223,12 +234,18 @@ class WorldLoader:
                         sum([len(ordered_groups[self.sections[i-k]])
                             for k in range(1, i + 1)])))
 
-        # get basic parameters ------------------------------------------------
-        name = room_dir
-        width = parsers['map'].getint('params', 'width')
-        height = parsers['map'].getint('params', 'height')
+        # define symbol index -------------------------------------------------
+        symbols = {}
+        for section in self.sections:
+            parser = parsers[section]
+            for ref in parser.sections():
+                if parser.has_option(ref, 'symbol'):
+                    symbol = parser.get(ref, 'symbol')
+                    symbols[symbol] = ref
 
         # construct empty map -------------------------------------------------
+        width = parsers['map'].getint('params', 'width')
+        height = parsers['map'].getint('params', 'height')
         room_map = [[[] for x in range(width)] for y in range(height)]
 
         # add entities --------------------------------------------------------
@@ -246,9 +263,10 @@ class WorldLoader:
                             continue
 
                         # get entity ref
-                        parser = self._choose_parser(parsers['map'],
-                            self.parsers['map'], section, symbol)
-                        ref = parser.get(section, symbol)
+                        if symbols.has_key(symbol):
+                            ref = symbols[symbol]
+                        else:
+                            ref = self.symbols[symbol]
                         
                         # instantiate entity
                         entity = self._load_entity(parsers[section],
@@ -269,7 +287,9 @@ class WorldLoader:
         portals = self._load_portals(room_dir)
 
         # return `Room` instance, plus `Hero` instance if appl.
-        room = world.room.Room(name, width, height, room_map, portals)
+        room = world.room.Room(room_dir, width, height, room_map, portals)
+        #    [group for group in [ordered_groups[section]
+        #        for section in self.sections]])
         if starting_room:
             return room,  hero
         else:
@@ -282,7 +302,8 @@ class WorldLoader:
         """Return a `world.World` instance from data in the 'data/world'
         directory."""
         # load rooms ----------------------------------------------------------
-        starting_room_name = self.parsers['map'].get('params', 'starting_room')
+        starting_room_name = self.parsers['world'].get(
+            'params', 'starting_room')
 
         for room_dir in os.listdir(self.room_path):
             if room_dir == starting_room_name:

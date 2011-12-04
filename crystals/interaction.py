@@ -54,9 +54,12 @@ class TextInteraction(Interaction):
         if super(TextInteraction, self).interact():
             output.print_message(self.text)
 
-class TalkInteraction(Interaction):
+class TalkInteraction(TextInteraction):
     """Outputs text preceded by the speaker's name, e.g. bob: hey!"""
 
-    def __init__(self, count, order, text, speaker):
+    def __init__(self, count, order, sequence, text, speaker):
         super(TalkInteraction, self).__init__(count, order, sequence,
-            speaker.name + ': ' + text)
+                speaker.name + ':  ' + text)
+
+    def __str__(self):
+        return 'talk'

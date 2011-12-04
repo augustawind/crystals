@@ -90,7 +90,7 @@ class World:
         self._current_room.delete_entity(entity, *portal.coords)
         from_room = self._current_room
         to_room = self._rooms[portal.dest_room]
-        to_portal = to_room.get_portal_from_room(from_room)
+        to_portal = to_room.get_recieving_portal(from_room, portal)
 
         self._current_room = to_room
         x, y = to_portal.coords
