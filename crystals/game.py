@@ -95,10 +95,8 @@ class Game(pyglet.window.Window):
             if symbol == self.pause_key:
                 self.activate_pause_menu()
 
-        self.on_draw = on_draw
-        self.on_text_motion = on_text_motion
-        self.on_text = on_text
-        self.on_key_press = on_key_press
+        self.remove_handlers()
+        self.set_handlers(on_draw, on_text_motion, on_text, on_key_press)
 
         pyglet.clock.schedule_interval(self.update_characters, self.base_delay)
 

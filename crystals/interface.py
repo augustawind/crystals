@@ -23,14 +23,14 @@ class Menu(object):
     
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, game_window):
-        self.game_window = game_window
+    def __init__(self, window):
+        self.window = window
         self.batch = pyglet.graphics.Batch()
 
         self.options = {}
 
     def on_draw(self):
-        self.game_window.clear()
+        self.window.clear()
         self.batch.draw()
 
     def on_key_press(self, symbol, modifiers):
@@ -38,9 +38,8 @@ class Menu(object):
             self.options[symbol]()
 
     def activate(self):
-        self.game_window.on_text_motion = lambda motion: None
-        self.game_window.on_draw = self.on_draw
-        self.game_window.on_key_press = self.on_key_press
+        self.window.remove_handlers()
+        self.window.set_handlers(self.on_draw, self.on_key_press)
 
 class TwoPanelMenu(Menu):
     """A Menu with two vertical panels. Submenus appear on the right panel, and
@@ -49,8 +48,8 @@ class TwoPanelMenu(Menu):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, game_window, width, height, margin, padding):
-        super(TwoPanelMenu, self).__init__(game_window)
+    def __init__(self, window, width, height, margin, padding):
+        super(TwoPanelMenu, self).__init__(window)
 
         self.width = width
         self.height = height
@@ -96,16 +95,16 @@ class TwoPanelMenu(Menu):
 class MainMenu(Menu):
     """The menu that first greets the user when she runs the game."""
 
-    def __init__(self, game_window):
-        super(MainMenu, self).__init__(game_window)
+    def __init__(self, window):
+        super(MainMenu, self).__init__(window)
 
         self.groups = [pyglet.graphics.OrderedGroup(0),
             pyglet.graphics.OrderedGroup(1)] 
 
         self.options = {
-            key.N: game_window.new_game,
-            key.L: game_window.load_game,
-            key.Q: game_window.quit}
+            key.N: window.new_game,
+            key.L: window.load_game,
+            key.Q: window.quit}
 
         # content -------------------------------------------------------------
         self.document = FormattedDocument(
@@ -119,7 +118,7 @@ class MainMenu(Menu):
                     color=(255, 255, 255, 255)))
 
         # layout --------------------------------------------------------------
-        self.layout = TextLayout(self.document, width=game_window.width,
+        self.layout = TextLayout(self.document, width=window.width,
             multiline=True, batch=self.batch, group=self.groups[1])
         self.layout.content_valign = 'center'
         self.layout.x = 16
@@ -127,8 +126,8 @@ class MainMenu(Menu):
 
         # background image ----------------------------------------------------
         image = images['interface']['album-cover']
-        image.width = game_window.width
-        image.height = game_window.height
+        image.width = window.width
+        image.height = window.height
         self.bg_image = pyglet.sprite.Sprite(image,
             batch=self.batch, group=self.groups[0])
 
@@ -137,13 +136,13 @@ class PauseMenu(TwoPanelMenu):
     information, make certain changes to characters and items, and quit the
     game."""
 
-    def __init__(self, game_window):
-        super(PauseMenu, self).__init__(game_window,
-            game_window.width, game_window.height, 10, 50)
+    def __init__(self, window):
+        super(PauseMenu, self).__init__(window,
+            window.width, window.height, 10, 50)
 
         self.main_options = {
-            key.ENTER: game_window.activate_world_mode,
-            key.S: pyglet.app.exit()}
+            key.ENTER: window.activate_world_mode,
+            key.S: pyglet.app.exit}
         self.options = self.main_options
 
         # content -------------------------------------------------------------
@@ -165,9 +164,9 @@ class CombatMenu(TwoPanelMenu):
     """The menu that is displayed in combat, allowing the player to make
     decisions about what her team will do."""
 
-    def __init__(self, game_window):
-        super(CombatMenu, self).__init__(game_window,
-            game_window.width, 96, 5, 25)
+    def __init__(self, window):
+        super(CombatMenu, self).__init__(window,
+            window.width, 96, 5, 25)
 
         self.main_options = {
             key.M: self.select_move,
@@ -215,32 +214,12 @@ class CombatMenu(TwoPanelMenu):
         #self.player_action = 'crystal'
         raise NotImplementedError('Evoking crystals has not been implemented')
 
-class WorldFrame:
-
-    def __init__(self):
-        self.batch = pyglet.graphics.Batch()
-
-        # primitives ----------------------------------------------------------
-        x1 = VIEWPORT['x1'] * TILE_SIZE
-        y1 = VIEWPORT['y1'] * TILE_SIZE
-        x2 = VIEWPORT['x2'] * TILE_SIZE
-        y2 = VIEWPORT['y2'] * TILE_SIZE
-        self.border = self.batch.add_indexed(4, GL_LINES, None,
-            [0, 1, 0, 2, 1, 2, 1, 3],
-            ('v2i', (x1, y1,
-                     x1, y2,
-                     x2, y1,
-                     x2, y2)))
-
-    def draw(self):
-        self.batch.draw()
-
 class MessageBox:
     """Displays messages from the world in world mode. All textual information
     that is given to the player in world mode is done so through MessageBox."""
 
-    def __init__(self, game_window):
-        self.game_window = game_window
+    def __init__(self, window):
+        self.window = window
 
         self.batch = pyglet.graphics.Batch()
 
