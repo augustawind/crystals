@@ -2,15 +2,12 @@
 
 from random import random
 
-from stats.combat import *
 from world import Room
-
 
 class CombatGrid(Room):
 
     def __init__(self, room):
         super(BattleGrid, self).__init__('combat', width=9, height=9) 
-        
 
 class Combat(object):
 

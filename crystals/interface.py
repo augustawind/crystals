@@ -8,13 +8,14 @@ from pyglet.window import key, mouse
 from pyglet.gl import GL_LINES
 
 from world import VIEWPORT, TILE_SIZE
-from data import ImageLoader
+from data import ImageLoader, load_fonts
 
 FONT_RUNESCAPE_UF = 'Runescape UF'
 FONT_TERMINUS = 'Terminus'
 DEFAULT_FONT = FONT_RUNESCAPE_UF
 
 images = ImageLoader()
+load_fonts()
 
 class Menu(object):
     """When activated, displays a list of options with corresponding keyboard

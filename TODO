@@ -3,42 +3,21 @@ TODO
 - add credits option to main menu
     - credits screen features julian wass, oryx, dustin, and charley
 
-- restructure data/world system
-    - restructure parameter inheritence
-        - inheritance is specified by prepending the parent section name to
-            the child section name with a period, i.e. [parent.child]
-        - sections in the root-level entity.ini files can be
-            subclassed by sections in the room-level entity.ini files
-        - sections in the root- and room-level entity.ini files can be
-            subclassed in the same file
-        - inheritance chains are possible, i.e. [section0.section1...sectionN]
-        - the parser searches the closest parent section when a parameter
-            is missing from the child section
-    - possible move symbol specification to entity config files
-        - this would allow for case-sensitive symbols, but would be
-            cumbersome to navigate (maybe)
-
 - restructure world code
     - separate world graphics code from world data code by abstracting
         graphics into a subclass of data
 
-- restructure interaction system
-    - change order parameter to sequence
-    - add new order paramater that specifies the index of how many times
-        you must interact with the character for it to trigger
-    - define built-in subclasses
-        - TalkInteraction
-            - initiates dialog
-        - CombatInteraction
-            - initiates combat
-        - PlotInteraction
-            - advances the plot
-        - ItemInteraction
-            - adds an item to a character's inventory
-        - ModAttrInteraction
-            - modifies a character's attribute
-        - SpawnInteraction
-            - spawns an entity in the room
-        - MetaInteraction
-            - changes this or another entity's Interaction 
-        ...
+- define interaction subclasses (as neccessary)
+    - CombatInteraction
+        - initiates combat
+    - PlotInteraction
+        - advances the plot
+    - ItemInteraction
+        - adds an item to a character's inventory
+    - ModAttrInteraction
+        - modifies a character's attribute
+    - SpawnInteraction
+        - spawns an entity in the room
+    - MetaInteraction
+        - changes this or another entity's Interaction 
+    ...

@@ -4,7 +4,6 @@ import os
 from ConfigParser import ConfigParser
 
 import pyglet.resource
-import pyglet.font
 from pyglet.graphics import OrderedGroup
 from pyglet.gl import *
 
@@ -16,11 +15,11 @@ glEnable(GL_TEXTURE_2D)
 
 DATA_PATH = os.path.join('crystals', 'data')
 
-# add local fonts to pyglet.font
-pyglet.font.add_file(
-    os.path.join(DATA_PATH, 'font', 'runescape_uf.ttf'))
-pyglet.font.add_file(
-    os.path.join(DATA_PATH, 'font', 'terminus.ttf'))
+def load_fonts():
+    pyglet.font.add_file(
+        os.path.join(DATA_PATH, 'font', 'runescape_uf.ttf'))
+    pyglet.font.add_file(
+        os.path.join(DATA_PATH, 'font', 'terminus.ttf'))
 
 class ImageLoader(dict):
     """A dictionary of game images."""
@@ -249,13 +248,14 @@ class WorldLoader:
         room_map = [[[] for x in range(width)] for y in range(height)]
 
         # add entities --------------------------------------------------------
-        interact_entities = []
         for section, files in map_files.items():
             for i in range(len(files)):
                 map_file = files[i]
                 for y in range(height):
+                    print y
                     row = map_file.readline().strip()
                     for x in range(width):
+                        print x
                         symbol = row[x]
 
                         # continue if 'nothing' symbol encountered

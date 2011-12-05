@@ -68,6 +68,12 @@ class Game(pyglet.window.Window):
     def quit(self):
         pyglet.app.exit()
 
+    # combat mode methods
+    # -------------------------------------------------------------------------
+
+    def activate_combat_mode(self):
+        pass
+
     # world mode methods
     # -------------------------------------------------------------------------
 
