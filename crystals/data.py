@@ -312,10 +312,9 @@ class WorldLoader:
                 starting_room = room
             else:
                 room = self._load_room(room_dir)
+            self.rooms[room_dir] = room
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         glDisable(GL_TEXTURE_2D)
-
-            self.rooms[room_dir] = room
 
         # return `world.World` instance ---------------------------------------
         return world.World(self.rooms, starting_room, hero)

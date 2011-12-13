@@ -49,7 +49,7 @@ class Game(pyglet.window.Window):
 
     def run(self):
         """Run the game."""
-        self.main_menu.activate(self)
+        self.main_menu.activate()
         pyglet.app.run()
 
     # main menu methods
@@ -59,6 +59,7 @@ class Game(pyglet.window.Window):
         world_loader = data.WorldLoader()
         self.world = world_loader.load_world()
         self.hero = self.world.hero
+        self.pause_menu = interface.PauseMenu(self)
 
         self.activate_world_mode()
 
@@ -78,12 +79,11 @@ class Game(pyglet.window.Window):
     # -------------------------------------------------------------------------
 
     def activate_world_mode(self):
-        self.pause_menu = interface.PauseMenu(self)
-        self.message_box = interface.MessageBox(self)
+        #self.message_box = interface.MessageBox(self)
 
         def on_draw():
             self.clear()
-            self.message_box.draw()
+            #self.message_box.draw()
             self.world.draw()
 
         def on_text_motion(motion):
@@ -98,13 +98,14 @@ class Game(pyglet.window.Window):
             if symbol == self.pause_key:
                 self.activate_pause_menu()
 
-        self.remove_handlers()
-        self.set_handlers(on_draw, on_text_motion, on_text, on_key_press)
+        self.pop_handlers()
+        self.push_handlers(on_draw, on_text_motion, on_text, on_key_press)
 
         pyglet.clock.schedule_interval(self.update_characters, self.base_delay)
 
     def activate_pause_menu(self):
         pyglet.clock.unschedule(self.update_characters)
+        self.pop_handlers()
         self.pause_menu.activate()
     
     def update_characters(self, dt):

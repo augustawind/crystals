@@ -48,16 +48,12 @@ class MenuItem(Label):
 class MenuBranch(MenuItem):
     """A menu item that activates a submenu."""
 
-    def __init__(self, x, y, width, height, batch, menu, window,
+    def __init__(self, x, y, width, height, batch, menu,
                  *args, **kwargs):
         self.menu = menu
-        self.window = window
         super(MenuBranch, self).__init__(
-            x, y, width, height, batch, self.menu.activate, (self.window, ),
+            x, y, width, height, batch, self.menu.activate,
             *args, **kwargs)
-
-    def trigger(self):
-        super(MenuBranch, self).trigger()
 
 
 class Menu(Panel):
@@ -102,9 +98,9 @@ class Menu(Panel):
         self.window.pop_handlers()
         self.parent.trigger()
 
-    def activate(self, window):
+    def activate(self):
         """Activate the menu, pushing its event handlers on the window."""
-        window.push_handlers(self)
+        self.window.push_handlers(self)
     
     # event handlers ----------------------------------------------------------
     def on_draw(self):

@@ -7,7 +7,7 @@ class TextBox(Widget):
     """A box that displays text."""
 
     def __init__(self, x, y, width, height, batch, padding=0,
-                 text_args={'font-size': 12, 'color': color.DEFAULT)},
+                 text_args={'font-size': 12, 'color': color.DEFAULT},
                  *args, **kwargs):
         super(TextBox, self).__init__(x, y, width, height, batch,
                                       *args, **kwargs)
