@@ -18,10 +18,10 @@ class Game(pyglet.window.Window):
             (VIEWPORT_COLS + OFFSET_COLS) * TILE_SIZE,
             (VIEWPORT_ROWS + OFFSET_ROWS) * TILE_SIZE,
             caption='CRYSTALS', resizable=False)
-
+        
         self.main_menu = interface.MainMenu(self)
-        self.pause_menu = interface.PauseMenu(self)
-        self.message_box = interface.MessageBox(self)
+        self.pause_menu = None
+        self.message_box = None
 
         self.world = None
         self.combat = None
@@ -49,7 +49,7 @@ class Game(pyglet.window.Window):
 
     def run(self):
         """Run the game."""
-        self.main_menu.activate()
+        self.main_menu.activate(self)
         pyglet.app.run()
 
     # main menu methods
@@ -78,6 +78,9 @@ class Game(pyglet.window.Window):
     # -------------------------------------------------------------------------
 
     def activate_world_mode(self):
+        self.pause_menu = interface.PauseMenu(self)
+        self.message_box = interface.MessageBox(self)
+
         def on_draw():
             self.clear()
             self.message_box.draw()

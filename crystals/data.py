@@ -1,4 +1,4 @@
-"""classes for loading world, image, and sound data"""
+"""loaders for world, image, and sound data"""
 
 import os
 from ConfigParser import ConfigParser
@@ -11,15 +11,15 @@ import world
 import interaction
 from entity import *
 
-glEnable(GL_TEXTURE_2D)
-
 DATA_PATH = os.path.join('crystals', 'data')
+
 
 def load_fonts():
     pyglet.font.add_file(
         os.path.join(DATA_PATH, 'font', 'runescape_uf.ttf'))
     pyglet.font.add_file(
         os.path.join(DATA_PATH, 'font', 'terminus.ttf'))
+
 
 class ImageLoader(dict):
     """A dictionary of game images."""
@@ -35,6 +35,7 @@ class ImageLoader(dict):
                 image = pyglet.resource.image(
                     os.path.join(image_subpath, filename))
                 self[directory][name] = image
+
 
 class WorldLoader:
 
@@ -278,8 +279,6 @@ class WorldLoader:
                         room_map[y][x].append(entity)
                 map_file.close()
 
-        # remove bluriness from scaled images
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
         # reverse map
         room_map.reverse()
 
@@ -305,12 +304,16 @@ class WorldLoader:
         starting_room_name = self.parsers['world'].get(
             'params', 'starting_room')
 
+        # 2d texture state keeps scaled images sharp
+        glEnable(GL_TEXTURE_2D)
         for room_dir in os.listdir(self.room_path):
             if room_dir == starting_room_name:
                 room, hero = self._load_room(room_dir, True)
                 starting_room = room
             else:
                 room = self._load_room(room_dir)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glDisable(GL_TEXTURE_2D)
 
             self.rooms[room_dir] = room
 
