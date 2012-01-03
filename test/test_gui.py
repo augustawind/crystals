@@ -16,7 +16,10 @@ class TestGui(object):
 
     def test_draw_box(self):
         box = gui.draw_box(0, 0, 10, 10, self.batch)
+
         assert isinstance(box, pyglet.graphics.vertexdomain.VertexList)
+        assert box.get_size() == 4
+
         box.delete()
 
 
