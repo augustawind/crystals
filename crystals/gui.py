@@ -2,6 +2,7 @@
 import pyglet
 
 COLOR_WHITE = (255, 255, 255, 255)
+COLOR_RED = (255, 0, 0, 255)
 
 ANCHOR_X = 'left'
 ANCHOR_Y = 'bottom'
@@ -22,6 +23,8 @@ class Box(object):
             self.show()
 
     def show(self):
+        if self.box:
+            return
         x2 = self.x + self.width
         y2 = self.y + self.height
         size = 5
@@ -35,7 +38,9 @@ class Box(object):
                   self.vertex_data, self.color_data)
 
     def hide(self):
-        self.box.delete()
+        if self.box:
+            self.box.delete()
+            self.box = None
 
 
 class Menu(object):
@@ -51,6 +56,7 @@ class Menu(object):
         self.batch = batch
         self.text = text
         self.functions = functions
+        self.selection = 0
 
         self.box = Box(self.x, self.y, self.width, self.height,
                             self.batch, color, box)
@@ -80,3 +86,10 @@ class Menu(object):
                 anchor_x='center', anchor_y='baseline',
                 halign='center', multiline=False, batch=self.batch))
             self.labels[-1].content_valign = 'center'
+
+    def select_item(self, i):
+        if self.selection == i:
+            return
+        self.boxes[self.selection].hide()
+        self.boxes[i].show()
+        self.selection = i
