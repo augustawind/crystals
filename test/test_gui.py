@@ -3,7 +3,7 @@ import pyglet
 
 from crystals import gui
 
-class AbstractTest(object):
+class TestCase(object):
 
     def setup(self):
         self.window = pyglet.window.Window(600, 400)
@@ -25,7 +25,7 @@ class AbstractTest(object):
             pyglet.app.exit()
 
 
-class TestBox(AbstractTest):
+class TestBox(TestCase):
 
     def setup(self):
         super(TestBox, self).setup()
@@ -56,7 +56,7 @@ class TestBox(AbstractTest):
         self.box.hide()
 
 
-class TestMenu(AbstractTest):
+class TestMenu(TestCase):
 
     def setup(self):
         super(TestMenu, self).setup()
@@ -84,7 +84,7 @@ class TestMenu(AbstractTest):
         assert self.menu.text == self.text
         assert self.menu.functions == self.functions
         assert len(self.menu.functions) == len(self.menu.text)
-        assert self.menu.selection == 0
+        assert self.menu.selection == -1
 
         assert isinstance(self.menu.box, gui.Box)
         assert all([isinstance(box, gui.Box) for box in self.menu.boxes])
@@ -105,7 +105,7 @@ class TestMenu(AbstractTest):
 
     def test_select_item(self):
         old_i = self.menu.selection
-        assert old_i == 0
+        assert old_i == -1
 
         self.menu.select_item(1)
 
@@ -119,4 +119,17 @@ class TestMenu(AbstractTest):
 
         self.run_app()
 
+    def test_select_next(self):
+        self.menu.select_item(0)
+        self.menu.select_next()
+        assert self.menu.selection == 1
+        self.menu.select_next()
+        self.menu.select_next()
+        assert self.menu.selection == 0
 
+    def test_select_prev(self):
+        self.menu.select_item(1)
+        self.menu.select_prev()
+        assert self.menu.selection == 0
+        self.menu.select_prev()
+        assert self.menu.selection == len(self.text) - 1

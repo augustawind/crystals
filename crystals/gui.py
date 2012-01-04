@@ -27,14 +27,13 @@ class Box(object):
             return
         x2 = self.x + self.width
         y2 = self.y + self.height
-        size = 5
-        self.vertex_data = ('v2i', (self.x, self.y,
-                                    self.x, y2,
-                                    x2, y2,
-                                    x2, self.y,
-                                    self.x, self.y))
+        size = 8
+        self.vertex_data = ('v2i', (self.x, self.y, self.x, y2,
+                                    self.x, self.y, x2, self.y,
+                                    x2, self.y, x2, y2,
+                                    self.x, y2, x2, y2))
         self.color_data = ('c4B', self.color * size)
-        self.box = self.batch.add(size, pyglet.gl.GL_LINE_STRIP, None,
+        self.box = self.batch.add(size, pyglet.gl.GL_LINES, None,
                   self.vertex_data, self.color_data)
 
     def hide(self):
@@ -56,10 +55,10 @@ class Menu(object):
         self.batch = batch
         self.text = text
         self.functions = functions
-        self.selection = 0
+        self.selection = -1
 
-        self.box = Box(self.x, self.y, self.width, self.height,
-                            self.batch, color, box)
+        self.box = Box(self.x, self.y, self.width, self.height, self.batch,
+                       color, box)
 
         box_x = self.x + margin
         box_y = self.y + margin
@@ -76,7 +75,7 @@ class Menu(object):
         for i in range(len(self.text)):
             self.boxes.append(
                 Box(box_x, box_y, box_width, box_height, self.batch,
-                         color, show=True))
+                         color, show=False))
             box_y += box_height 
 
             label_y += box_height
@@ -88,8 +87,22 @@ class Menu(object):
             self.labels[-1].content_valign = 'center'
 
     def select_item(self, i):
-        if self.selection == i:
+        if i == self.selection:
             return
         self.boxes[self.selection].hide()
-        self.boxes[i].show()
+        if i != -1:
+            self.boxes[i].show()
         self.selection = i
+    
+    def select_next(self):
+        if self.selection < len(self.text) - 1:
+            self.select_item(self.selection + 1)
+        else:
+            self.select_item(0)
+
+    def select_prev(self):
+        if self.selection > 0:
+            self.select_item(self.selection - 1)
+        else:
+            self.select_item(len(self.text) - 1)
+
