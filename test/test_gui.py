@@ -155,10 +155,14 @@ class TestMenu(TestCase):
         self.menu.deselect()
         assert self.menu.selection == -1
 
-    def test_on_mouse_motion(self):
+    def check_mouse_event(self):
         for box in self.menu.boxes:
             x = box.x
             y = box.y
+            yield box, x, y
+
+    def test_on_mouse_motion(self):
+        for box, x, y in self.check_mouse_event():
             for dx, dy in permutations((-1, 0, 1), 2):
                 self.menu.on_mouse_motion(x, y, dx, dy)
                 assert self.menu.selection == self.menu.boxes.index(box), \
@@ -174,5 +178,3 @@ class TestMenu(TestCase):
             self.menu.boxes[-1].x * 2, self.menu.boxes[-1].y * 2, dx, dy)
         assert self.menu.selection == -1
 
-        self.window.push_handlers(self.menu)
-        self.run_app()

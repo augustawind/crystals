@@ -130,4 +130,3 @@ class Menu(object):
                 self.select_item(self.boxes.index(box))
                 return
         self.deselect()
-
