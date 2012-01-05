@@ -1,3 +1,5 @@
+from itertools import permutations
+
 from nose.tools import *
 import pyglet
 
@@ -44,6 +46,11 @@ class TestBox(TestCase):
             self.box.box is None or
             isinstance(self.box.box, pyglet.graphics.vertexdomain.VertexList))
 
+    def test_visible(self):
+        assert not self.box.visible
+        self.box.show()
+        assert self.box.visible
+
     def test_show(self):
         self.box.show()
         assert hasattr(self.box, 'vertex_data')
@@ -54,6 +61,7 @@ class TestBox(TestCase):
     def test_hide(self):
         self.box.show()
         self.box.hide()
+        assert self.box.box is None
 
 
 class TestMenu(TestCase):
@@ -70,9 +78,6 @@ class TestMenu(TestCase):
     def create_menu(self):
         self.menu = gui.Menu(self.x, self.y, self.width, self.height, self.batch,
                              self.text, self.functions, **self.kwargs)
-
-    def teardown(self):
-        super(TestMenu, self).teardown()
 
     def test_init(self):
         assert isinstance(self.menu, gui.Menu)
@@ -99,16 +104,29 @@ class TestMenu(TestCase):
             assert label.italic == False
             assert label.color == (255, 255, 255, 255)
             assert label.anchor_x == 'center'
-            assert label.anchor_y == 'baseline'
+            assert label.anchor_y == 'center'
             assert label.multiline == False
             assert label.batch == self.batch
 
+    def test_hit_test(self):
+        for box in self.menu.boxes:
+            x1 = box.x
+            y1 = box.y
+            x2 = x1 + box.width
+            y2 = y1 + box.height
+            for x, y in (
+                    ((x1 + x2 - 1) / 2, (y1 + y2 - 1) / 2),
+                    (x1, y1), (x1, y2 - 1), (x2 - 1, y1), (x2 - 1, y2 - 1)):
+                assert self.menu.hit_test(x, y, box), 'i=' + str(
+                    self.menu.boxes.index(box))
+            for x, y in (
+                    (x1 + x2, y1 + y2), (x1, y2), (x2, y1), (x2, y2)):
+                assert not self.menu.hit_test(x, y, box), 'i=' + str(
+                    self.menu.boxes.index(box))
+
     def test_select_item(self):
         old_i = self.menu.selection
-        assert old_i == -1
-
         self.menu.select_item(1)
-
         assert not isinstance(self.menu.boxes[old_i].box,
                               pyglet.graphics.vertexdomain.VertexList)
 
@@ -116,8 +134,6 @@ class TestMenu(TestCase):
         assert new_i == 1
         assert isinstance(self.menu.boxes[new_i].box,
                           pyglet.graphics.vertexdomain.VertexList)
-
-        self.run_app()
 
     def test_select_next(self):
         self.menu.select_item(0)
@@ -133,3 +149,30 @@ class TestMenu(TestCase):
         assert self.menu.selection == 0
         self.menu.select_prev()
         assert self.menu.selection == len(self.text) - 1
+
+    def test_deselect(self):
+        self.menu.select_item(1)
+        self.menu.deselect()
+        assert self.menu.selection == -1
+
+    def test_on_mouse_motion(self):
+        for box in self.menu.boxes:
+            x = box.x
+            y = box.y
+            for dx, dy in permutations((-1, 0, 1), 2):
+                self.menu.on_mouse_motion(x, y, dx, dy)
+                assert self.menu.selection == self.menu.boxes.index(box), \
+                    'x={}, y={}, dx={}, dy={}, s={}, i={}'.format(
+                        x, y, dx, dy, self.menu.selection,
+                        self.menu.boxes.index(box))
+                self.menu.on_mouse_motion(x, y + box.height, dx, dy)
+                assert self.menu.selection != self.menu.boxes.index(box), \
+                    'x={}, y={}, dx={}, dy={}, s={}, i={}'.format(
+                        x, y, dx, dy, self.menu.selection,
+                        self.menu.boxes.index(box))
+        self.menu.on_mouse_motion(
+            self.menu.boxes[-1].x * 2, self.menu.boxes[-1].y * 2, dx, dy)
+        assert self.menu.selection == -1
+
+        self.window.push_handlers(self.menu)
+        self.run_app()

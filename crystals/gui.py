@@ -22,8 +22,12 @@ class Box(object):
         if show:
             self.show()
 
+    @property
+    def visible(self):
+        return self.box is not None
+
     def show(self):
-        if self.box:
+        if self.visible:
             return
         x2 = self.x + self.width
         y2 = self.y + self.height
@@ -37,7 +41,7 @@ class Box(object):
                   self.vertex_data, self.color_data)
 
     def hide(self):
-        if self.box:
+        if self.visible:
             self.box.delete()
             self.box = None
 
@@ -63,12 +67,12 @@ class Menu(object):
         box_x = self.x + margin
         box_y = self.y + margin
         box_width = self.width - (margin * 2)
-        box_height = (self.height / len(text)) - (margin)
+        box_height = (self.height / len(text)) - (margin * 2)
 
         label_width = box_width - (padding * 2)
         label_height = box_height - (padding * 2)
         label_x = (box_x + box_width) / 2
-        label_y = box_y + padding - (label_height / 2)
+        label_y = box_y - label_height
 
         self.boxes = []
         self.labels = []
@@ -76,23 +80,31 @@ class Menu(object):
             self.boxes.append(
                 Box(box_x, box_y, box_width, box_height, self.batch,
                          color, show=False))
-            box_y += box_height 
 
-            label_y += box_height
+            step = box_height + (margin * 2)
+            box_y += step
+            label_y += step
+
             self.labels.append(pyglet.text.Label(
                 self.text[i], font_name, font_size, bold, italic, color,
                 label_x, label_y, label_width, label_height,
-                anchor_x='center', anchor_y='baseline',
+                anchor_x='center', anchor_y='center',
                 halign='center', multiline=False, batch=self.batch))
             self.labels[-1].content_valign = 'center'
+
+    def hit_test(self, x, y, box):
+        if (box.x <= x < box.x + box.width and
+                box.y <= y < box.y + box.height):
+            return True
+        return False
 
     def select_item(self, i):
         if i == self.selection:
             return
-        self.boxes[self.selection].hide()
+        self.deselect()
         if i != -1:
             self.boxes[i].show()
-        self.selection = i
+            self.selection = i
     
     def select_next(self):
         if self.selection < len(self.text) - 1:
@@ -105,4 +117,17 @@ class Menu(object):
             self.select_item(self.selection - 1)
         else:
             self.select_item(len(self.text) - 1)
+
+    def deselect(self):
+        if self.boxes[self.selection].visible:
+            self.boxes[self.selection].hide()
+            self.selection = -1
+
+    # event handlers ---------------------------------------------------
+    def on_mouse_motion(self, x, y, dx, dy):
+        for box in self.boxes:
+            if self.hit_test(x, y, box):
+                self.select_item(self.boxes.index(box))
+                return
+        self.deselect()
 
