@@ -4,10 +4,8 @@ import pyglet
 COLOR_WHITE = (255, 255, 255, 255)
 COLOR_RED = (255, 0, 0, 255)
 
-ANCHOR_X = 'left'
-ANCHOR_Y = 'bottom'
-
 class Box(object):
+    """A rectangle that serves as a line border."""
 
     def __init__(self, x, y, width, height, batch, color=COLOR_WHITE,
                  show=False):
@@ -24,32 +22,37 @@ class Box(object):
 
     @property
     def visible(self):
+        """Return True if the box is visible."""
         return self.box is not None
 
     def show(self):
+        """Show the box. If it's already visible, do nothing."""
         if self.visible:
             return
         x2 = self.x + self.width
         y2 = self.y + self.height
         size = 8
-        self.vertex_data = ('v2i', (self.x, self.y, self.x, y2,
+        vertex_data = ('v2i', (self.x, self.y, self.x, y2,
                                     self.x, self.y, x2, self.y,
                                     x2, self.y, x2, y2,
                                     self.x, y2, x2, y2))
-        self.color_data = ('c4B', self.color * size)
+        color_data = ('c4B', self.color * size)
         self.box = self.batch.add(size, pyglet.gl.GL_LINES, None,
-                  self.vertex_data, self.color_data)
+                  vertex_data, color_data)
 
     def hide(self):
+        """Hide the box. If it's already invisible, do nothing."""
         if self.visible:
             self.box.delete()
             self.box = None
 
 
 class Menu(object):
+    """A menu of clickable/selectable buttons that execute arbitrary
+       functions."""
 
     def __init__(self, x, y, width, height, batch, text, functions,
-                 box=False, margin=10, padding=10, 
+                 show_box=False, margin=10, padding=10, 
                  font_name='monospace', font_size=16, bold=False,
                  italic=False, color=COLOR_WHITE):
         self.x = x
@@ -62,8 +65,10 @@ class Menu(object):
         self.selection = -1
 
         self.box = Box(self.x, self.y, self.width, self.height, self.batch,
-                       color, box)
+                       color, show_box)
 
+        # Create menu items -------------------------------------------
+        # Each item is represented by a Box and a Label ---------------
         box_x = self.x + margin
         box_y = self.y + margin
         box_width = self.width - (margin * 2)
@@ -93,12 +98,15 @@ class Menu(object):
             self.labels[-1].content_valign = 'center'
 
     def hit_test(self, x, y, box):
+        """Return True if (x, y) is within the bounds of box, else False."""
         if (box.x <= x < box.x + box.width and
                 box.y <= y < box.y + box.height):
             return True
         return False
 
     def select_item(self, i):
+        """Deselect the currently selected menu item, then select the
+           menu item at index i, displaying its border."""
         if i == self.selection:
             return
         self.deselect()
@@ -107,24 +115,36 @@ class Menu(object):
             self.selection = i
     
     def select_next(self):
+        """Select the next menu item in sequence.
+        
+        If the next index exceeds the highest item index, use the
+        lowest index in the sequence."""
         if self.selection < len(self.text) - 1:
             self.select_item(self.selection + 1)
         else:
             self.select_item(0)
 
     def select_prev(self):
+        """Select the previous menu item in sequence.
+
+        If the previous index is below item index zero, use the
+        highest index in the sequence."""
         if self.selection > 0:
             self.select_item(self.selection - 1)
         else:
             self.select_item(len(self.text) - 1)
 
     def deselect(self):
+        """Deselect the current menu item if it is currently selected, else
+           do nothing."""
         if self.boxes[self.selection].visible:
             self.boxes[self.selection].hide()
             self.selection = -1
 
     # event handlers ---------------------------------------------------
     def on_mouse_motion(self, x, y, dx, dy):
+        """If the mouse is positioned within the bounds of a menu item's
+           box, select that item. Deselect the previous menu item."""
         for box in self.boxes:
             if self.hit_test(x, y, box):
                 self.select_item(self.boxes.index(box))

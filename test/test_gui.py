@@ -53,8 +53,6 @@ class TestBox(TestCase):
 
     def test_show(self):
         self.box.show()
-        assert hasattr(self.box, 'vertex_data')
-        assert hasattr(self.box, 'color_data')
         assert isinstance(self.box.box,
                           pyglet.graphics.vertexdomain.VertexList)
 
@@ -71,13 +69,12 @@ class TestMenu(TestCase):
         self.x, self.y = 0, 0
         self.width, self.height = 350, 300
         self.text = ['Here Lies Text', 'the next text is hexed', 'inTEXTicated']
-        self.functions = [lambda: None for i in range(3)]
-        self.kwargs = {'box': True}
-        self.create_menu()
-
-    def create_menu(self):
-        self.menu = gui.Menu(self.x, self.y, self.width, self.height, self.batch,
-                             self.text, self.functions, **self.kwargs)
+        # menu functions simply return numbers 1, 2, and 3 respectively
+        self.functions = [(lambda x: x)(i) for i in range(3)]
+        self.kwargs = {'show_box': True}
+        self.menu = gui.Menu(
+            self.x, self.y, self.width, self.height, self.batch,
+            self.text, self.functions, **self.kwargs)
 
     def test_init(self):
         assert isinstance(self.menu, gui.Menu)
@@ -155,14 +152,13 @@ class TestMenu(TestCase):
         self.menu.deselect()
         assert self.menu.selection == -1
 
-    def check_mouse_event(self):
-        for box in self.menu.boxes:
-            x = box.x
-            y = box.y
-            yield box, x, y
+    def get_box_data(self):
+        """Convenience function for test_on_mouse_motion and
+           test_on_mouse_release."""
+        return [(box, box.x, box.y) for box in self.menu.boxes]
 
     def test_on_mouse_motion(self):
-        for box, x, y in self.check_mouse_event():
+        for box, x, y in self.get_box_data():
             for dx, dy in permutations((-1, 0, 1), 2):
                 self.menu.on_mouse_motion(x, y, dx, dy)
                 assert self.menu.selection == self.menu.boxes.index(box), \
@@ -177,4 +173,3 @@ class TestMenu(TestCase):
         self.menu.on_mouse_motion(
             self.menu.boxes[-1].x * 2, self.menu.boxes[-1].y * 2, dx, dy)
         assert self.menu.selection == -1
-
