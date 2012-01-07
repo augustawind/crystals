@@ -1,5 +1,6 @@
 """simple gui components"""
 import pyglet
+from pyglet.window import mouse
 
 COLOR_WHITE = (255, 255, 255, 255)
 COLOR_RED = (255, 0, 0, 255)
@@ -48,8 +49,7 @@ class Box(object):
 
 
 class Menu(object):
-    """A menu of clickable/selectable buttons that execute arbitrary
-       functions."""
+    """A menu of clickable/selectable text buttons that execute functions."""
 
     def __init__(self, x, y, width, height, batch, text, functions,
                  show_box=False, margin=10, padding=10, 
@@ -150,3 +150,9 @@ class Menu(object):
                 self.select_item(self.boxes.index(box))
                 return
         self.deselect()
+
+    def on_mouse_release(self, x, y, button, modifiers):
+        """On a left mouse release, if a button is currently selected,
+           execute that button's corresponding function."""
+        if self.selection != -1 and button == mouse.LEFT:
+            self.functions[self.selection]()

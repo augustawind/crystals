@@ -1,6 +1,7 @@
 from itertools import permutations
 
 from nose.tools import *
+from pyglet.graphics.vertexdomain import VertexList
 import pyglet
 
 from crystals import gui
@@ -42,9 +43,7 @@ class TestBox(TestCase):
         assert isinstance(self.box, gui.Box)
         assert (self.box.x, self.box.y, self.box.width, self.box.height,
                 self.box.batch, self.box.color) == self.args
-        assert (
-            self.box.box is None or
-            isinstance(self.box.box, pyglet.graphics.vertexdomain.VertexList))
+        assert (self.box.box is None or isinstance(self.box.box, VertexList))
 
     def test_visible(self):
         assert not self.box.visible
@@ -53,8 +52,7 @@ class TestBox(TestCase):
 
     def test_show(self):
         self.box.show()
-        assert isinstance(self.box.box,
-                          pyglet.graphics.vertexdomain.VertexList)
+        assert isinstance(self.box.box, VertexList)
 
     def test_hide(self):
         self.box.show()
@@ -69,9 +67,15 @@ class TestMenu(TestCase):
         self.x, self.y = 0, 0
         self.width, self.height = 350, 300
         self.text = ['Here Lies Text', 'the next text is hexed', 'inTEXTicated']
-        # menu functions simply return numbers 1, 2, and 3 respectively
-        self.functions = [(lambda x: x)(i) for i in range(3)]
         self.kwargs = {'show_box': True}
+
+        # menu functions set self.test_number to 1, 2, and 3 respectively
+        self.test_number = None
+        def f0(): self.test_number = 0
+        def f1(): self.test_number = 1
+        def f2(): self.test_number = 2
+        self.functions = (f0, f1, f2)
+
         self.menu = gui.Menu(
             self.x, self.y, self.width, self.height, self.batch,
             self.text, self.functions, **self.kwargs)
@@ -173,3 +177,17 @@ class TestMenu(TestCase):
         self.menu.on_mouse_motion(
             self.menu.boxes[-1].x * 2, self.menu.boxes[-1].y * 2, dx, dy)
         assert self.menu.selection == -1
+
+    def test_on_mouse_release(self):
+        self.menu.select_item(-1)
+        n = self.menu.on_mouse_release(0, 0, 1, 0)
+        assert n == None
+        for i in range(3):
+            self.menu.select_item(i)
+            self.test_number = None
+            self.menu.on_mouse_release(0, 0, 1, 0)  # see self.functions
+            assert self.test_number == i
+            for mouse_button in (2, 4):
+                self.test_number = None
+                n = self.menu.on_mouse_release(0, 0, mouse_button, 0)
+                assert self.test_number == None 
