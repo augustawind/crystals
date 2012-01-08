@@ -106,7 +106,8 @@ class Menu(object):
 
     def select_item(self, i):
         """Deselect the currently selected menu item, then select the
-           menu item at index i, displaying its border."""
+        menu item at index i, displaying its border.
+        """
         if i == self.selection:
             return
         self.deselect()
@@ -118,7 +119,8 @@ class Menu(object):
         """Select the next menu item in sequence.
         
         If the next index exceeds the highest item index, use the
-        lowest index in the sequence."""
+        lowest index in the sequence.
+        """
         if self.selection < len(self.text) - 1:
             self.select_item(self.selection + 1)
         else:
@@ -128,31 +130,36 @@ class Menu(object):
         """Select the previous menu item in sequence.
 
         If the previous index is below item index zero, use the
-        highest index in the sequence."""
+        highest index in the sequence.
+        """
         if self.selection > 0:
             self.select_item(self.selection - 1)
         else:
             self.select_item(len(self.text) - 1)
 
     def deselect(self):
-        """Deselect the current menu item if it is currently selected, else
-           do nothing."""
-        if self.boxes[self.selection].visible:
+        """Deselect the current menu item if it is currently selected,
+        else do nothing.
+        """
+        if self.selection != -1 and self.boxes[self.selection].visible:
             self.boxes[self.selection].hide()
             self.selection = -1
 
     # event handlers ---------------------------------------------------
     def on_mouse_motion(self, x, y, dx, dy):
-        """If the mouse is positioned within the bounds of a menu item's
-           box, select that item. Deselect the previous menu item."""
+        """Deselect the current menu item. Then, if the mouse is
+        positioned within the bounds of a menu item's box, select that
+        item.
+        """
+        self.deselect()
         for box in self.boxes:
             if self.hit_test(x, y, box):
                 self.select_item(self.boxes.index(box))
-                return
-        self.deselect()
+                break 
 
     def on_mouse_release(self, x, y, button, modifiers):
         """On a left mouse release, if a button is currently selected,
-           execute that button's corresponding function."""
+        execute that button's corresponding function.
+        """
         if self.selection != -1 and button == mouse.LEFT:
             self.functions[self.selection]()
