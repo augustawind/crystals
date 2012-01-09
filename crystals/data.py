@@ -45,6 +45,8 @@ class WorldLoader(object):
         return entity.Entity(name, walkable, image)
 
     def load_entities(self, entity_type):
+        """Load and instantiate all entities for a specific entity type and
+        return a dict object mapping the entity symbols to the objects."""
         images = ImageDict(entity_type)
         config = __import__('crystals.world.config.' + entity_type,
                             fromlist=['archetypes', 'entities'])
@@ -66,6 +68,7 @@ class WorldLoader(object):
                 # Replace the image name with the actual image object
                 params['image'] = images[params['image']]
                 
+                # Map the symbol to a corresponding Entity instance
                 symbol = params.pop('symbol')
                 entities[symbol] = entity.Entity(**params)
 
