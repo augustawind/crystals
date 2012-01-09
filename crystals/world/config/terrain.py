@@ -1,6 +1,6 @@
 archetypes = {
     'floor': {'walkable': True,
-              'color': 'blue'},
+              'color': 'red'},
     'wall': {'name': 'wall',
              'walkable': False,
              'color': 'blue'}
