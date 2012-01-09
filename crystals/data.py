@@ -63,7 +63,7 @@ class WorldLoader(object):
                         params[key] = default_params[key]
                 # Combine image and color params to get the image name
                 params['image'] += '-' + params.pop('color')
-                # Load the image
+                # Replace the image name with the actual image object
                 params['image'] = images[params['image']]
                 
                 symbol = params.pop('symbol')

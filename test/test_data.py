@@ -1,10 +1,11 @@
 import os
+import random
 
 import pyglet
 
 from crystals import data
 from crystals import entity
-from test.constants import *
+from test.helpers import *
 
 class TestImageDict(object):
 
@@ -27,9 +28,10 @@ class TestImageDict(object):
                 assert match
 
 
-class TestWorldLoader(object):
+class TestWorldLoader(TestCase):
 
     def setup(self):
+        super(TestWorldLoader, self).setup()
         self.loader = data.WorldLoader(res_path=RES_PATH)
 
     def test_init(self):
@@ -49,13 +51,27 @@ class TestWorldLoader(object):
 
     def test_load_entities(self):
         entities = self.loader.load_entities('terrain')
+        images = data.ImageDict('terrain', RES_PATH)
         assert all(type(symbol) == str for symbol in entities.iterkeys())
         assert all(isinstance(entity_, entity.Entity)
                    for entity_ in entities.itervalues())
-        assert entities['-'].name == 'wall'
-        assert entities['|'].name == 'towering wall'
-        assert entities[','].name == 'cobbled floor'
-        assert entities['+'].name == 'floor-smooth'
+
+        symbols = ('-', '|', ',', '+')
+        names = ('wall', 'towering wall', 'cobbled floor', 'floor-smooth')
+        imagedict = data.ImageDict('terrain', RES_PATH)
+        images = [imagedict[name] for name in
+                    ('wall-horiz-blue', 'wall-vert-blue',
+                        'floor-a-red', 'floor-b-red')]
+                  
+        for symbol, name, image in zip(symbols, names, images):
+            assert entities[symbol].name == name
+            assert isinstance(entities[symbol], pyglet.sprite.Sprite)
+
+            entities[symbol].batch = self.batch
+            entities[symbol].position = [random.randint(200, 400)] * 2
+
+        #self.run_app()
+                
 
     def test_load_world(self):
         self.loader.load_world()
