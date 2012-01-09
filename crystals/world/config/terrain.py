@@ -1,13 +1,15 @@
 archetypes = {
     'floor': {'walkable': True,
               'color': 'blue'},
-    'wall': {'walkable': False,
+    'wall': {'name': 'wall',
+             'walkable': False,
              'color': 'blue'}
     }
 
-terrain = {
+entities = {
     'floor': {
         'rough': {
+            'name': 'cobbled floor',
             'image': 'floor-a',
             'symbol': ','},
         'smooth': {
@@ -17,7 +19,8 @@ terrain = {
         'horiz': {
             'image': 'wall-horiz',
             'symbol': '-'},
-         'vert': {
-             'image': 'wall-vert',
-             'symbol': '|'}}
+        'vert': {
+            'name': 'towering wall',
+            'image': 'wall-vert',
+            'symbol': '|'}}
     }

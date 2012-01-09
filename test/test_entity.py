@@ -3,9 +3,7 @@ import os
 import pyglet
 
 from crystals import entity
-
-DATA_PATH = os.path.join('test', 'data')
-IMAGE_PATH = os.path.join(DATA_PATH, 'image')
+from test.constants import *
 
 class TestEntity(object):
 
@@ -17,3 +15,4 @@ class TestEntity(object):
         assert entity_.name == 'an entity'
         assert entity_.walkable == True
         assert isinstance(entity_.sprite, pyglet.sprite.Sprite)
+        assert entity_.sprite.image.texture == image.texture

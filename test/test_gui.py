@@ -93,7 +93,7 @@ class TestMenu(TestCase):
         assert self.menu.selection == -1
 
         assert isinstance(self.menu.box, gui.Box)
-        assert all([isinstance(box, gui.Box) for box in self.menu.boxes])
+        assert all(isinstance(box, gui.Box) for box in self.menu.boxes)
 
         for i in range(len(self.menu.labels)):
             label = self.menu.labels[i]
