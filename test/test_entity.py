@@ -3,7 +3,7 @@ import os
 import pyglet
 
 from crystals import entity
-from test.constants import *
+from test.helpers import *
 
 class TestEntity(object):
 

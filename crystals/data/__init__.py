@@ -3,7 +3,8 @@ import os
 
 import pyglet
 
-from crystals import entity
+from .. import entity
+from world import terrain
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 ENTITY_TYPES = ('terrain', 'item', 'character') # entity sub-categories
@@ -48,9 +49,8 @@ class WorldLoader(object):
         """Load and instantiate all entities for a specific entity type and
         return a dict object mapping the entity symbols to the objects."""
         images = ImageDict(entity_type)
-        config = __import__('crystals.world.config.' + entity_type,
-                            fromlist=['archetypes', 'entities'])
-
+        config = eval(entity_type)
+                            
         entities = {}
         for archetype_name, archetype in config.entities.iteritems():
             default_params = config.archetypes[archetype_name]
