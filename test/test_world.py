@@ -11,6 +11,7 @@ class WorldTestCase(TestCase):
         self.img = ImageDict('terrain')
 
     def get_room(self):
+        name = 'a room'
         wall = lambda: entity.Entity(
             'terrain', 'wall', False, self.img['wall-vert-blue'])
         floor = lambda: entity.Entity(
@@ -19,15 +20,15 @@ class WorldTestCase(TestCase):
             [[wall(), wall(), wall()],
              [wall(), floor(), wall()],
              [wall(), floor(), floor()]]]
-        room = world.Room(self.batch, layers)
+        room = world.Room(name, self.batch, layers)
 
-        return room, layers, wall, floor
+        return room, name, layers, wall, floor
 
 
 class TestRoom(WorldTestCase):
 
     def test_init(self):
-        room, layers, wall, floor = self.get_room()
+        room, name, layers, wall, floor = self.get_room()
         assert room == layers
         assert room.batch == self.batch
 
@@ -38,7 +39,7 @@ class TestRoom(WorldTestCase):
                     assert layer[y][x].y == y * world.TILE_SIZE
 
     def test__update_entity(self):
-        room, layers, wall, floor = self.get_room()
+        room, name, layers, wall, floor = self.get_room()
         wall1 = wall()
         room._update_entity(wall1, 2, 1)
         assert wall1.batch == room.batch
@@ -55,12 +56,14 @@ class TestWorld(WorldTestCase):
 
     def setup(self):
         super(TestWorld, self).setup()
-        self.room1, l1, self.wall1, self.floor1 = self.get_room()
-        self.room2, l2, self.wall2, self.floor2 = self.get_room()
+        self.room1, n1, l1, self.wall1, self.floor1 = self.get_room()
+        self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
+        self.room2.name = 'b room'
         self.room2 = reversed(self.room2)
-        self.world = world.World(self.batch, [self.room1, self.room2], 1)
+        self.rooms = {'a room': self.room1, 'b room': self.room2}
+        self.world = world.World(self.batch, self.rooms, 'b room')
 
     def test_init(self):
-        assert self.world == [self.room1, self.room2]
+        assert self.world == self.rooms
         assert self.world.batch == self.batch
-        assert self.world.focus == 1
+        assert self.world.focus == 'b room'

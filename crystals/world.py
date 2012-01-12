@@ -4,8 +4,9 @@ TILE_SIZE = 24
 
 class Room(list):
 
-    def __init__(self, batch, layers):
+    def __init__(self, name, batch, layers):
         super(Room, self).__init__(layers)
+        self.name = name
         self.batch = batch
 
         for layer in self:
@@ -19,10 +20,10 @@ class Room(list):
         entity.batch = self.batch
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
 
-class World(list):
+class World(dict):
 
-    def __init__(self, batch, rooms, room_index):
+    def __init__(self, batch, rooms, current_room):
         super(World, self).__init__(rooms)
         self.batch = batch
-        self.focus = room_index
+        self.focus = current_room
 

@@ -104,4 +104,6 @@ class TestWorldLoader(TestCase):
                         assert e1.batch == e2.batch
                 
     def test_load_world(self):
-        self.loader.load_world()
+        world = self.loader.load_world()
+        assert isinstance(world, crystals.world.World)
+        

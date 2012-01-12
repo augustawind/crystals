@@ -6,7 +6,9 @@ import pyglet
 from pyglet.gl import *
 
 from crystals import entity
-from crystals.world import Room, TILE_SIZE
+from crystals.world import TILE_SIZE
+from crystals.world import Room
+from crystals.world import World
 
 __all__ = ['world']
 
@@ -129,7 +131,13 @@ class WorldLoader(object):
                         entity_ = entity.Entity(**entity_args[symbol])
                         grid[-1][-1].append(entity_)
 
-        return Room(self.batch, grid)
+        return Room(room_name, self.batch, grid)
 
     def load_world(self):
-        pass
+        """Load and return a World instance."""
+        rooms = dict((room_name, self.load_room(room_name))
+                 for room_name in self.config['maps'].rooms)
+        starting_room = self.config['maps'].starting_room
+        world = World(self.batch, rooms, starting_room)
+        
+        return world
