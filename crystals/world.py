@@ -7,3 +7,15 @@ class Room(list):
     def __init__(self, grid, batch):
         super(Room, self).__init__(grid)
         self.batch = batch
+
+        for layer in self:
+            for y in range(len(layer)):
+                for x in range(len(layer[y])):
+                    entity_ = layer[y][x]
+                    if entity_ is not None:
+                        self._update_entity(entity_, x, y)
+
+    def _update_entity(self, entity, x, y):
+        entity.batch = self.batch
+        entity.x = x * TILE_SIZE
+        entity.y = y * TILE_SIZE

@@ -75,14 +75,14 @@ class TestWorldLoader(TestCase):
         # rough integrity test for room.grid ---------------------------
         archetype = 'terrain'
         img = loaders.ImageDict(archetype)
-        vwall = entity.Entity(
-            archetype, 'towering wall', False, img['wall-vert-blue'])
-        hwall = entity.Entity(
-            archetype, 'wall', False, img['wall-horiz-blue'])
-        floora = entity.Entity(
-            archetype, 'cobbled floor', True, img['floor-a-blue'])
-        floorb = entity.Entity(
-            archetype, 'floor-smooth', True, img['floor-b-blue'])
+        vwall = entity.Entity(archetype, 'towering wall', False,
+                              img['wall-vert-blue'], self.batch)
+        hwall = entity.Entity(archetype, 'wall', False,
+                              img['wall-horiz-blue'], self.batch)
+        floora = entity.Entity(archetype, 'cobbled floor', True,
+                               img['floor-a-blue'], self.batch)
+        floorb = entity.Entity(archetype, 'floor-smooth', True,
+                               img['floor-b-blue'], self.batch)
 
         room2 = [
             [[vwall, hwall, vwall],
