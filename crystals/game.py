@@ -1,4 +1,5 @@
 import pyglet
+from pyglet.window import key
 
 from crystals.loaders import WorldLoader
 from crystals.gui import Menu
@@ -7,6 +8,7 @@ class Game(object):
 
     def __init__(self):
         self.batch = pyglet.graphics.Batch()
+
         self.win_width = 600
         self.win_height = 400
         self.window = pyglet.window.Window(self.win_width, self.win_height)

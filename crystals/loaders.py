@@ -119,7 +119,7 @@ class WorldLoader(object):
                             entity_ = entity.Entity(**entity_args[symbol])
                             grid[-1][-1].append(entity_)
 
-        return Room(grid, self.batch)
+        return Room(self.batch, grid)
 
     def load_world(self):
         pass

@@ -4,8 +4,8 @@ TILE_SIZE = 24
 
 class Room(list):
 
-    def __init__(self, grid, batch):
-        super(Room, self).__init__(grid)
+    def __init__(self, batch, layers):
+        super(Room, self).__init__(layers)
         self.batch = batch
 
         for layer in self:
@@ -18,3 +18,10 @@ class Room(list):
     def _update_entity(self, entity, x, y):
         entity.batch = self.batch
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
+
+class World(list):
+
+    def __init__(self, batch, rooms):
+        super(World, self).__init__(rooms)
+        self.batch = batch
+
