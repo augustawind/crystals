@@ -49,18 +49,20 @@ class WorldLoader(object):
         return entity.Entity(name, walkable, image)
 
     def load_entity_args(self, room_name, entity_type):
-        """Load and instantiate all entities for a given room and type.
+        """Load the arguments for each entity for a given room and type.
         
-        Return a dict object mapping the entity symbols to the objects.
+        Return a dict object mapping the entity symbols to the argument
+        tuples.
         """
         images = ImageDict(entity_type)
+        # load config object from crystals.data.world
         config = getattr(getattr(world, entity_type), room_name)
 
         entity_args = {}
         for archetype_name, archetype in config.entities.iteritems():
-            default_params = config.defaults[archetype_name]
+            default_params = config.defaults[archetype_name].copy()
             for entity_name, params in archetype.iteritems():
-                params = params.copy() # Leave original params intact
+                params = params.copy() # Leave module data intact
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
                     params['name'] = archetype_name + '-' + entity_name
