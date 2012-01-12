@@ -20,6 +20,7 @@ class Room(list):
         entity.batch = self.batch
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
 
+
 class World(dict):
 
     def __init__(self, rooms, current_room):

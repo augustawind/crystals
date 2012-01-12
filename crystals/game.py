@@ -8,6 +8,28 @@ from crystals.gui import Menu
 if __debug__:
     from test.helpers import DATA_PATH, RES_PATH
 
+class GameMode(object):
+
+    def __init__(self, window, batch):
+        self.window = window
+        self.batch = batch
+
+    def on_draw(self):
+        self.window.clear()
+        self.batch.draw()
+
+
+class MainMenu(GameMode, Menu):
+
+    def __init__(self, window, batch, new_game):
+        GameMode.__init__(self, window, batch)
+        Menu.__init__(
+            self, 0, 0, window.width, window.height, self.batch,
+            ['new game', 'quit'],
+            [new_game, pyglet.app.exit],
+            show_box=True, bold=True)
+
+
 class Game(object):
 
     def __init__(self):
@@ -17,16 +39,8 @@ class Game(object):
         self.win_height = 400
         self.window = pyglet.window.Window(self.win_width, self.win_height)
         self.window.clear()
-        @self.window.event
-        def on_draw():
-            self.window.clear()
-            self.batch.draw()
 
-        self.main_menu = Menu(
-            0, 0, self.win_width, self.win_height, self.batch,
-            ['new game', 'quit'],
-            [self.new_game, pyglet.app.exit],
-            show_box=True, bold=True)
+        self.main_menu = MainMenu(self.window, self.batch, self.new_game)
         self.world = None
 
     def run(self):

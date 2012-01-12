@@ -105,4 +105,3 @@ class TestWorldLoader(TestCase):
     def test_load_world(self):
         world = self.loader.load_world()
         assert isinstance(world, crystals.world.World)
-        
