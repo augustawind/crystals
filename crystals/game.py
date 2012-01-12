@@ -1,7 +1,9 @@
+"""top-level game logic"""
 import pyglet
 from pyglet.window import key
 
 from crystals.loaders import WorldLoader
+from crystals.loaders import DATA_PATH, RES_PATH
 from crystals.gui import Menu
 
 # Use the data/ and res/ directories in the test suite when debugging

@@ -1,3 +1,4 @@
+"""the component parts of a world"""
 import pyglet
 
 class Entity(pyglet.sprite.Sprite):

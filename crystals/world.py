@@ -1,5 +1,4 @@
 """creation and mutation of the game world"""
-
 TILE_SIZE = 24
 
 class Room(list):
