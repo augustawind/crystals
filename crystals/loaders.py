@@ -44,8 +44,8 @@ class WorldLoader(object):
 
         # add data_path to PYTHON_PATH and import world data
         sys.path.insert(0, os.path.join(data_path, 'world'))
-        self.terrain = __import__('terrain')
-        self.maps = __import__('maps')
+        self.config = dict((e, __import__(e)) for e in ENTITY_TYPES)
+        self.config['maps'] = __import__('maps')
 
     def load_images(self, entity_type):
         """Load all images for the given entity type."""
@@ -59,7 +59,7 @@ class WorldLoader(object):
         """
         images = ImageDict(entity_type)
         # load config object from DATA_PATH/world
-        config = getattr(getattr(self, entity_type), room_name)
+        config = getattr(self.config[entity_type], room_name)
 
         entity_args = {}
         for archetype_name, archetype in config.entities.iteritems():
@@ -87,7 +87,7 @@ class WorldLoader(object):
 
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
-        atlas = getattr(self.maps, room_name)
+        atlas = getattr(self.config['maps'], room_name)
 
         grid = []
         for entity_type in ENTITY_TYPES:
