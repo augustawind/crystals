@@ -31,7 +31,13 @@ class TestRoom(TestCase):
 
     def test_update_entity(self):
         wall = self.wall()
-        self.room._update_entity(wall, 1, 2)
+        self.room._update_entity(wall, 2, 1)
         assert wall.batch == self.room.batch
-        assert wall.x == 1 * world.TILE_SIZE
-        assert wall.y == 2 * world.TILE_SIZE
+        assert wall.x == 2 * world.TILE_SIZE
+        assert wall.y == 1 * world.TILE_SIZE
+
+        floor = self.floor()
+        self.room._update_entity(floor, 0, 0)
+        assert floor.batch == self.room.batch
+        assert floor.x == 0
+        assert floor.y == 0

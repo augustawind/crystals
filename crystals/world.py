@@ -17,5 +17,4 @@ class Room(list):
 
     def _update_entity(self, entity, x, y):
         entity.batch = self.batch
-        entity.x = x * TILE_SIZE
-        entity.y = y * TILE_SIZE
+        entity.set_position(x * TILE_SIZE, y * TILE_SIZE)

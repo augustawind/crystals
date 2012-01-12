@@ -3,10 +3,10 @@ import os
 import sys
 
 import pyglet
+from pyglet.gl import *
 
-import world
 from crystals import entity
-from crystals.world import Room
+from crystals.world import Room, TILE_SIZE
 
 __all__ = ['world']
 
@@ -18,16 +18,27 @@ class ImageDict(dict):
     """Loads game images."""
 
     def __init__(self, img_dir, res_path=RES_PATH):
-        """Load all images in RES_PATH/img_dir.
+        """Load all images in RES_PATH/img_dir, and scale them to TILE_SIZE.
 
         Images can then be accessed dict-style, where each key is an
         image's filename without the extension, e.g. 'goblin.png' --> 'goblin'.
         """
+        glEnable(GL_TEXTURE_2D)
+
         path = os.path.join(res_path, 'image', img_dir)
         for filename in os.listdir(path):
             key = filename.rsplit('.', 1)[0]
             image = pyglet.image.load(os.path.join(path, filename))
+
+            texture = image.get_texture()
+            glBindTexture(GL_TEXTURE_2D, texture.id)
+            texture.width = TILE_SIZE
+            texture.height = TILE_SIZE
+
             self[key] = image
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
+        glDisable(GL_TEXTURE_2D)
 
 
 class WorldLoader(object):
