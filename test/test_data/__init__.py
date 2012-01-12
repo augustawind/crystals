@@ -50,7 +50,7 @@ class TestWorldLoader(TestCase):
         assert isinstance(entity_, entity.Entity)
 
     def test_load_entities(self):
-        entities = self.loader.load_entities('terrain')
+        entities = self.loader.load_entities('terrain', 'Room1')
         images = data.ImageDict('terrain', RES_PATH)
         assert all(type(symbol) == str for symbol in entities.iterkeys())
         assert all(isinstance(entity_, entity.Entity)
@@ -71,7 +71,9 @@ class TestWorldLoader(TestCase):
             entities[symbol].position = [random.randint(200, 400)] * 2
 
         #self.run_app()
-                
 
+    def test_load_room(self):
+        pass
+                
     def test_load_world(self):
         self.loader.load_world()

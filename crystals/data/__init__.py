@@ -3,8 +3,8 @@ import os
 
 import pyglet
 
+from . import world
 from .. import entity
-from world import terrain
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 ENTITY_TYPES = ('terrain', 'item', 'character') # entity sub-categories
@@ -45,15 +45,17 @@ class WorldLoader(object):
         """Return an Entity object with the given parameters."""
         return entity.Entity(name, walkable, image)
 
-    def load_entities(self, entity_type):
+    def load_entities(self, entity_type, room_name):
         """Load and instantiate all entities for a specific entity type and
         return a dict object mapping the entity symbols to the objects."""
         images = ImageDict(entity_type)
-        config = eval(entity_type)
-                            
+        config = eval('world.' + entity_type)
+
         entities = {}
-        for archetype_name, archetype in config.entities.iteritems():
-            default_params = config.archetypes[archetype_name]
+        for archetype_name, archetype in eval(
+                'config.' + room_name).entities.iteritems():
+            default_params = eval(
+                'config.' + room_name).defaults[archetype_name]
             for entity_name, params in archetype.iteritems():
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
@@ -74,4 +76,5 @@ class WorldLoader(object):
 
         return entities
 
-    def load_world(self):pass
+    def load_world(self):
+        pass
