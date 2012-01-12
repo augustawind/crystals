@@ -3,8 +3,9 @@ import os
 
 import pyglet
 
-from crystals.data import world
+import world
 from crystals import entity
+from crystals.world import Room
 
 __all__ = ['world']
 
@@ -30,12 +31,14 @@ class ImageDict(dict):
 class WorldLoader(object):
     """Loads the game world."""
 
-    def __init__(self, res_path=RES_PATH):
+    def __init__(self, batch, res_path=RES_PATH):
+        self.batch = batch
         self.res_path = res_path
         self.world_path = os.path.join(self.res_path, 'world')
         self.room_path = os.path.join(self.world_path, 'rooms')
         self.rooms = {}
         self.images = dict.fromkeys(ENTITY_TYPES)
+        self.ignore_char = '.' # char to ignore when reading room maps
 
     def load_images(self, entity_type):
         """Load all images for the given entity type."""
@@ -51,16 +54,19 @@ class WorldLoader(object):
         Return a dict object mapping the entity symbols to the objects.
         """
         images = ImageDict(entity_type)
-        config = eval('world.' + entity_type)
-        room_config = eval('config.' + room_name)
+        config = getattr(world, entity_type)
+        room_config = getattr(config, room_name)
 
         entities = {}
         for archetype_name, archetype in room_config.entities.iteritems():
             default_params = room_config.defaults[archetype_name]
+            print default_params
             for entity_name, params in archetype.iteritems():
+                print params
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
                     params['name'] = archetype_name + '-' + entity_name
+                print params
                 # Replace missing entries from params with entries from
                 # default_params
                 for key in ('name', 'walkable', 'image', 'color', 'symbol'):
@@ -76,6 +82,30 @@ class WorldLoader(object):
                 entities[symbol] = entity.Entity(**params)
 
         return entities
+
+    def load_room(self, room_name):
+        atlas = getattr(world.maps, room_name)
+
+        grid = []
+        for entity_type in ENTITY_TYPES:
+            if not hasattr(atlas, entity_type):
+                continue
+            entities = self.load_entities(room_name, entity_type)
+            symbols = getattr(atlas, entity_type)
+            for layer in symbols:
+                grid.append([])
+                for row in layer.strip().split('\n'):
+                    grid[-1].append([])
+                    for symbol in row.strip():
+                        # an unwanted side effect of this is that the same
+                        # entity will appear in multiple places instead of
+                        # functionally equal yet unique entities
+                        if symbol == '.':
+                            grid[-1][-1].append(None)
+                        else:
+                            grid[-1][-1].append(entities[symbol])
+
+        return Room(grid, self.batch)
 
     def load_world(self):
         pass

@@ -22,7 +22,7 @@ class Room1:
                 'image': 'wall-horiz',
                 'symbol': '-'},
              'vert': {
-                 'name': 'towering wall',
-                 'image': 'wall-vert',
-                 'symbol': '|'}}
+                'name': 'towering wall',
+                'image': 'wall-vert',
+                'symbol': '|'}}
         }

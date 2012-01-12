@@ -5,6 +5,7 @@ import pyglet
 
 from crystals import data
 from crystals import entity
+from crystals import world
 from test.helpers import *
 
 class TestImageDict(object):
@@ -32,7 +33,7 @@ class TestWorldLoader(TestCase):
 
     def setup(self):
         super(TestWorldLoader, self).setup()
-        self.loader = data.WorldLoader(res_path=RES_PATH)
+        self.loader = data.WorldLoader(self.batch, res_path=RES_PATH)
 
     def test_init(self):
         assert self.loader.images == {'terrain': None, 'item': None,
@@ -73,7 +74,36 @@ class TestWorldLoader(TestCase):
         #self.run_app()
 
     def test_load_room(self):
-        pass
+        room = self.loader.load_room('Room1')
+        assert isinstance(room, world.Room)
+        assert room.batch == self.batch
+
+        # rough integrity test for room.grid ---------------------------
+        img = data.ImageDict('terrain')
+        vwall = entity.Entity(
+            'towering wall', False, img['wall-vert-blue'], self.batch)
+        hwall = entity.Entity(
+            'wall', False, img['wall-horiz-blue'], self.batch)
+        floora = entity.Entity(
+            'cobbled floor', True, img['floor-a-blue'], self.batch)
+        floorb = entity.Entity(
+            'floor-smooth', True, img['floor-b-blue'], self.batch)
+
+        profile1 = [
+            (e.name, e.walkable, e.batch) for e in row for row in layer
+            for layer in room.grid]
+        profile2 = [
+            (e.name, e.walkable, e.batch) for e in row for row in layer
+            for layer in
+            ([[vwall, hwall, vwall],
+              [vwall, floorb, vwall],
+              [vwall, floorb, floorb]
+             ],
+             [[floora, floora, floora],
+              [floora, None, floora],
+              [floora, None, None]])]
+
+        assert profile1 == profile2
                 
     def test_load_world(self):
         self.loader.load_world()
