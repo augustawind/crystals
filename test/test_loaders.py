@@ -43,9 +43,9 @@ class TestWorldLoader(TestCase):
         assert os.path.join(DATA_PATH, 'world') in sys.path
 
     def test_load_images(self):
-        for etype in loaders.ENTITY_TYPES:
-            self.loader.load_images(etype)
-            assert isinstance(self.loader.images[etype], loaders.ImageDict)
+        for atype in loaders.ARCHETYPES:
+            self.loader.load_images(atype)
+            assert isinstance(self.loader.images[atype], loaders.ImageDict)
 
     def test_load_entities(self):
         entity_args = self.loader.load_entity_args('TestRoom', 'terrain')
@@ -73,11 +73,16 @@ class TestWorldLoader(TestCase):
         assert room1.batch == self.batch
 
         # rough integrity test for room.grid ---------------------------
-        img = loaders.ImageDict('terrain')
-        vwall = entity.Entity('towering wall', False, img['wall-vert-blue'])
-        hwall = entity.Entity('wall', False, img['wall-horiz-blue'])
-        floora = entity.Entity('cobbled floor', True, img['floor-a-blue'])
-        floorb = entity.Entity('floor-smooth', True, img['floor-b-blue'])
+        archetype = 'terrain'
+        img = loaders.ImageDict(archetype)
+        vwall = entity.Entity(
+            archetype, 'towering wall', False, img['wall-vert-blue'])
+        hwall = entity.Entity(
+            archetype, 'wall', False, img['wall-horiz-blue'])
+        floora = entity.Entity(
+            archetype, 'cobbled floor', True, img['floor-a-blue'])
+        floorb = entity.Entity(
+            archetype, 'floor-smooth', True, img['floor-b-blue'])
 
         room2 = [
             [[vwall, hwall, vwall],

@@ -6,13 +6,18 @@ from test.helpers import *
 
 class TestRoom(TestCase):
 
-    def test_init(self):
+    def setup(self):
+        super(TestRoom, self).setup()
         img = ImageDict('terrain')
-        wall = entity.Entity('wall', False, img['wall-vert-blue'], self.batch)
-        floor = entity.Entity('floor', True, img['floor-b-blue'], self.batch)
-        grid = [[wall, wall, wall],
-                [wall, floor, wall],
-                [wall, floor, floor]]
-        room = world.Room(grid, self.batch)
-        assert room == grid
-        assert room.batch == self.batch
+        self.wall = entity.Entity(
+            'terrain', 'wall', False, img['wall-vert-blue'])
+        self.floor = entity.Entity(
+            'terrain', 'floor', True, img['floor-b-blue'])
+        self.grid = [[self.wall, self.wall, self.wall],
+                [self.wall, self.floor, self.wall],
+                [self.wall, self.floor, self.floor]]
+        self.room = world.Room(self.grid, self.batch)
+
+    def test_init(self):
+        assert self.room == self.grid
+        assert self.room.batch == self.batch

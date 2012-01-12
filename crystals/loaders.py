@@ -12,7 +12,7 @@ __all__ = ['world']
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 DATA_PATH = os.path.join('crystals', 'data') # default path to game data
-ENTITY_TYPES = ('terrain', 'feature', 'item', 'character') # entity categories
+ARCHETYPES = ('terrain', 'feature', 'item', 'character') # entity categories
 
 class ImageDict(dict):
     """Loads game images."""
@@ -39,36 +39,37 @@ class WorldLoader(object):
         self.world_path = os.path.join(self.res_path, 'world')
         self.room_path = os.path.join(self.world_path, 'rooms')
         self.rooms = {}
-        self.images = dict.fromkeys(ENTITY_TYPES)
+        self.images = dict.fromkeys(ARCHETYPES)
         self.ignore_char = '.' # char to ignore when reading room maps
 
         # add data_path to PYTHON_PATH and import world data
         sys.path.insert(0, os.path.join(data_path, 'world'))
-        self.config = dict((e, __import__(e)) for e in ENTITY_TYPES)
+        self.config = dict((a, __import__(a)) for a in ARCHETYPES)
         self.config['maps'] = __import__('maps')
 
-    def load_images(self, entity_type):
-        """Load all images for the given entity type."""
-        self.images[entity_type] = ImageDict(entity_type, self.res_path)
+    def load_images(self, archetype):
+        """Load all images for the given archetype."""
+        self.images[archetype] = ImageDict(archetype, self.res_path)
 
-    def load_entity_args(self, room_name, entity_type):
-        """Load the arguments for each entity for a given room and type.
+    def load_entity_args(self, room_name, archetype):
+        """Load the arguments for each entity for a given room and archetype.
         
         Return a dict object mapping the entity symbols to the argument
         tuples. If no data is found, return None.
         """
-        images = ImageDict(entity_type)
+        images = ImageDict(archetype)
         # load config object from DATA_PATH/world
-        config = getattr(self.config[entity_type], room_name)
+        config = getattr(self.config[archetype], room_name)
 
         entity_args = {}
-        for archetype_name, archetype in config.entities.iteritems():
-            default_params = config.defaults[archetype_name].copy()
-            for entity_name, params in archetype.iteritems():
+        for category_name, category in config.entities.iteritems():
+            default_params = config.defaults[category_name].copy()
+            for entity_name, params in category.iteritems():
                 params = params.copy() # Leave module data intact
+                params['archetype'] = archetype
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
-                    params['name'] = archetype_name + '-' + entity_name
+                    params['name'] = category_name + '-' + entity_name
                 # Replace missing entries from params with entries from
                 # default_params
                 for key in ('name', 'walkable', 'image', 'color', 'symbol'):
@@ -90,11 +91,11 @@ class WorldLoader(object):
         atlas = getattr(self.config['maps'], room_name)
 
         grid = []
-        for entity_type in ENTITY_TYPES:
-            if not hasattr(atlas, entity_type):
+        for archetype in ARCHETYPES:
+            if not hasattr(atlas, archetype):
                 continue
-            entity_args = self.load_entity_args(room_name, entity_type)
-            symbols = getattr(atlas, entity_type)
+            entity_args = self.load_entity_args(room_name, archetype)
+            symbols = getattr(atlas, archetype)
             for layer in symbols:
                 grid.append([])
                 for row in layer.strip().split('\n'):
