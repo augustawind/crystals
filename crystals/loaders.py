@@ -1,4 +1,4 @@
-"""tools for loading game resources"""
+"""tools for loading variable game data and resources"""
 import os
 import sys
 
@@ -9,8 +9,6 @@ from crystals import entity
 from crystals.world import TILE_SIZE
 from crystals.world import Room
 from crystals.world import World
-
-__all__ = ['world']
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 DATA_PATH = os.path.join('crystals', 'data') # default path to game data
@@ -60,7 +58,7 @@ class WorldLoader(object):
         self.config['maps'] = __import__('maps')
 
     def load_images(self, archetype):
-        """Load all images for the given archetype."""
+        """Load all images for the given archetype. Return an ImageDict."""
         self.images[archetype] = ImageDict(archetype, self.res_path)
 
     def load_archetype_args(self, room_name, archetype):
