@@ -3,8 +3,10 @@ import os
 
 import pyglet
 
-from . import world
-from .. import entity
+from crystals.data import world
+from crystals import entity
+
+__all__ = ['world']
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 ENTITY_TYPES = ('terrain', 'item', 'character') # entity sub-categories
@@ -50,12 +52,11 @@ class WorldLoader(object):
         """
         images = ImageDict(entity_type)
         config = eval('world.' + entity_type)
+        room_config = eval('config.' + room_name)
 
         entities = {}
-        for archetype_name, archetype in eval(
-                'config.' + room_name).entities.iteritems():
-            default_params = eval(
-                'config.' + room_name).defaults[archetype_name]
+        for archetype_name, archetype in room_config.entities.iteritems():
+            default_params = room_config.defaults[archetype_name]
             for entity_name, params in archetype.iteritems():
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:

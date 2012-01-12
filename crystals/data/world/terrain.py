@@ -2,7 +2,7 @@ class Room1:
 
     defaults = {
         'floor': {'walkable': True,
-                  'color': 'red'},
+                  'color': 'blue'},
         'wall': {'name': 'wall',
                  'walkable': False,
                  'color': 'blue'}
@@ -21,8 +21,8 @@ class Room1:
             'horiz': {
                 'image': 'wall-horiz',
                 'symbol': '-'},
-            'vert': {
-                'name': 'towering wall',
-                'image': 'wall-vert',
-                'symbol': '|'}}
+             'vert': {
+                 'name': 'towering wall',
+                 'image': 'wall-vert',
+                 'symbol': '|'}}
         }
