@@ -58,8 +58,9 @@ class TestWorld(WorldTestCase):
         self.room1, l1, self.wall1, self.floor1 = self.get_room()
         self.room2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2 = reversed(self.room2)
-        self.world = world.World(self.batch, [self.room1, self.room2])
+        self.world = world.World(self.batch, [self.room1, self.room2], 1)
 
     def test_init(self):
         assert self.world == [self.room1, self.room2]
         assert self.world.batch == self.batch
+        assert self.world.focus == 1

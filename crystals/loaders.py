@@ -62,17 +62,19 @@ class WorldLoader(object):
         """Load all images for the given archetype."""
         self.images[archetype] = ImageDict(archetype, self.res_path)
 
-    def load_entity_args(self, room_name, archetype):
+    def load_archetype_args(self, room_name, archetype):
         """Load the arguments for each entity for a given room and archetype.
         
-        Return a dict object mapping the entity symbols to the argument
-        tuples. If no data is found, return None.
+        Return a dict object mapping the entity symbols to argument
+        tuples. If no data is found, return an empty dict.
         """
         images = ImageDict(archetype)
+        if not hasattr(self.config[archetype], room_name):
+            return {}
         # load config object from DATA_PATH/world
         config = getattr(self.config[archetype], room_name)
 
-        entity_args = {}
+        archetype_args = {}
         for category_name, category in config.entities.iteritems():
             default_params = config.defaults[category_name].copy()
             for entity_name, params in category.iteritems():
@@ -93,31 +95,39 @@ class WorldLoader(object):
                 
                 # Map the symbol to a corresponding Entity instance
                 symbol = params.pop('symbol')
-                entity_args[symbol] = params
+                archetype_args[symbol] = params
+
+        return archetype_args
+
+    def load_entity_args(self, room_name):
+        """Load the arguments for each entity for a given room.
+
+        Return a dict object mapping the entity symbols to argument
+        tuples. If no data is found, return an empty dict.
+        """
+        entity_args = {}
+        for atype in ARCHETYPES:
+            archetype_args = self.load_archetype_args(room_name, atype)
+            entity_args.update(archetype_args)
 
         return entity_args
 
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
-        atlas = getattr(self.config['maps'], room_name)
-
+        entity_args = self.load_entity_args(room_name)
+        layers = getattr(self.config['maps'], room_name)
         grid = []
-        for archetype in ARCHETYPES:
-            if not hasattr(atlas, archetype):
-                continue
-            entity_args = self.load_entity_args(room_name, archetype)
-            symbols = getattr(atlas, archetype)
-            for layer in symbols:
-                grid.append([])
-                for row in layer.strip().split('\n'):
-                    grid[-1].append([])
-                    for symbol in row.strip():
-                        if symbol == '.':
-                            # append None when a '.' (period) is encountered
-                            grid[-1][-1].append(None)
-                        else:
-                            entity_ = entity.Entity(**entity_args[symbol])
-                            grid[-1][-1].append(entity_)
+        for layer in layers:
+            grid.append([])
+            for row in layer.strip().split('\n'):
+                grid[-1].append([])
+                for symbol in row.strip():
+                    if symbol == '.':
+                        # append None when a '.' (period) is encountered
+                        grid[-1][-1].append(None)
+                    else:
+                        entity_ = entity.Entity(**entity_args[symbol])
+                        grid[-1][-1].append(entity_)
 
         return Room(self.batch, grid)
 

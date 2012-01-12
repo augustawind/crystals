@@ -1,6 +1,4 @@
-class TestRoom:
-
-    terrain = (
+TestRoom1 = (
     """
         |-|
         |+|
@@ -12,6 +10,4 @@ class TestRoom:
         ,..
     """)
 
-    items = ()
-
-    characters = ()
+STARTING_ROOM = TestRoom1

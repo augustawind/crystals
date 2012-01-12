@@ -47,16 +47,16 @@ class TestWorldLoader(TestCase):
             self.loader.load_images(atype)
             assert isinstance(self.loader.images[atype], loaders.ImageDict)
 
-    def test_load_entities(self):
-        entity_args = self.loader.load_entity_args('TestRoom', 'terrain')
-        assert all(type(symbol) == str for symbol in entity_args.iterkeys())
+    def test_load_archetype_args(self):
+        archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
+        assert all(type(symbol) == str for symbol in archetype_args.iterkeys())
 
         symbols = ('-', '|', ',', '+')
         names = ('wall', 'towering wall', 'cobbled floor', 'floor-smooth')
         walkables = (False, False, True, True)
                   
         for symbol, name, walkable in zip(symbols, names, walkables):
-            entity_ = entity.Entity(**entity_args[symbol])
+            entity_ = entity.Entity(**archetype_args[symbol])
             assert isinstance(entity_, entity.Entity)
             assert isinstance(entity_, pyglet.sprite.Sprite)
             assert entity_.name == name
@@ -68,7 +68,7 @@ class TestWorldLoader(TestCase):
         #self.run_app()
 
     def test_load_room(self):
-        room1 = self.loader.load_room('TestRoom')
+        room1 = self.loader.load_room('TestRoom1')
         assert isinstance(room1, crystals.world.Room)
         assert room1.batch == self.batch
 

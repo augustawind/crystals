@@ -4,6 +4,10 @@ from pyglet.window import key
 from crystals.loaders import WorldLoader
 from crystals.gui import Menu
 
+# Use the data/ and res/ directories in the test suite when debugging
+if __debug__:
+    from test.helpers import DATA_PATH, RES_PATH
+
 class Game(object):
 
     def __init__(self):
@@ -32,5 +36,5 @@ class Game(object):
     def new_game(self):
         self.window.pop_handlers()
         self.window.clear()
-        loader = WorldLoader(self.batch)
-        self.world = loader.load_room('TestRoom')
+        loader = WorldLoader(self.batch, DATA_PATH, RES_PATH)
+        self.world = loader.load_room('TestRoom1')

@@ -21,7 +21,8 @@ class Room(list):
 
 class World(list):
 
-    def __init__(self, batch, rooms):
+    def __init__(self, batch, rooms, room_index):
         super(World, self).__init__(rooms)
         self.batch = batch
+        self.focus = room_index
 

@@ -1,4 +1,4 @@
-class TestRoom:
+class TestRoom1:
     """Example room. Used by the test suite."""
 
     defaults = {
