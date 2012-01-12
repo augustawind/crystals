@@ -48,25 +48,22 @@ class WorldLoader(object):
         """Return an Entity object with the given parameters."""
         return entity.Entity(name, walkable, image)
 
-    def load_entities(self, room_name, entity_type):
+    def load_entity_args(self, room_name, entity_type):
         """Load and instantiate all entities for a given room and type.
         
         Return a dict object mapping the entity symbols to the objects.
         """
         images = ImageDict(entity_type)
-        config = getattr(world, entity_type)
-        room_config = getattr(config, room_name)
+        config = getattr(getattr(world, entity_type), room_name)
 
-        entities = {}
-        for archetype_name, archetype in room_config.entities.iteritems():
-            default_params = room_config.defaults[archetype_name]
-            print default_params
+        entity_args = {}
+        for archetype_name, archetype in config.entities.iteritems():
+            default_params = config.defaults[archetype_name]
             for entity_name, params in archetype.iteritems():
-                print params
+                params = params.copy() # Leave original params intact
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
                     params['name'] = archetype_name + '-' + entity_name
-                print params
                 # Replace missing entries from params with entries from
                 # default_params
                 for key in ('name', 'walkable', 'image', 'color', 'symbol'):
@@ -79,9 +76,9 @@ class WorldLoader(object):
                 
                 # Map the symbol to a corresponding Entity instance
                 symbol = params.pop('symbol')
-                entities[symbol] = entity.Entity(**params)
+                entity_args[symbol] = params
 
-        return entities
+        return entity_args
 
     def load_room(self, room_name):
         atlas = getattr(world.maps, room_name)
@@ -90,7 +87,7 @@ class WorldLoader(object):
         for entity_type in ENTITY_TYPES:
             if not hasattr(atlas, entity_type):
                 continue
-            entities = self.load_entities(room_name, entity_type)
+            entity_args = self.load_entity_args(room_name, entity_type)
             symbols = getattr(atlas, entity_type)
             for layer in symbols:
                 grid.append([])
@@ -103,7 +100,8 @@ class WorldLoader(object):
                         if symbol == '.':
                             grid[-1][-1].append(None)
                         else:
-                            grid[-1][-1].append(entities[symbol])
+                            entity_ = entity.Entity(**entity_args[symbol])
+                            grid[-1][-1].append(entity_)
 
         return Room(grid, self.batch)
 
