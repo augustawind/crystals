@@ -29,7 +29,7 @@ class TestRoom(TestCase):
                     assert layer[y][x].x == x * world.TILE_SIZE
                     assert layer[y][x].y == y * world.TILE_SIZE
 
-    def test_update_entity(self):
+    def test__update_entity(self):
         wall = self.wall()
         self.room._update_entity(wall, 2, 1)
         assert wall.batch == self.room.batch
