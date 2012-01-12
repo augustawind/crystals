@@ -17,8 +17,7 @@ class TestImageDict(object):
 
             filenames = os.listdir(
                 os.path.join(RES_PATH, 'image', img_dir))
-            assert len(images) == len(filenames)
-
+            assert len(images) == len(filenames) 
             # Test that each file in img_dir is represented by an entry
             # in `ImageLoader`
             for key, image in images.iteritems():
@@ -73,15 +72,15 @@ class TestWorldLoader(TestCase):
 
         # rough integrity test for room.grid ---------------------------
         archetype = 'terrain'
-        img = loaders.ImageDict(archetype)
+        img = loaders.ImageDict(archetype, RES_PATH)
         vwall = entity.Entity(archetype, 'towering wall', False,
                               img['wall-vert-blue'], room1.batch)
         hwall = entity.Entity(archetype, 'wall', False,
                               img['wall-horiz-blue'], room1.batch)
         floora = entity.Entity(archetype, 'cobbled floor', True,
-                               img['floor-a-blue'], room1.batch)
+                               img['floor-a-red'], room1.batch)
         floorb = entity.Entity(archetype, 'floor-smooth', True,
-                               img['floor-b-blue'], room1.batch)
+                               img['floor-b-red'], room1.batch)
 
         room2 = [
             [[vwall, hwall, vwall],

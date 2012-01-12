@@ -2,7 +2,7 @@ class TestRoom1:
 
     defaults = {
         'floor': {'walkable': True,
-                  'color': 'blue'},
+                  'color': 'red'},
         'wall': {'name': 'wall',
                  'walkable': False,
                  'color': 'blue'}

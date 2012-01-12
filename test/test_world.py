@@ -8,14 +8,14 @@ class WorldTestCase(TestCase):
 
     def __init__(self):
         super(WorldTestCase, self).__init__()
-        self.img = ImageDict('terrain')
+        self.img = ImageDict('terrain', RES_PATH)
 
     def get_room(self):
         name = 'a room'
         wall = lambda: entity.Entity(
             'terrain', 'wall', False, self.img['wall-vert-blue'])
         floor = lambda: entity.Entity(
-            'terrain', 'floor', True, self.img['floor-b-blue'])
+            'terrain', 'floor', True, self.img['floor-b-red'])
         layers = [
             [[wall(), wall(), wall()],
              [wall(), floor(), wall()],
