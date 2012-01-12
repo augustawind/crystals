@@ -44,14 +44,8 @@ class TestWorldLoader(TestCase):
             self.loader.load_images(etype)
             assert isinstance(self.loader.images[etype], data.ImageDict)
 
-    def test_load_entity(self):
-        entity_ = self.loader.load_entity(
-            'an entity', False,
-            pyglet.image.load(os.path.join(IMAGE_PATH, 'item', 'sack.png')))
-        assert isinstance(entity_, entity.Entity)
-
     def test_load_entities(self):
-        entity_args = self.loader.load_entity_args('Room1', 'terrain')
+        entity_args = self.loader.load_entity_args('TestRoom', 'terrain')
         assert all(type(symbol) == str for symbol in entity_args.iterkeys())
 
         symbols = ('-', '|', ',', '+')
@@ -71,7 +65,7 @@ class TestWorldLoader(TestCase):
         #self.run_app()
 
     def test_load_room(self):
-        room1 = self.loader.load_room('Room1')
+        room1 = self.loader.load_room('TestRoom')
         assert isinstance(room1, world.Room)
         assert room1.batch == self.batch
 

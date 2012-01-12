@@ -1,4 +1,4 @@
-class Room1:
+class TestRoom:
 
     terrain = (
     """

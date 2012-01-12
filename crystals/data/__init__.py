@@ -44,10 +44,6 @@ class WorldLoader(object):
         """Load all images for the given entity type."""
         self.images[entity_type] = ImageDict(entity_type, self.res_path)
 
-    def load_entity(self, name, walkable, image):
-        """Return an Entity object with the given parameters."""
-        return entity.Entity(name, walkable, image)
-
     def load_entity_args(self, room_name, entity_type):
         """Load the arguments for each entity for a given room and type.
         

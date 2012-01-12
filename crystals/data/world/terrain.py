@@ -1,4 +1,5 @@
-class Room1:
+class TestRoom:
+    """Example room. Used by the test suite."""
 
     defaults = {
         'floor': {'walkable': True,
