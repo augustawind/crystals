@@ -1,5 +1,6 @@
 """tools for loading game resources"""
 import os
+import sys
 
 import pyglet
 
@@ -10,7 +11,8 @@ from crystals.world import Room
 __all__ = ['world']
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
-ENTITY_TYPES = ('terrain', 'item', 'character') # entity sub-categories
+DATA_PATH = os.path.join('crystals', 'data') # default path to game data
+ENTITY_TYPES = ('terrain', 'feature', 'item', 'character') # entity categories
 
 class ImageDict(dict):
     """Loads game images."""
@@ -31,7 +33,7 @@ class ImageDict(dict):
 class WorldLoader(object):
     """Loads the game world."""
 
-    def __init__(self, batch, res_path=RES_PATH):
+    def __init__(self, batch, data_path=DATA_PATH, res_path=RES_PATH):
         self.batch = batch
         self.res_path = res_path
         self.world_path = os.path.join(self.res_path, 'world')
@@ -39,6 +41,11 @@ class WorldLoader(object):
         self.rooms = {}
         self.images = dict.fromkeys(ENTITY_TYPES)
         self.ignore_char = '.' # char to ignore when reading room maps
+
+        # add data_path to PYTHON_PATH and import world data
+        sys.path.insert(0, os.path.join(data_path, 'world'))
+        self.terrain = __import__('terrain')
+        self.maps = __import__('maps')
 
     def load_images(self, entity_type):
         """Load all images for the given entity type."""
@@ -48,11 +55,11 @@ class WorldLoader(object):
         """Load the arguments for each entity for a given room and type.
         
         Return a dict object mapping the entity symbols to the argument
-        tuples.
+        tuples. If no data is found, return None.
         """
         images = ImageDict(entity_type)
-        # load config object from crystals.data.world
-        config = getattr(getattr(world, entity_type), room_name)
+        # load config object from DATA_PATH/world
+        config = getattr(getattr(self, entity_type), room_name)
 
         entity_args = {}
         for archetype_name, archetype in config.entities.iteritems():
@@ -79,7 +86,8 @@ class WorldLoader(object):
         return entity_args
 
     def load_room(self, room_name):
-        atlas = getattr(world.maps, room_name)
+        """Load and return a Room instance, given a room name."""
+        atlas = getattr(self.maps, room_name)
 
         grid = []
         for entity_type in ENTITY_TYPES:
@@ -92,10 +100,8 @@ class WorldLoader(object):
                 for row in layer.strip().split('\n'):
                     grid[-1].append([])
                     for symbol in row.strip():
-                        # an unwanted side effect of this is that the same
-                        # entity will appear in multiple places instead of
-                        # functionally equal yet unique entities
                         if symbol == '.':
+                            # append None when a '.' (period) is encountered
                             grid[-1][-1].append(None)
                         else:
                             entity_ = entity.Entity(**entity_args[symbol])

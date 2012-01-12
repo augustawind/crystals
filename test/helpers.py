@@ -4,6 +4,7 @@ import os.path
 import pyglet
 
 RES_PATH = os.path.join('test', 'res')
+DATA_PATH = os.path.join('test', 'data')
 IMAGE_PATH = os.path.join(RES_PATH, 'image')
 
 class TestCase(object):

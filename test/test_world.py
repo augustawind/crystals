@@ -1,6 +1,6 @@
 from crystals import world
 from crystals import entity
-from crystals.data import ImageDict
+from crystals.loaders import ImageDict
 
 from test.helpers import *
 

@@ -1,18 +1,19 @@
 import os
+import sys
 import random
 
 import pyglet
 
-from crystals import data
+import crystals
+from crystals import loaders
 from crystals import entity
-from crystals import world
 from test.helpers import *
 
 class TestImageDict(object):
 
     def test_init(self):
         for img_dir in ('terrain', 'item', 'character', 'interface'):
-            images = data.ImageDict(img_dir, res_path=RES_PATH)
+            images = loaders.ImageDict(img_dir, res_path=RES_PATH)
 
             filenames = os.listdir(
                 os.path.join(RES_PATH, 'image', img_dir))
@@ -33,16 +34,18 @@ class TestWorldLoader(TestCase):
 
     def setup(self):
         super(TestWorldLoader, self).setup()
-        self.loader = data.WorldLoader(self.batch, res_path=RES_PATH)
+        self.loader = loaders.WorldLoader(self.batch, data_path=DATA_PATH,
+                                          res_path=RES_PATH)
 
     def test_init(self):
         assert self.loader.images == {'terrain': None, 'item': None,
-                                      'character': None}
+                                      'feature': None, 'character': None}
+        assert os.path.join(DATA_PATH, 'world') in sys.path
 
     def test_load_images(self):
-        for etype in data.ENTITY_TYPES:
+        for etype in loaders.ENTITY_TYPES:
             self.loader.load_images(etype)
-            assert isinstance(self.loader.images[etype], data.ImageDict)
+            assert isinstance(self.loader.images[etype], loaders.ImageDict)
 
     def test_load_entities(self):
         entity_args = self.loader.load_entity_args('TestRoom', 'terrain')
@@ -66,11 +69,11 @@ class TestWorldLoader(TestCase):
 
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom')
-        assert isinstance(room1, world.Room)
+        assert isinstance(room1, crystals.world.Room)
         assert room1.batch == self.batch
 
         # rough integrity test for room.grid ---------------------------
-        img = data.ImageDict('terrain')
+        img = loaders.ImageDict('terrain')
         vwall = entity.Entity('towering wall', False, img['wall-vert-blue'])
         hwall = entity.Entity('wall', False, img['wall-horiz-blue'])
         floora = entity.Entity('cobbled floor', True, img['floor-a-blue'])
