@@ -13,12 +13,10 @@ class ImageDict(dict):
     """Loads game images."""
 
     def __init__(self, img_dir, res_path=RES_PATH):
-        """Load all images in `img_dir`, where `img_dir` is a
-        directory in data/images.
+        """Load all images in RES_PATH/img_dir.
 
         Images can then be accessed dict-style, where each key is an
-        image's filename without the extension, e.g. 'human-peasant'
-        for 'human-peasant.png'.
+        image's filename without the extension, e.g. 'goblin.png' --> 'goblin'.
         """
         path = os.path.join(res_path, 'image', img_dir)
         for filename in os.listdir(path):
@@ -45,9 +43,11 @@ class WorldLoader(object):
         """Return an Entity object with the given parameters."""
         return entity.Entity(name, walkable, image)
 
-    def load_entities(self, entity_type, room_name):
-        """Load and instantiate all entities for a specific entity type and
-        return a dict object mapping the entity symbols to the objects."""
+    def load_entities(self, room_name, entity_type):
+        """Load and instantiate all entities for a given room and type.
+        
+        Return a dict object mapping the entity symbols to the objects.
+        """
         images = ImageDict(entity_type)
         config = eval('world.' + entity_type)
 

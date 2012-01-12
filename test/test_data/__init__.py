@@ -50,7 +50,7 @@ class TestWorldLoader(TestCase):
         assert isinstance(entity_, entity.Entity)
 
     def test_load_entities(self):
-        entities = self.loader.load_entities('terrain', 'Room1')
+        entities = self.loader.load_entities('Room1', 'terrain')
         images = data.ImageDict('terrain', RES_PATH)
         assert all(type(symbol) == str for symbol in entities.iterkeys())
         assert all(isinstance(entity_, entity.Entity)
