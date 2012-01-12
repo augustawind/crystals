@@ -30,7 +30,7 @@ class TestRoom(WorldTestCase):
     def test_init(self):
         room, name, layers, wall, floor = self.get_room()
         assert room == layers
-        assert room.batch == self.batch
+        assert isinstance(room.batch, pyglet.graphics.Batch)
 
         for layer in room:
             for y in range(len(layer)):
@@ -61,9 +61,8 @@ class TestWorld(WorldTestCase):
         self.room2.name = 'b room'
         self.room2 = reversed(self.room2)
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.world = world.World(self.batch, self.rooms, 'b room')
+        self.world = world.World(self.rooms, 'b room')
 
     def test_init(self):
         assert self.world == self.rooms
-        assert self.world.batch == self.batch
         assert self.world.focus == 'b room'

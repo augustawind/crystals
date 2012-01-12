@@ -12,9 +12,9 @@ class Room(list):
         for layer in self:
             for y in range(len(layer)):
                 for x in range(len(layer[y])):
-                    entity_ = layer[y][x]
-                    if entity_ is not None:
-                        self._update_entity(entity_, x, y)
+                    entity = layer[y][x]
+                    if entity is not None:
+                        self._update_entity(entity, x, y)
 
     def _update_entity(self, entity, x, y):
         entity.batch = self.batch
@@ -22,8 +22,6 @@ class Room(list):
 
 class World(dict):
 
-    def __init__(self, batch, rooms, current_room):
+    def __init__(self, rooms, current_room):
         super(World, self).__init__(rooms)
-        self.batch = batch
         self.focus = current_room
-

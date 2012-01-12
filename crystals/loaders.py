@@ -125,19 +125,20 @@ class WorldLoader(object):
                 grid[-1].append([])
                 for symbol in row.strip():
                     if symbol == '.':
-                        # append None when a '.' (period) is encountered
+                        # Append None when a '.' (period) is encountered
                         grid[-1][-1].append(None)
                     else:
                         entity_ = entity.Entity(**entity_args[symbol])
                         grid[-1][-1].append(entity_)
 
-        return Room(room_name, self.batch, grid)
+        # Each room gets a separate batch
+        return Room(room_name, pyglet.graphics.Batch(), grid)
 
     def load_world(self):
         """Load and return a World instance."""
         rooms = dict((room_name, self.load_room(room_name))
                  for room_name in self.config['maps'].rooms)
         starting_room = self.config['maps'].starting_room
-        world = World(self.batch, rooms, starting_room)
+        world = World(rooms, starting_room)
         
         return world

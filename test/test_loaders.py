@@ -70,19 +70,18 @@ class TestWorldLoader(TestCase):
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom1')
         assert isinstance(room1, crystals.world.Room)
-        assert room1.batch == self.batch
 
         # rough integrity test for room.grid ---------------------------
         archetype = 'terrain'
         img = loaders.ImageDict(archetype)
         vwall = entity.Entity(archetype, 'towering wall', False,
-                              img['wall-vert-blue'], self.batch)
+                              img['wall-vert-blue'], room1.batch)
         hwall = entity.Entity(archetype, 'wall', False,
-                              img['wall-horiz-blue'], self.batch)
+                              img['wall-horiz-blue'], room1.batch)
         floora = entity.Entity(archetype, 'cobbled floor', True,
-                               img['floor-a-blue'], self.batch)
+                               img['floor-a-blue'], room1.batch)
         floorb = entity.Entity(archetype, 'floor-smooth', True,
-                               img['floor-b-blue'], self.batch)
+                               img['floor-b-blue'], room1.batch)
 
         room2 = [
             [[vwall, hwall, vwall],
