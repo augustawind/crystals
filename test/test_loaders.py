@@ -34,7 +34,7 @@ class TestWorldLoader(TestCase):
 
     def setup(self):
         super(TestWorldLoader, self).setup()
-        self.loader = loaders.WorldLoader(self.batch, data_path=DATA_PATH,
+        self.loader = loaders.WorldLoader(data_path=DATA_PATH,
                                           res_path=RES_PATH)
 
     def test_init(self):

@@ -10,9 +10,9 @@ if __debug__:
 
 class GameMode(object):
 
-    def __init__(self, window, batch):
+    def __init__(self, window):
         self.window = window
-        self.batch = batch
+        self.batch = pyglet.graphics.Batch()
 
     def on_draw(self):
         self.window.clear()
@@ -21,8 +21,8 @@ class GameMode(object):
 
 class MainMenu(GameMode, Menu):
 
-    def __init__(self, window, batch, new_game):
-        GameMode.__init__(self, window, batch)
+    def __init__(self, window, new_game):
+        GameMode.__init__(self, window)
         Menu.__init__(
             self, 0, 0, window.width, window.height, self.batch,
             ['new game', 'quit'],
@@ -33,14 +33,12 @@ class MainMenu(GameMode, Menu):
 class Game(object):
 
     def __init__(self):
-        self.batch = pyglet.graphics.Batch()
-
         self.win_width = 600
         self.win_height = 400
         self.window = pyglet.window.Window(self.win_width, self.win_height)
         self.window.clear()
 
-        self.main_menu = MainMenu(self.window, self.batch, self.new_game)
+        self.main_menu = MainMenu(self.window, self.new_game)
         self.world = None
 
     def run(self):
@@ -50,5 +48,5 @@ class Game(object):
     def new_game(self):
         self.window.pop_handlers()
         self.window.clear()
-        loader = WorldLoader(self.batch, DATA_PATH, RES_PATH)
+        loader = WorldLoader(DATA_PATH, RES_PATH)
         self.world = loader.load_room('TestRoom1')

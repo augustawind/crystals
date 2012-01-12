@@ -46,8 +46,7 @@ class ImageDict(dict):
 class WorldLoader(object):
     """Loads the game world."""
 
-    def __init__(self, batch, data_path=DATA_PATH, res_path=RES_PATH):
-        self.batch = batch
+    def __init__(self, data_path=DATA_PATH, res_path=RES_PATH):
         self.res_path = res_path
         self.world_path = os.path.join(self.res_path, 'world')
         self.room_path = os.path.join(self.world_path, 'rooms')
