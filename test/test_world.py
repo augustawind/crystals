@@ -32,12 +32,6 @@ class TestRoom(WorldTestCase):
         assert room == layers
         assert isinstance(room.batch, pyglet.graphics.Batch)
 
-        for layer in room:
-            for y in range(len(layer)):
-                for x in range(len(layer[y])):
-                    assert layer[y][x].x == x * world.TILE_SIZE
-                    assert layer[y][x].y == y * world.TILE_SIZE
-
     def test__update_entity(self):
         room, name, layers, wall, floor = self.get_room()
         wall1 = wall()
@@ -52,6 +46,18 @@ class TestRoom(WorldTestCase):
         assert floor1.x == 0
         assert floor1.y == 0
 
+    def test_focus(self):
+        room = self.get_room()[0]
+        room.focus()
+        for layer in room:
+            for y in range(len(layer)):
+                for x in range(len(layer[y])):
+                    assert layer[y][x].x == x * world.TILE_SIZE
+                    assert layer[y][x].y == y * world.TILE_SIZE
+
+        self.run_app()
+
+
 class TestWorld(WorldTestCase):
 
     def setup(self):
@@ -59,7 +65,6 @@ class TestWorld(WorldTestCase):
         self.room1, n1, l1, self.wall1, self.floor1 = self.get_room()
         self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2.name = 'b room'
-        self.room2 = reversed(self.room2)
         self.rooms = {'a room': self.room1, 'b room': self.room2}
         self.world = world.World(self.rooms, 'b room')
 

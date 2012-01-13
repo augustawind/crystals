@@ -8,6 +8,11 @@ class Room(list):
         self.name = name
         self.batch = batch
 
+    def _update_entity(self, entity, x, y):
+        entity.batch = self.batch
+        entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
+
+    def focus(self):
         for layer in self:
             for y in range(len(layer)):
                 for x in range(len(layer[y])):
@@ -15,13 +20,14 @@ class Room(list):
                     if entity is not None:
                         self._update_entity(entity, x, y)
 
-    def _update_entity(self, entity, x, y):
-        entity.batch = self.batch
-        entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
-
 
 class World(dict):
 
     def __init__(self, rooms, current_room):
         dict.__init__(self, rooms)
-        self.focus = current_room
+        self.focus = None
+        self.set_focus(current_room)
+
+    def set_focus(self, room_name):
+        self[room_name].focus()
+        self.focus = room_name

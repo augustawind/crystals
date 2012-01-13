@@ -18,6 +18,9 @@ class GameMode(object):
         self.window = window
         self.batch = pyglet.graphics.Batch()
 
+    def activate(self):
+        self.window.push_handlers(self)
+
     def on_draw(self):
         self.window.clear()
         self.batch.draw()
@@ -38,9 +41,12 @@ class MainMenu(GameMode, Menu):
 class WorldMode(GameMode, World):
     """Game mode where the player explores the game world."""
 
-    def __init__(self, window, rooms, current_room):
+    def __init__(self, window, world):
         GameMode.__init__(self, window)
-        World.__init__(self, rooms, current_room)
+        World.__init__(self, dict(world), world.focus)
+
+    def activate(self):
+        GameMode.activate(self)
 
 
 class Game(object):
@@ -56,11 +62,13 @@ class Game(object):
         self.world = None
 
     def run(self):
-        self.window.push_handlers(self.main_menu)
+        self.main_menu.activate()
         pyglet.app.run()
 
     def new_game(self):
         self.window.pop_handlers()
         self.window.clear()
         loader = WorldLoader(DATA_PATH, RES_PATH)
-        self.world = loader.load_room('TestRoom1')
+        world = loader.load_world()
+        self.world = WorldMode(self.window, world)
+        self.world.activate()

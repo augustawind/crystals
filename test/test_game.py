@@ -35,7 +35,7 @@ class TestWorldMode(WorldTestCase):
         room2 = self.get_room()[0]
         rooms = {'a room': room1, 'b room': room2}
 
-        worldmode = game.WorldMode(window, rooms, 'b room')
+        worldmode = game.WorldMode(window, world.World(rooms, 'b room'))
         assert worldmode.window == window
         assert isinstance(worldmode, game.GameMode)
         assert isinstance(worldmode, world.World)
@@ -60,4 +60,4 @@ class TestGame(object):
     def test_new_game(self):
         self.game.window.push_handlers(self.game.main_menu)
         self.game.new_game()
-        assert isinstance(self.game.world, world.Room)
+        assert isinstance(self.game.world, game.WorldMode)
