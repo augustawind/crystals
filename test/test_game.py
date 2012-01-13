@@ -38,7 +38,6 @@ class TestWorldMode(WorldTestCase):
         worldmode = game.WorldMode(window, world.World(rooms, 'b room'))
         assert worldmode.window == window
         assert isinstance(worldmode, game.GameMode)
-        assert isinstance(worldmode, world.World)
 
 
 class TestGame(object):

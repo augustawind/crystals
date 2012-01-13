@@ -38,12 +38,13 @@ class MainMenu(GameMode, Menu):
             show_box=True, bold=True)
 
 
-class WorldMode(GameMode, World):
+class WorldMode(GameMode):
     """Game mode where the player explores the game world."""
 
     def __init__(self, window, world):
         GameMode.__init__(self, window)
-        World.__init__(self, dict(world), world.focus)
+        self.world = world
+        self.batch = self.world.focus.batch
 
     def activate(self):
         GameMode.activate(self)

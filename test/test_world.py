@@ -70,4 +70,4 @@ class TestWorld(WorldTestCase):
 
     def test_init(self):
         assert self.world == self.rooms
-        assert self.world.focus == 'b room'
+        assert self.world.focus == self.room2

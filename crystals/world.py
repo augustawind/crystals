@@ -29,5 +29,5 @@ class World(dict):
         self.set_focus(current_room)
 
     def set_focus(self, room_name):
-        self[room_name].focus()
-        self.focus = room_name
+        self.focus = self[room_name]
+        self.focus.focus()
