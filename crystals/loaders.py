@@ -58,7 +58,7 @@ class WorldLoader(object):
         self.config['maps'] = __import__('maps')
 
     def load_images(self, archetype):
-        """Load all images for the given archetype. Return an ImageDict."""
+        """Load all images for the given archetype."""
         self.images[archetype] = ImageDict(archetype, self.res_path)
 
     def load_archetype_args(self, room_name, archetype):
