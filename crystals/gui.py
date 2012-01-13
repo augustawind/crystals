@@ -3,6 +3,7 @@ import pyglet
 from pyglet.window import mouse
 
 COLOR_WHITE = (255, 255, 255, 255)
+COLOR_RED = (255, 0, 0, 255)
 
 class Box(object):
     """A rectangle that serves as a line border."""
