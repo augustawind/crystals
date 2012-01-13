@@ -1,4 +1,6 @@
 """creation and mutation of the game world"""
+from pyglet.graphics import OrderedGroup
+
 TILE_SIZE = 24
 
 class Room(list):
@@ -7,18 +9,20 @@ class Room(list):
         super(Room, self).__init__(layers)
         self.name = name
         self.batch = batch
+        self.groups = [OrderedGroup(z) for z in range(len(self))]
 
-    def _update_entity(self, entity, x, y):
+    def _update_entity(self, entity, x, y, z):
         entity.batch = self.batch
+        entity.group = self.groups[z]
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
 
     def focus(self):
-        for layer in self:
-            for y in range(len(layer)):
-                for x in range(len(layer[y])):
-                    entity = layer[y][x]
+        for z in range(len(self)):
+            for y in range(len(self[z])):
+                for x in range(len(self[z][y])):
+                    entity = self[z][y][x]
                     if entity is not None:
-                        self._update_entity(entity, x, y)
+                        self._update_entity(entity, x, y, z)
 
 
 class World(dict):

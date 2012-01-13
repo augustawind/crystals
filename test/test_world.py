@@ -31,20 +31,24 @@ class TestRoom(WorldTestCase):
         room, name, layers, wall, floor = self.get_room()
         assert room == layers
         assert isinstance(room.batch, pyglet.graphics.Batch)
+        assert all(isinstance(group, pyglet.graphics.OrderedGroup)
+                   for group in room.groups)
 
     def test__update_entity(self):
         room, name, layers, wall, floor = self.get_room()
         wall1 = wall()
-        room._update_entity(wall1, 2, 1)
+        room._update_entity(wall1, 2, 1, 0)
         assert wall1.batch == room.batch
         assert wall1.x == 2 * world.TILE_SIZE
         assert wall1.y == 1 * world.TILE_SIZE
+        assert wall1.group.order == 0
 
         floor1 = floor()
-        room._update_entity(floor1, 0, 0)
+        room._update_entity(floor1, 0, 0, 0)
         assert floor1.batch == room.batch
         assert floor1.x == 0
         assert floor1.y == 0
+        assert floor1.group.order == 0
 
     def test_focus(self):
         room = self.get_room()[0]
