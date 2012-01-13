@@ -55,8 +55,6 @@ class TestRoom(WorldTestCase):
                     assert layer[y][x].x == x * world.TILE_SIZE
                     assert layer[y][x].y == y * world.TILE_SIZE
 
-        self.run_app()
-
 
 class TestWorld(WorldTestCase):
 

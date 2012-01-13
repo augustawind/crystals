@@ -29,15 +29,25 @@ class TestMainMenu(object):
 
 class TestWorldMode(WorldTestCase):
 
-    def test_init(self):
-        window = pyglet.window.Window()
-        room1 = self.get_room()[0]
-        room2 = self.get_room()[0]
-        rooms = {'a room': room1, 'b room': room2}
+    def setup(self):
+        WorldTestCase.setup(self)
 
-        worldmode = game.WorldMode(window, world.World(rooms, 'b room'))
-        assert worldmode.window == window
-        assert isinstance(worldmode, game.GameMode)
+        self.window = pyglet.window.Window()
+        self.room1 = self.get_room()[0]
+        self.room2 = self.get_room()[0]
+        self.rooms = {'a room': self.room1, 'b room': self.room2}
+        self.world_ = world.World(self.rooms, 'b room')
+        self.worldmode = game.WorldMode(self.window, self.world_)
+
+    def test_init(self):
+        assert self.worldmode.window == self.window
+        assert self.worldmode.batch != self.worldmode.world.focus.batch
+        assert self.worldmode.world == self.world_
+        assert isinstance(self.worldmode, game.GameMode)
+
+    def test_activate(self):
+        self.worldmode.activate()
+        assert self.worldmode.batch == self.worldmode.world.focus.batch
 
 
 class TestGame(object):

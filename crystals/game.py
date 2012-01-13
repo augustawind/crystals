@@ -19,9 +19,11 @@ class GameMode(object):
         self.batch = pyglet.graphics.Batch()
 
     def activate(self):
+        """Push all event handlers onto the window."""
         self.window.push_handlers(self)
 
     def on_draw(self):
+        """Clear the window and repaint the batch."""
         self.window.clear()
         self.batch.draw()
 
@@ -44,9 +46,9 @@ class WorldMode(GameMode):
     def __init__(self, window, world):
         GameMode.__init__(self, window)
         self.world = world
-        self.batch = self.world.focus.batch
 
     def activate(self):
+        self.batch = self.world.focus.batch
         GameMode.activate(self)
 
 
@@ -63,12 +65,15 @@ class Game(object):
         self.world = None
 
     def run(self):
+        """Run the game, activating the main menu."""
         self.main_menu.activate()
         pyglet.app.run()
 
     def new_game(self):
+        """Initialize and start a new game in world mode."""
         self.window.pop_handlers()
         self.window.clear()
+
         loader = WorldLoader(DATA_PATH, RES_PATH)
         world = loader.load_world()
         self.world = WorldMode(self.window, world)
