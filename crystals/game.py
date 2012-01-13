@@ -2,15 +2,17 @@
 import pyglet
 from pyglet.window import key
 
+from crystals.gui import Menu
 from crystals.loaders import WorldLoader
 from crystals.loaders import DATA_PATH, RES_PATH
-from crystals.gui import Menu
+from crystals.world import World
 
 # Use the data/ and res/ directories in the test suite when debugging
 if __debug__:
     from test.helpers import DATA_PATH, RES_PATH
 
 class GameMode(object):
+    """Abstract class for top-level game objects with event handlers."""
 
     def __init__(self, window):
         self.window = window
@@ -22,6 +24,7 @@ class GameMode(object):
 
 
 class MainMenu(GameMode, Menu):
+    """Game mode that displays a menu. Greets the player."""
 
     def __init__(self, window, new_game):
         GameMode.__init__(self, window)
@@ -32,7 +35,16 @@ class MainMenu(GameMode, Menu):
             show_box=True, bold=True)
 
 
+class WorldMode(GameMode, World):
+    """Game mode where the player explores the game world."""
+
+    def __init__(self, window, rooms, current_room):
+        GameMode.__init__(self, window)
+        World.__init__(self, rooms, current_room)
+
+
 class Game(object):
+    """The main application object. Runs the game."""
 
     def __init__(self):
         self.win_width = 600

@@ -23,5 +23,5 @@ class Room(list):
 class World(dict):
 
     def __init__(self, rooms, current_room):
-        super(World, self).__init__(rooms)
+        dict.__init__(self, rooms)
         self.focus = current_room

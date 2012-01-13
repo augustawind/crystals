@@ -3,6 +3,7 @@ import pyglet
 from crystals import game
 from crystals import gui
 from crystals import world
+from test.test_world import WorldTestCase
 
 class TestGameMode(object):
 
@@ -24,6 +25,20 @@ class TestMainMenu(object):
         assert mm.window == window
         assert isinstance(mm.batch, pyglet.graphics.Batch)
         assert mm.functions[0] == new_game
+
+
+class TestWorldMode(WorldTestCase):
+
+    def test_init(self):
+        window = pyglet.window.Window()
+        room1 = self.get_room()[0]
+        room2 = self.get_room()[0]
+        rooms = {'a room': room1, 'b room': room2}
+
+        worldmode = game.WorldMode(window, rooms, 'b room')
+        assert worldmode.window == window
+        assert isinstance(worldmode, game.GameMode)
+        assert isinstance(worldmode, world.World)
 
 
 class TestGame(object):
