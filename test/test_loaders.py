@@ -51,7 +51,7 @@ class TestWorldLoader(TestCase):
         assert all(type(symbol) == str for symbol in archetype_args.iterkeys())
 
         keys = ('wall-horiz', 'wall-vert', 'floor-rough', 'floor-smooth')
-        names = ('wall', 'towering wall', 'cobbled floor', 'floor-smooth')
+        names = ('a wall', 'towering wall', 'cobbled floor', 'a smooth floor')
         walkables = (False, False, True, True)
                   
         for key, name, walkable in zip(keys, names, walkables):
@@ -81,11 +81,11 @@ class TestWorldLoader(TestCase):
         img = loaders.ImageDict(archetype, RES_PATH)
         vwall = entity.Entity(archetype, 'towering wall', False,
                               img['wall-vert-blue'], room1.batch)
-        hwall = entity.Entity(archetype, 'wall', False,
+        hwall = entity.Entity(archetype, 'a wall', False,
                               img['wall-horiz-blue'], room1.batch)
         floora = entity.Entity(archetype, 'cobbled floor', True,
                                img['floor-a-red'], room1.batch)
-        floorb = entity.Entity(archetype, 'floor-smooth', True,
+        floorb = entity.Entity(archetype, 'a smooth floor', True,
                                img['floor-b-red'], room1.batch)
 
         room2 = [

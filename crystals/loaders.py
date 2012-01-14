@@ -14,6 +14,9 @@ RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 DATA_PATH = os.path.join('crystals', 'data') # default path to game data
 ARCHETYPES = ('terrain', 'feature', 'item', 'character') # entity categories
 
+# Parameter names (all entities)
+ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
+
 class ImageDict(dict):
     """Loads game images."""
 
@@ -52,11 +55,18 @@ class WorldLoader(object):
         self.images = dict.fromkeys(ARCHETYPES)
         self.ignore_char = '.' # char to ignore when reading room maps
 
-        # add data_path to PYTHON_PATH and import world data
+        # add data_path to PYTHON_PATH
         sys.path.insert(0, os.path.join(data_path, 'world'))
-        self.config = dict((a, __import__(a)) for a in ARCHETYPES)
-        self.atlas = __import__('atlas')
 
+        # load world data
+        self.configs = {}
+        self.defaults = {}
+        for archetype in ARCHETYPES:
+            self.configs[archetype] =  __import__(archetype)
+            if hasattr(self.configs[archetype], 'entities'):
+                self.defaults[archetype] = self.configs[archetype].entities
+
+        self.atlas = __import__('atlas')
         self.symbols = self.atlas.symbols # Default symbol dict
 
     def load_images(self, archetype):
@@ -71,28 +81,33 @@ class WorldLoader(object):
         empty dict.
         """
         images = ImageDict(archetype)
-        if not hasattr(self.config[archetype], room_name):
+        if not hasattr(self.configs[archetype], room_name):
             return {}
         # load config object from DATA_PATH/world
-        config = getattr(self.config[archetype], room_name)
+        config = getattr(self.configs[archetype], room_name).entities
+        defaults = self.defaults[archetype]
 
         archetype_args = {}
-        for category_name, category in config.entities.iteritems():
-            default_params = config.defaults[category_name].copy()
-            for entity_name, params in category.iteritems():
-                params = params.copy() # Leave module data intact
-                key = category_name + '-' + entity_name # Unique identifier
+        for classname, classcfg in config.iteritems():
+            classparams = {}
+            classdefaults = defaults.get(classname, {})
+            if 'params' in classdefaults:
+                classparams.update(classdefaults['params'])
+            classparams.update(classcfg['params'])
+
+            for cfgname, cfg in classcfg.iteritems():
+                if cfgname == 'params':
+                    continue
+                params = classparams.copy()
+                cfgdefaults = classdefaults.get(cfgname, {})
+                params.update(cfgdefaults)
+                params.update(cfg) 
+
+                key = classname + '-' + cfgname # Unique identifier
                 params['archetype'] = archetype
-                # If name is not given in any params, generate one
-                if 'name' not in params and 'name' not in default_params:
-                    params['name'] = key
-                # Replace missing entries from params with entries from
-                # default_params
-                for param in ('name', 'walkable', 'image', 'color'):
-                    if param not in params:
-                        params[param] = default_params[param]
-                # Combine image and color params to get the image name
-                params['image'] += '-' + params.pop('color')
+                # Combine image and variant params to get the image name
+                if 'variant' in params:
+                    params['image'] += '-' + params.pop('variant')
                 # Replace the image name with the actual image object
                 params['image'] = images[params['image']]
                 
