@@ -88,19 +88,21 @@ class WorldLoader(object):
 
         archetype_args = {}
         for clsname, clscfg in config.iteritems():
+            # Load entity class parameters
             clsparams = {}
             clsdefaults = defaults.get(clsname, {})
             if 'params' in clsdefaults:
-                clsparams.update(clsdefaults['params'])
-            clsparams.update(clscfg['params'])
+                clsparams.update(clsdefaults['params']) # Add defaults
+            clsparams.update(clscfg['params']) # Add room-specifics
 
-            for cfgname, cfg in clscfg.iteritems():
-                if cfgname == 'params':
+            for specname, speccfg in clscfg.iteritems():
+                if specname == 'params':
                     continue
+                # Load specific entity parameters
                 params = clsparams.copy()
-                cfgdefaults = clsdefaults.get(cfgname, {})
-                params.update(cfgdefaults)
-                params.update(cfg) 
+                specdefaults = clsdefaults.get(specname, {})
+                params.update(specdefaults) # Add defaults
+                params.update(speccfg) # Add room-specifics
 
                 params['archetype'] = archetype
                 if 'variant' in params:
@@ -110,7 +112,7 @@ class WorldLoader(object):
                 params['image'] = images[params['image']]
                 
                 # Map an Entity instance to a unique identifier
-                key = clsname + '-' + cfgname
+                key = clsname + '-' + specname
                 archetype_args[key] = params
 
         return archetype_args
