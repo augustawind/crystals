@@ -13,6 +13,7 @@ from crystals.world import World
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 DATA_PATH = os.path.join('crystals', 'data') # default path to game data
 ARCHETYPES = ('terrain', 'feature', 'item', 'character') # entity categories
+IGNORE_SYMBOL = '.' # character to ignore when reading maps
 
 # Parameter names (all entities)
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
@@ -53,7 +54,6 @@ class WorldLoader(object):
         self.room_path = os.path.join(self.world_path, 'rooms')
         self.rooms = {}
         self.images = dict.fromkeys(ARCHETYPES)
-        self.ignore_char = '.' # char to ignore when reading room maps
 
         # add data_path to PYTHON_PATH
         sys.path.insert(0, os.path.join(data_path, 'world'))
@@ -83,35 +83,34 @@ class WorldLoader(object):
         images = ImageDict(archetype)
         if not hasattr(self.configs[archetype], room_name):
             return {}
-        # load config object from DATA_PATH/world
         config = getattr(self.configs[archetype], room_name).entities
         defaults = self.defaults[archetype]
 
         archetype_args = {}
-        for classname, classcfg in config.iteritems():
-            classparams = {}
-            classdefaults = defaults.get(classname, {})
-            if 'params' in classdefaults:
-                classparams.update(classdefaults['params'])
-            classparams.update(classcfg['params'])
+        for clsname, clscfg in config.iteritems():
+            clsparams = {}
+            clsdefaults = defaults.get(clsname, {})
+            if 'params' in clsdefaults:
+                clsparams.update(clsdefaults['params'])
+            clsparams.update(clscfg['params'])
 
-            for cfgname, cfg in classcfg.iteritems():
+            for cfgname, cfg in clscfg.iteritems():
                 if cfgname == 'params':
                     continue
-                params = classparams.copy()
-                cfgdefaults = classdefaults.get(cfgname, {})
+                params = clsparams.copy()
+                cfgdefaults = clsdefaults.get(cfgname, {})
                 params.update(cfgdefaults)
                 params.update(cfg) 
 
-                key = classname + '-' + cfgname # Unique identifier
                 params['archetype'] = archetype
-                # Combine image and variant params to get the image name
                 if 'variant' in params:
+                    # Combine image and variant params to get the image name
                     params['image'] += '-' + params.pop('variant')
                 # Replace the image name with the actual image object
                 params['image'] = images[params['image']]
                 
-                # Map an Entity instance to its corresponding key
+                # Map an Entity instance to a unique identifier
+                key = clsname + '-' + cfgname
                 archetype_args[key] = params
 
         return archetype_args
@@ -120,42 +119,44 @@ class WorldLoader(object):
         """Load the arguments for each entity for a given room.
 
         Return a dict object mapping argument tuples to unique names
-        generated from the config file. If no data is found, return an
-        empty dict.
+        generated from the config file. If no data is found, raise an
+        exception.
         """
         entity_args = {}
         for archetype in ARCHETYPES:
             archetype_args = self.load_archetype_args(room_name, archetype)
             entity_args.update(archetype_args)
 
+        if not entity_args:
+            raise Exception('No entity data found')
         return entity_args
 
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
         entity_args = self.load_entity_args(room_name)
         atlas = getattr(self.atlas, room_name)
-        symbols = atlas.symbols
-        layers = atlas.maps
-        grid = []
-        for layer in layers:
-            grid.append([])
-            for row in layer.strip().split('\n'):
-                grid[-1].append([])
-                for symbol in row.strip():
-                    if symbol == '.':
-                        # Append None when a '.' (period) is encountered
-                        grid[-1][-1].append(None)
-                    else:
-                        # Use default symbol dict if symbol not defined in room
-                        if symbol not in symbols:
-                            key = self.symbols[symbol]
-                        else:
-                            key = symbols[symbol]
-                        entity_ = entity.Entity(**entity_args[key])
-                        grid[-1][-1].append(entity_)
+        symbols = self.symbols.copy()
+        symbols.update(atlas.symbols)
 
-        # Each room gets a separate batch
-        return Room(room_name, pyglet.graphics.Batch(), grid)
+        # Build the room
+        layers = []
+        for layer in atlas.maps:
+            layers.append([])
+            for row in layer.strip().split('\n'):
+                layers[-1].append([])
+                for symbol in row.strip():
+                    # Place None if IGNORE_SYMBOL is encountered
+                    if symbol == IGNORE_SYMBOL:
+                        entity_ = None
+                    # Else place an entity
+                    else:
+                        key = symbols[symbol] 
+                        kwargs = entity_args[key]
+                        entity_ = entity.Entity(**kwargs)
+                    layers[-1][-1].append(entity_)
+
+        # The room gets a unique batch
+        return Room(room_name, pyglet.graphics.Batch(), layers)
 
     def load_world(self):
         """Load and return a World instance."""
