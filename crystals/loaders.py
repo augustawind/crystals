@@ -64,8 +64,9 @@ class WorldLoader(object):
     def load_archetype_args(self, room_name, archetype):
         """Load the arguments for each entity for a given room and archetype.
         
-        Return a dict object mapping the entity symbols to argument
-        tuples. If no data is found, return an empty dict.
+        Return a dict object mapping argument tuples to unique names
+        generated from the config file. If no data is found, return an
+        empty dict.
         """
         images = ImageDict(archetype)
         if not hasattr(self.config[archetype], room_name):
@@ -78,35 +79,36 @@ class WorldLoader(object):
             default_params = config.defaults[category_name].copy()
             for entity_name, params in category.iteritems():
                 params = params.copy() # Leave module data intact
+                key = category_name + '-' + entity_name # Unique identifier
                 params['archetype'] = archetype
                 # If name is not given in any params, generate one
                 if 'name' not in params and 'name' not in default_params:
-                    params['name'] = category_name + '-' + entity_name
+                    params['name'] = key
                 # Replace missing entries from params with entries from
                 # default_params
-                for key in ('name', 'walkable', 'image', 'color', 'symbol'):
-                    if key not in params:
-                        params[key] = default_params[key]
+                for param in ('name', 'walkable', 'image', 'color'):
+                    if param not in params:
+                        params[param] = default_params[param]
                 # Combine image and color params to get the image name
                 params['image'] += '-' + params.pop('color')
                 # Replace the image name with the actual image object
                 params['image'] = images[params['image']]
                 
-                # Map the symbol to a corresponding Entity instance
-                symbol = params.pop('symbol')
-                archetype_args[symbol] = params
+                # Map an Entity instance to its corresponding key
+                archetype_args[key] = params
 
         return archetype_args
 
     def load_entity_args(self, room_name):
         """Load the arguments for each entity for a given room.
 
-        Return a dict object mapping the entity symbols to argument
-        tuples. If no data is found, return an empty dict.
+        Return a dict object mapping argument tuples to unique names
+        generated from the config file. If no data is found, return an
+        empty dict.
         """
         entity_args = {}
-        for atype in ARCHETYPES:
-            archetype_args = self.load_archetype_args(room_name, atype)
+        for archetype in ARCHETYPES:
+            archetype_args = self.load_archetype_args(room_name, archetype)
             entity_args.update(archetype_args)
 
         return entity_args
@@ -114,7 +116,9 @@ class WorldLoader(object):
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
         entity_args = self.load_entity_args(room_name)
-        layers = getattr(self.config['maps'], room_name)
+        atlas = getattr(self.config['maps'], room_name)
+        symbols = atlas.symbols
+        layers = atlas.maps
         grid = []
         for layer in layers:
             grid.append([])
@@ -125,7 +129,8 @@ class WorldLoader(object):
                         # Append None when a '.' (period) is encountered
                         grid[-1][-1].append(None)
                     else:
-                        entity_ = entity.Entity(**entity_args[symbol])
+                        entity_name = symbols[symbol]
+                        entity_ = entity.Entity(**entity_args[entity_name])
                         grid[-1][-1].append(entity_)
 
         # Each room gets a separate batch

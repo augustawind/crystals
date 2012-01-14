@@ -12,17 +12,13 @@ class TestRoom1:
         'floor': {
             'rough': {
                 'name': 'cobbled floor',
-                'image': 'floor-a',
-                'symbol': ','},
+                'image': 'floor-a'},
             'smooth': {
-                'image': 'floor-b',
-                'symbol': '+'}},
+                'image': 'floor-b'}},
         'wall': {
             'horiz': {
-                'image': 'wall-horiz',
-                'symbol': '-'},
+                'image': 'wall-horiz'},
              'vert': {
                 'name': 'towering wall',
-                'image': 'wall-vert',
-                'symbol': '|'}}
+                'image': 'wall-vert'}}
         }

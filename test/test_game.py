@@ -64,7 +64,7 @@ class TestGame(object):
 
     def test_run(self):
         pass
-        #self.game.run() # comment this line for ease of testing
+        #self.game.run() # Comment this line for ease of testing
 
     def test_new_game(self):
         self.game.window.push_handlers(self.game.main_menu)

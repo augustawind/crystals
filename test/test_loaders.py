@@ -50,12 +50,12 @@ class TestWorldLoader(TestCase):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
         assert all(type(symbol) == str for symbol in archetype_args.iterkeys())
 
-        symbols = ('-', '|', ',', '+')
+        keys = ('wall-horiz', 'wall-vert', 'floor-rough', 'floor-smooth')
         names = ('wall', 'towering wall', 'cobbled floor', 'floor-smooth')
         walkables = (False, False, True, True)
                   
-        for symbol, name, walkable in zip(symbols, names, walkables):
-            entity_ = entity.Entity(**archetype_args[symbol])
+        for key, name, walkable in zip(keys, names, walkables):
+            entity_ = entity.Entity(**archetype_args[key])
             assert isinstance(entity_, entity.Entity)
             assert isinstance(entity_, pyglet.sprite.Sprite)
             assert entity_.name == name
@@ -100,9 +100,7 @@ class TestWorldLoader(TestCase):
         for layer1, layer2 in zip(room1, room2):
             for row1, row2 in zip(layer1, layer2):
                 for e1, e2 in zip(row1, row2):
-                    if e1 == None or e2 == None:
-                        pass
-                    else:
+                    if e1 != None and e2 != None:
                         assert e1.name == e2.name
                         assert e1.walkable == e2.walkable
                         assert e1.batch == e2.batch
