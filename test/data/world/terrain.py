@@ -81,4 +81,3 @@ class TestRoom1:
             'vert': {'name': 'towering wall'},
         }
     }
-

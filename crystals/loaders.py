@@ -18,6 +18,9 @@ IGNORE_SYMBOL = '.' # character to ignore when reading maps
 # Parameter names (all entities)
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
+#class DataError(Exception):pass
+
+
 class ImageDict(dict):
     """Loads game images."""
 
@@ -98,7 +101,7 @@ class WorldLoader(object):
             for specname, speccfg in clscfg.iteritems():
                 if specname == 'params':
                     continue
-                # Load specific entity parameters
+                # Load entity specific parameters
                 params = clsparams.copy()
                 specdefaults = clsdefaults.get(specname, {})
                 params.update(specdefaults) # Add defaults
@@ -118,7 +121,8 @@ class WorldLoader(object):
         return archetype_args
 
     def load_entity_args(self, room_name):
-        """Load the arguments for each entity for a given room.
+        """Load the arguments for each entity for a given room for
+        every archetype.
 
         Return a dict object mapping argument tuples to unique names
         generated from the config file. If no data is found, raise an
@@ -130,7 +134,9 @@ class WorldLoader(object):
             entity_args.update(archetype_args)
 
         if not entity_args:
-            raise Exception('No entity data found')
+            raise AttributeError("No declaration for '{}' exists in " +
+                                 "data/world/ archetype modules".format(
+                                     room_name))
         return entity_args
 
     def load_room(self, room_name):

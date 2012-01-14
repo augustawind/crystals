@@ -3,6 +3,7 @@ import sys
 import random
 
 import pyglet
+from nose.tools import *
 
 import crystals
 from crystals import loaders
@@ -48,7 +49,8 @@ class TestWorldLoader(TestCase):
 
     def test_load_archetype_args(self):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
-        assert all(type(symbol) == str for symbol in archetype_args.iterkeys())
+        assert all(type(key) == str for key in archetype_args.iterkeys())
+        assert all(type(value) == dict for value in archetype_args.itervalues())
 
         keys = ('wall-horiz', 'wall-vert', 'floor-rough', 'floor-smooth')
         names = ('a wall', 'towering wall', 'cobbled floor', 'a smooth floor')
@@ -65,6 +67,17 @@ class TestWorldLoader(TestCase):
             entity_.position = [random.randint(200, 400)] * 2
 
         #self.run_app()
+
+    def test_load_entity_args_(self):
+        entity_args = self.loader.load_entity_args('TestRoom1')
+        assert all(type(key) == str for key in entity_args.iterkeys())
+        assert all(type(value) == dict for value in entity_args.itervalues())
+        archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
+        assert len(entity_args) == len(archetype_args)
+
+    @raises(AttributeError)
+    def test_load_entity_args_raises_exception(self):
+        entity_args = self.loader.load_entity_args('NotARoomName')
 
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom1')
