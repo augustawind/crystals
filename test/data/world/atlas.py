@@ -1,10 +1,13 @@
+symbols = {
+    '|': 'wall-vert',
+    '-': 'wall-horiz',
+    '+': 'floor-smooth',
+    ',': 'floor-rough'}
+
+
 class TestRoom1:
 
-    symbols = {
-        '|': 'wall-vert',
-        '-': 'wall-horiz',
-        '+': 'floor-smooth',
-        ',': 'floor-rough'}
+    symbols = {}
     
     maps = (
     """

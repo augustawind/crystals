@@ -55,7 +55,9 @@ class WorldLoader(object):
         # add data_path to PYTHON_PATH and import world data
         sys.path.insert(0, os.path.join(data_path, 'world'))
         self.config = dict((a, __import__(a)) for a in ARCHETYPES)
-        self.config['maps'] = __import__('maps')
+        self.atlas = __import__('atlas')
+
+        self.symbols = self.atlas.symbols # Default symbol dict
 
     def load_images(self, archetype):
         """Load all images for the given archetype."""
@@ -116,7 +118,7 @@ class WorldLoader(object):
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
         entity_args = self.load_entity_args(room_name)
-        atlas = getattr(self.config['maps'], room_name)
+        atlas = getattr(self.atlas, room_name)
         symbols = atlas.symbols
         layers = atlas.maps
         grid = []
@@ -129,8 +131,12 @@ class WorldLoader(object):
                         # Append None when a '.' (period) is encountered
                         grid[-1][-1].append(None)
                     else:
-                        entity_name = symbols[symbol]
-                        entity_ = entity.Entity(**entity_args[entity_name])
+                        # Use default symbol dict if symbol not defined in room
+                        if symbol not in symbols:
+                            key = self.symbols[symbol]
+                        else:
+                            key = symbols[symbol]
+                        entity_ = entity.Entity(**entity_args[key])
                         grid[-1][-1].append(entity_)
 
         # Each room gets a separate batch
@@ -139,8 +145,8 @@ class WorldLoader(object):
     def load_world(self):
         """Load and return a World instance."""
         rooms = dict((room_name, self.load_room(room_name))
-                 for room_name in self.config['maps'].rooms)
-        starting_room = self.config['maps'].starting_room
+                 for room_name in self.atlas.rooms)
+        starting_room = self.atlas.starting_room
         world = World(rooms, starting_room)
         
         return world
