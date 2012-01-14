@@ -18,7 +18,7 @@ IGNORE_SYMBOL = '.' # character to ignore when reading maps
 # Parameter names (all entities)
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
-#class DataError(Exception):pass
+class DataError(Exception):pass
 
 
 class ImageDict(dict):
@@ -134,9 +134,8 @@ class WorldLoader(object):
             entity_args.update(archetype_args)
 
         if not entity_args:
-            raise AttributeError("No declaration for '{}' exists in " +
-                                 "data/world/ archetype modules".format(
-                                     room_name))
+            raise DataError("No declaration for '{}' exists in " +
+                            "data/world/ archetype modules".format(room_name))
         return entity_args
 
     def load_room(self, room_name):

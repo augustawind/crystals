@@ -10,24 +10,27 @@ from crystals import loaders
 from crystals import entity
 from test.helpers import *
 
-class TestImageDict(object):
+@raises(loaders.DataError)
+def test_DataError():
+    raise loaders.DataError()
 
-    def test_init(self):
-        for img_dir in ('terrain', 'item', 'character', 'interface'):
-            images = loaders.ImageDict(img_dir, res_path=RES_PATH)
 
-            filenames = os.listdir(
-                os.path.join(RES_PATH, 'image', img_dir))
-            assert len(images) == len(filenames) 
-            # Test that each file in img_dir is represented by an entry
-            # in `ImageLoader`
-            for key, image in images.iteritems():
-                assert isinstance(image, pyglet.image.AbstractImage)
-                match = False
-                for filename in filenames:
-                    if key == filename.rsplit('.', 1)[0]:
-                        match = True
-                assert match
+def test_ImageDict():
+    for img_dir in ('terrain', 'item', 'character', 'interface'):
+        images = loaders.ImageDict(img_dir, res_path=RES_PATH)
+
+        filenames = os.listdir(
+            os.path.join(RES_PATH, 'image', img_dir))
+        assert len(images) == len(filenames) 
+        # Test that each file in img_dir is represented by an entry
+        # in `ImageLoader`
+        for key, image in images.iteritems():
+            assert isinstance(image, pyglet.image.AbstractImage)
+            match = False
+            for filename in filenames:
+                if key == filename.rsplit('.', 1)[0]:
+                    match = True
+            assert match
 
 
 class TestWorldLoader(TestCase):
@@ -75,7 +78,7 @@ class TestWorldLoader(TestCase):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
         assert len(entity_args) == len(archetype_args)
 
-    @raises(AttributeError)
+    @raises(loaders.DataError)
     def test_load_entity_args_raises_exception(self):
         entity_args = self.loader.load_entity_args('NotARoomName')
 
