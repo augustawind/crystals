@@ -37,18 +37,30 @@ class TestWorldLoader(TestCase):
 
     def setup(self):
         super(TestWorldLoader, self).setup()
-        self.loader = loaders.WorldLoader(data_path=DATA_PATH,
-                                          res_path=RES_PATH)
+        self.loader = loaders.WorldLoader(DATA_PATH, RES_PATH)
 
     def test_init(self):
-        assert self.loader.images == {'terrain': None, 'item': None,
-                                      'feature': None, 'character': None}
+        assert all(k in loaders.ARCHETYPES
+                   for k in self.loader.images.iterkeys())
+        assert all(isinstance(v, loaders.ImageDict)
+                   for v in self.loader.images.itervalues())
         assert os.path.join(DATA_PATH, 'world') in sys.path
 
-    def test_load_images(self):
-        for atype in loaders.ARCHETYPES:
-            self.loader.load_images(atype)
-            assert isinstance(self.loader.images[atype], loaders.ImageDict)
+    @raises(loaders.DataError)
+    def test_init_invalid_res_path1(self):
+        loader = loaders.WorldLoader(res_path='notapath')
+    @raises(loaders.DataError)
+    def test_init_invalid_res_path2(self):
+        loader = loaders.WorldLoader(
+            res_path=os.path.join('test', 'res-invalid'))
+
+    @raises(loaders.DataError)
+    def test_init_invalid_data_path1(self):
+        loader = loaders.WorldLoader(data_path='notapath')
+    @raises(loaders.DataError)
+    def test_init_invalid_data_path2(self):
+        loader = loaders.WorldLoader(
+            data_path=os.path.join('test', 'data-invalid'))
 
     def test_load_archetype_args(self):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
@@ -78,10 +90,6 @@ class TestWorldLoader(TestCase):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
         assert len(entity_args) == len(archetype_args)
 
-    @raises(loaders.DataError)
-    def test_load_entity_args_raises_exception(self):
-        entity_args = self.loader.load_entity_args('NotARoomName')
-
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom1')
         assert isinstance(room1, crystals.world.Room)
@@ -89,7 +97,6 @@ class TestWorldLoader(TestCase):
     def test_load_world(self):
         world = self.loader.load_world()
         assert isinstance(world, crystals.world.World)
-
 
         # rough integrity test for room.grid ---------------------------
         room1 = world['TestRoom1']

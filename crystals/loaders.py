@@ -24,15 +24,15 @@ class DataError(Exception):pass
 class ImageDict(dict):
     """Loads game images."""
 
-    def __init__(self, img_dir, res_path=RES_PATH):
-        """Load all images in RES_PATH/img_dir, and scale them to TILE_SIZE.
+    def __init__(self, archetype, res_path=RES_PATH):
+        """Load all images in RES_PATH/archetype, and scale them to TILE_SIZE.
 
         Images can then be accessed dict-style, where each key is an
         image's filename without the extension, e.g. 'goblin.png' --> 'goblin'.
         """
         glEnable(GL_TEXTURE_2D)
 
-        path = os.path.join(res_path, 'image', img_dir)
+        path = os.path.join(res_path, 'image', archetype)
         for filename in os.listdir(path):
             key = filename.rsplit('.', 1)[0]
             image = pyglet.image.load(os.path.join(path, filename))
@@ -52,16 +52,29 @@ class WorldLoader(object):
     """Loads the game world."""
 
     def __init__(self, data_path=DATA_PATH, res_path=RES_PATH):
-        self.res_path = res_path
-        self.world_path = os.path.join(self.res_path, 'world')
-        self.room_path = os.path.join(self.world_path, 'rooms')
-        self.rooms = {}
-        self.images = dict.fromkeys(ARCHETYPES)
+        # Ensure data and resource paths are valid
+        image_path = os.path.join(res_path, 'image')
+        if not os.path.exists(image_path):
+            raise DataError("Resource path must contain 'image' directory")
+        world_path = os.path.join(data_path, 'world')
+        if not os.path.exists(world_path):
+            raise DataError("Data path must contain 'world' directory")
+        for archetype in ARCHETYPES:
+            if not os.path.exists(os.path.join(image_path, archetype)):
+                raise DataError("Image path must contain a subdirectory " +
+                                "for each archetype")
+            if not os.path.exists(os.path.join(world_path, archetype + '.py')):
+                raise DataError("World data path must contain a Python " +
+                                "module for each archetype")
+        if not os.path.exists(os.path.join(world_path, 'atlas.py')):
+            raise DataError("World data directory must contain atlas.py")
 
-        # add data_path to PYTHON_PATH
-        sys.path.insert(0, os.path.join(data_path, 'world'))
+        # Load images
+        self.images = dict((a, ImageDict(a, res_path)) for a in ARCHETYPES)
+        # Add world directory to PYTHONPATH
+        sys.path.insert(0, world_path)
 
-        # load world data
+        # Load world data
         self.configs = {}
         self.defaults = {}
         for archetype in ARCHETYPES:
@@ -70,11 +83,9 @@ class WorldLoader(object):
                 self.defaults[archetype] = self.configs[archetype].entities
 
         self.atlas = __import__('atlas')
-        self.symbols = self.atlas.symbols # Default symbol dict
+        self.symbols = self.atlas.symbols # Default symbols
 
-    def load_images(self, archetype):
-        """Load all images for the given archetype."""
-        self.images[archetype] = ImageDict(archetype, self.res_path)
+        self.rooms = {}
 
     def load_archetype_args(self, room_name, archetype):
         """Load the arguments for each entity for a given room and archetype.
@@ -83,7 +94,6 @@ class WorldLoader(object):
         generated from the config file. If no data is found, return an
         empty dict.
         """
-        images = ImageDict(archetype)
         if not hasattr(self.configs[archetype], room_name):
             return {}
         config = getattr(self.configs[archetype], room_name).entities
@@ -112,7 +122,7 @@ class WorldLoader(object):
                     # Combine image and variant params to get the image name
                     params['image'] += '-' + params.pop('variant')
                 # Replace the image name with the actual image object
-                params['image'] = images[params['image']]
+                params['image'] = self.images[archetype][params['image']]
                 
                 # Map an Entity instance to a unique identifier
                 key = clsname + '-' + specname
@@ -133,9 +143,6 @@ class WorldLoader(object):
             archetype_args = self.load_archetype_args(room_name, archetype)
             entity_args.update(archetype_args)
 
-        if not entity_args:
-            raise DataError("No declaration for '{}' exists in " +
-                            "data/world/ archetype modules".format(room_name))
         return entity_args
 
     def load_room(self, room_name):
