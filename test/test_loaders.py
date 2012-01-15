@@ -46,10 +46,10 @@ class TestWorldLoader(TestCase):
                    for v in self.loader.images.itervalues())
         assert os.path.join(DATA_PATH, 'world') in sys.path
 
-    @raises(loaders.DataError)
+    @raises(loaders.ResourceError)
     def test_init_invalid_res_path1(self):
         loader = loaders.WorldLoader(res_path='notapath')
-    @raises(loaders.DataError)
+    @raises(loaders.ResourceError)
     def test_init_invalid_res_path2(self):
         loader = loaders.WorldLoader(
             res_path=os.path.join('test', 'res-invalid'))
@@ -61,6 +61,18 @@ class TestWorldLoader(TestCase):
     def test_init_invalid_data_path2(self):
         loader = loaders.WorldLoader(
             data_path=os.path.join('test', 'data-invalid'))
+
+    def test__validate_res_path(self):
+        self.loader._validate_res_path(RES_PATH)
+    @raises(loaders.ResourceError)
+    def test__validate_res_path_invalid(self):
+        self.loader._validate_res_path('notapath')
+
+    def test__validate_data_path(self):
+        self.loader._validate_data_path(DATA_PATH)
+    @raises(loaders.DataError)
+    def test__validate_data_path_invalid(self):
+        self.loader._validate_data_path('notapath')
 
     def test_load_archetype_args(self):
         archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')

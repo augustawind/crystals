@@ -18,7 +18,14 @@ IGNORE_SYMBOL = '.' # character to ignore when reading maps
 # Parameter names (all entities)
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
-class DataError(Exception):pass
+class ResourceError(Exception):
+    """Exception class for errors in loading game resources."""
+    pass
+
+
+class DataError(Exception):
+    """Exception class for errors in loading game data."""
+    pass
 
 
 class ImageDict(dict):
@@ -53,28 +60,15 @@ class WorldLoader(object):
 
     def __init__(self, data_path=DATA_PATH, res_path=RES_PATH):
         # Ensure data and resource paths are valid
-        image_path = os.path.join(res_path, 'image')
-        if not os.path.exists(image_path):
-            raise DataError("Resource path must contain 'image' directory")
-        world_path = os.path.join(data_path, 'world')
-        if not os.path.exists(world_path):
-            raise DataError("Data path must contain 'world' directory")
-        for archetype in ARCHETYPES:
-            if not os.path.exists(os.path.join(image_path, archetype)):
-                raise DataError("Image path must contain a subdirectory " +
-                                "for each archetype")
-            if not os.path.exists(os.path.join(world_path, archetype + '.py')):
-                raise DataError("World data path must contain a Python " +
-                                "module for each archetype")
-        if not os.path.exists(os.path.join(world_path, 'atlas.py')):
-            raise DataError("World data directory must contain atlas.py")
+        self._validate_res_path(res_path)
+        self._validate_data_path(data_path)
 
         # Load images
         self.images = dict((a, ImageDict(a, res_path)) for a in ARCHETYPES)
-        # Add world directory to PYTHONPATH
-        sys.path.insert(0, world_path)
-
+        
         # Load world data
+        world_path = os.path.join(data_path, 'world')
+        sys.path.insert(0, world_path) # Add world directory to PYTHONPATH
         self.configs = {}
         self.defaults = {}
         for archetype in ARCHETYPES:
@@ -86,6 +80,29 @@ class WorldLoader(object):
         self.symbols = self.atlas.symbols # Default symbols
 
         self.rooms = {}
+
+    def _validate_res_path(self, res_path):
+        """Raise a ResourceError if res_path is invalid."""
+        image_path = os.path.join(res_path, 'image')
+        if not os.path.exists(image_path):
+            raise ResourceError("Resource path must contain 'image' directory")
+        for archetype in ARCHETYPES:
+            if not os.path.exists(os.path.join(image_path, archetype)):
+                raise ResourceError("Image path must contain a subdirectory " +
+                                    "for each archetype")
+
+    def _validate_data_path(self, data_path):
+        """Raise a DataError if data_path is invalid."""
+        world_path = os.path.join(data_path, 'world')
+        if not os.path.exists(world_path):
+            raise DataError("Data path must contain 'world' directory")
+        for archetype in ARCHETYPES:
+            if not os.path.exists(os.path.join(world_path, archetype + '.py')):
+                raise DataError("World data path must contain a Python " +
+                                "module for each archetype")
+        if not os.path.exists(os.path.join(world_path, 'atlas.py')):
+            raise DataError(
+                "World data directory must contain module atlas")
 
     def load_archetype_args(self, room_name, archetype):
         """Load the arguments for each entity for a given room and archetype.
