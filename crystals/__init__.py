@@ -1,7 +1,7 @@
 import entity
 import game
 import gui
-import loaders
+import data
 import world
 
-__all__ = ['entity', 'game', 'gui', 'loaders', 'world']
+__all__ = ['entity', 'game', 'gui', 'data', 'world']

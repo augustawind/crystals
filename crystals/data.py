@@ -112,7 +112,7 @@ class WorldLoader(object):
             clsdefaults = defaults.get(clsname, {})
             if 'params' in clsdefaults:
                 clsparams.update(clsdefaults['params']) # Add defaults
-            clsparams.update(clscfg['params']) # Add room-specifics
+            clsparams.update(clscfg.get('params', {})) # Add room-specifics
 
             for specname, speccfg in clscfg.iteritems():
                 if specname == 'params':
