@@ -1,14 +1,15 @@
 from crystals import world
 from crystals import entity
-from crystals.loaders import ImageDict
+from crystals.data import ImageDict
 
 from test.helpers import *
+from test.test_data import IMAGE_PATH
 
 class WorldTestCase(TestCase):
 
     def __init__(self):
         super(WorldTestCase, self).__init__()
-        self.img = ImageDict('terrain', RES_PATH)
+        self.img = ImageDict('terrain', IMAGE_PATH)
 
     def get_room(self):
         name = 'a room'

@@ -3,13 +3,13 @@ import pyglet
 from pyglet.window import key
 
 from crystals.gui import Menu
-from crystals.loaders import WorldLoader
-from crystals.loaders import DATA_PATH, RES_PATH
+from crystals.data import WorldLoader
+from crystals.data import RES_PATH
 from crystals.world import World
 
-# Use the data/ and res/ directories in the test suite when debugging
+# Use the resource directory in the test suite when debugging
 if __debug__:
-    from test.helpers import DATA_PATH, RES_PATH
+    from test.helpers import RES_PATH
 
 class GameMode(object):
     """Abstract class for top-level game objects with event handlers."""
@@ -74,7 +74,7 @@ class Game(object):
         self.window.pop_handlers()
         self.window.clear()
 
-        loader = WorldLoader(DATA_PATH, RES_PATH)
+        loader = WorldLoader(RES_PATH)
         world = loader.load_world()
         self.world = WorldMode(self.window, world)
         self.world.activate()
