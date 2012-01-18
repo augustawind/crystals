@@ -77,17 +77,19 @@ class WorldLoader(object):
         """Raise a ResourceError if res_path is invalid."""
         image_path = os.path.join(res_path, 'image')
         if not os.path.exists(image_path):
-            raise ResourceError("Resource path must contain 'image' directory")
+            raise ResourceError("Resource path must contain " +
+                                 "subdirectory 'image'")
         world_path = os.path.join(res_path, 'world')
         if not os.path.exists(world_path):
-            raise ResourceError("Resource path must contain 'world' directory")
+            raise ResourceError("Resource path must contain subdirectory " +
+                                "'world'")
         for archetype in ARCHETYPES:
             if not os.path.exists(os.path.join(image_path, archetype)):
-                raise ResourceError("Image path must contain a subdirectory " +
-                                    "for each archetype")
+                raise ResourceError("Image path must contain subdirectory '" +
+                                    archetype + "'")
             if not os.path.exists(os.path.join(world_path, archetype + '.py')):
-                raise ResourceError("World path must contain a Python " +
-                                    "module for each archetype")
+                raise ResourceError("World path must contain module '" +
+                                    archetype + "'")
         if not os.path.exists(os.path.join(world_path, 'atlas.py')):
             raise ResourceError("World path must contain module 'atlas'")
 
