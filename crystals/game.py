@@ -1,10 +1,14 @@
 """top-level game logic"""
+import os.path
+
 import pyglet
 from pyglet.window import key
 
 from crystals.gui import Menu
+from crystals.data import ImageDict
 from crystals.data import WorldLoader
 from crystals.data import RES_PATH
+from crystals.entity import Entity
 from crystals.world import World
 
 # Use the resource directory in the test suite when debugging
@@ -43,9 +47,10 @@ class MainMenu(GameMode, Menu):
 class WorldMode(GameMode):
     """Game mode where the player explores the game world."""
 
-    def __init__(self, window, world):
+    def __init__(self, window, world, hero):
         GameMode.__init__(self, window)
         self.world = world
+        self.hero = hero
 
     def activate(self):
         self.batch = self.world.focus.batch
@@ -63,6 +68,7 @@ class Game(object):
 
         self.main_menu = MainMenu(self.window, self.new_game)
         self.world = None
+        self.hero = None
 
     def run(self):
         """Run the game, activating the main menu."""
@@ -76,5 +82,8 @@ class Game(object):
 
         loader = WorldLoader(RES_PATH)
         world = loader.load_world()
-        self.world = WorldMode(self.window, world)
+
+        images = ImageDict('character', os.path.join(RES_PATH, 'image'))
+        hero = Entity('character', 'hero', False, images['human-peasant'])
+        self.world = WorldMode(self.window, world, hero)
         self.world.activate()

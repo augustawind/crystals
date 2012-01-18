@@ -2,8 +2,10 @@ import pyglet
 
 from crystals import game
 from crystals import gui
+from crystals import entity
 from crystals import world
 from test.test_world import WorldTestCase
+from test.helpers import *
 
 class TestGameMode(object):
 
@@ -37,17 +39,24 @@ class TestWorldMode(WorldTestCase):
         self.room2 = self.get_room()[0]
         self.rooms = {'a room': self.room1, 'b room': self.room2}
         self.world_ = world.World(self.rooms, 'b room')
-        self.worldmode = game.WorldMode(self.window, self.world_)
+        self.hero = entity.Entity(
+            'character', 'hero', False, pyglet.image.load(
+            os.path.join(IMAGE_PATH, 'character', 'cow.png')))
+        self.worldmode = game.WorldMode(self.window, self.world_, self.hero)
 
     def test_init(self):
+        assert isinstance(self.worldmode, game.GameMode)
         assert self.worldmode.window == self.window
         assert self.worldmode.batch != self.worldmode.world.focus.batch
         assert self.worldmode.world == self.world_
-        assert isinstance(self.worldmode, game.GameMode)
 
     def test_activate(self):
         self.worldmode.activate()
         assert self.worldmode.batch == self.worldmode.world.focus.batch
+
+    def test_on_text_motion(self):
+        self.worldmode.on_text_motion(key.MOTION_LEFT)
+        self.wo
 
 
 class TestGame(object):
@@ -61,6 +70,7 @@ class TestGame(object):
         assert isinstance(self.game.window, pyglet.window.Window)
         assert isinstance(self.game.main_menu, game.MainMenu)
         assert self.game.world == None
+        assert self.game.hero == None
 
     def test_run(self):
         pass

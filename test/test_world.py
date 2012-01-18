@@ -1,7 +1,8 @@
+from nose.tools import *
+
 from crystals import world
 from crystals import entity
 from crystals.data import ImageDict
-
 from test.helpers import *
 from test.test_data import IMAGE_PATH
 
@@ -20,10 +21,18 @@ class WorldTestCase(TestCase):
         layers = [
             [[wall(), wall(), wall()],
              [wall(), floor(), wall()],
-             [wall(), floor(), floor()]]]
+             [wall(), floor(), floor()]],
+            [[None, None, None],
+             [None, None, None],
+             [None, None, wall()]]]
         room = world.Room(name, self.batch, layers)
 
         return room, name, layers, wall, floor
+
+
+@raises(world.WorldError)
+def test_WorldError():
+    raise world.WorldError()
 
 
 class TestRoom(WorldTestCase):
@@ -57,8 +66,35 @@ class TestRoom(WorldTestCase):
         for layer in room:
             for y in range(len(layer)):
                 for x in range(len(layer[y])):
+                    if layer[y][x] is None:
+                        continue
                     assert layer[y][x].x == x * world.TILE_SIZE
                     assert layer[y][x].y == y * world.TILE_SIZE
+
+    def dummy_entity(self):
+        images = ImageDict('terrain', IMAGE_PATH)
+        return entity.Entity('terrain', 'tree', False, images['tree-green'],
+                             pyglet.graphics.Batch())
+
+    def test_replace_entity(self):
+        room = self.get_room()[0]
+        dummy = self.dummy_entity()
+        room.replace_entity(dummy, 0, 0, 0)
+        assert room[0][0][0] == dummy
+
+    def test_add_entity(self):
+        room = self.get_room()[0]
+        dummy = self.dummy_entity()
+
+        room.add_entity(dummy, 1, 1, 1)
+        assert room[1][1][1] == dummy 
+        assert dummy.batch == room.batch
+        assert dummy.group == room.groups[1]
+
+    @raises(world.WorldError)
+    def test_add_entity_is_safe(self):
+        room = self.get_room()[0]
+        room.add_entity(self.dummy_entity(), 0, 0, 0)
 
 
 class TestWorld(WorldTestCase):
