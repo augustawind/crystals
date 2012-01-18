@@ -20,6 +20,16 @@ class Room(list):
         entity.group = self.groups[z]
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
 
+    def add_layer(self, z=None):
+        """If z is an integer, insert a blank layer at z. If z is None,
+        append a blank layer at the top."""
+        layer = [[None for x in range(len(self[0][0]))]
+                 for y in range(len(self[0]))]
+        if z is None:
+            self.append(layer)
+        else:
+            self.insert(z, layer)
+
     def replace_entity(self, entity, x, y, z):
         """Place 'entity' at (x, y, z), replacing an existing entity if
         neccesary."""
@@ -55,3 +65,15 @@ class World(dict):
     def set_focus(self, room_name):
         self.focus = self[room_name]
         self.focus.focus()
+    
+    def add_entity(self, entity, x, y, z=None):
+        if z is None:
+            self.focus.add_layer()
+            self.focus.replace_entity(entity, x, y, -1)
+            return
+        try:
+            self.focus.add_entity(entity, x, y, z)
+        except WorldError:
+            self.focus.add_layer(z)
+            self.focus.replace_entity(entity, x, y, z)
+

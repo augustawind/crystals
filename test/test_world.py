@@ -71,6 +71,17 @@ class TestRoom(WorldTestCase):
                     assert layer[y][x].x == x * world.TILE_SIZE
                     assert layer[y][x].y == y * world.TILE_SIZE
 
+    def test_add_layer(self):
+        room = self.get_room()[0]
+
+        roomlen = len(room)
+        room.add_layer(0)
+        assert len(room) == roomlen + 1
+
+        roomlen = len(room)
+        room.add_layer()
+        assert all(e == None for row in room[-1] for e in row)
+
     def dummy_entity(self):
         images = ImageDict('terrain', IMAGE_PATH)
         return entity.Entity('terrain', 'tree', False, images['tree-green'],
@@ -110,3 +121,24 @@ class TestWorld(WorldTestCase):
     def test_init(self):
         assert self.world == self.rooms
         assert self.world.focus == self.room2
+
+    def test_add_entity1(self):
+        wall = self.wall1()
+        nlayers = len(self.world.focus)
+        self.world.add_entity(wall, 1, 1)
+        assert self.world.focus[-1][1][1] == wall
+        assert len(self.world.focus) == nlayers + 1
+
+    def test_add_entity2(self):
+        floor = self.floor1()
+        nlayers = len(self.world.focus)
+        self.world.add_entity(floor, 1, 1, 0)
+        assert self.world.focus[0][1][1] == floor
+        assert len(self.world.focus) == nlayers + 1
+
+    def test_add_entity3(self):
+        wall = self.wall2()
+        nlayers = len(self.world.focus)
+        self.world.add_entity(wall, 1, 1, 1)
+        assert self.world.focus[1][1][1] == wall
+        assert len(self.world.focus) == nlayers
