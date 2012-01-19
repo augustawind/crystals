@@ -170,3 +170,28 @@ class TestMenu(TestCase):
                 self.test_number = None
                 n = self.menu.on_mouse_release(0, 0, mouse_button, 0)
                 assert self.test_number == None 
+
+
+class TestTextFeed(TestCase):
+
+    def test_labels(self):
+        textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
+                                self.batch)
+        assert len(textfeed.labels) == len(range(0, self.window.height, 24))
+
+    def test_update(self):
+        textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
+                                self.batch)
+        assert all(label.text == '' for label in textfeed.labels)
+
+        text = 'Hello, world!!!'
+        for i in range(len(textfeed.labels) - 1):
+            textfeed.update(text)
+            assert textfeed.labels[-(i + 1)].text == text
+            assert all(label.text == '' for label in textfeed.labels[:-(i + 1)])
+
+        textfeed.update(text)
+        assert all(label.text == text for label in textfeed.labels)
+        textfeed.update('Goodbye, cruel world...')
+        assert textfeed.labels[0].text == 'Goodbye, cruel world...'
+        assert all(label.text == text for label in textfeed.labels[1:])

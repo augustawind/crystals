@@ -49,7 +49,6 @@ class Box(object):
 
 
 class Menu(object):
-    """A menu of clickable/selectable text buttons that execute functions."""
 
     def __init__(self, x, y, width, height, batch, text, functions,
                  show_box=False, margin=10, padding=10, 
@@ -163,3 +162,52 @@ class Menu(object):
         """
         if self.selection != -1 and button == mouse.LEFT:
             self.functions[self.selection]()
+
+
+class TextFeed(object):
+    """A self-scrolling pane of text."""
+
+    def __init__(self, x, y, width, height, batch, show_box=False,
+                 margin=10, line_height=24, font_name='monospace',
+                 font_size=16, bold=False, italic=False, color=COLOR_WHITE):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.batch = batch
+
+        self.box = Box(self.x, self.y, self.width, self.height, self.batch,
+                       color, show_box)
+
+        # Create a label for each line in the textfeed
+        label_x = x + margin
+        label_width = width - (margin * 2)
+        label_height = max(font_size, line_height)
+
+        self.labels = []
+        for label_y in range(y, height, label_height):
+            self.labels.append(pyglet.text.Label(
+                '', font_name, font_size, bold, italic, color,
+                label_x, label_y, label_width, label_height,
+                halign='center', multiline=False, batch=self.batch))
+            self.labels[-1].content_valign = 'center'
+
+    def update(self, text):
+        """Add some text to the textfeed, scrolling up if necessary."""
+        updated = False
+        for label in reversed(self.labels):
+            if not label.text:
+                label.text = text
+                updated = True
+                break
+        if updated:
+            return
+
+        # All labels display text
+        # Move all text up a label, discarding the top text and assigning 
+        # `text` to the bottom label
+        labeltext = [text,] + [self.labels[i - 1].text
+                               for i in range(1, len(self.labels))]
+        for i in range(len(self.labels)):
+            self.labels[i].text = labeltext[i]
+
