@@ -55,6 +55,13 @@ class WorldMode(GameMode):
         self.batch = self.world.focus.batch
         GameMode.activate(self)
 
+    def on_text_motion(self, motion):
+        xstep, ystep = {key.MOTION_LEFT: (-1, 0),
+                        key.MOTION_RIGHT: (1, 0),
+                        key.MOTION_DOWN: (0, -1),
+                        key.MOTION_UP: (0, 1)}[motion]
+        self.world.step_entity(self.player, xstep, ystep)
+
 
 class Game(object):
     """The main application object. Runs the game."""

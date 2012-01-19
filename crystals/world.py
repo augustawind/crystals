@@ -20,30 +20,17 @@ class Room(list):
         entity.group = self.groups[z]
         entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
 
-    def add_layer(self, z=None):
-        """If z is an integer, insert a blank layer at z. If z is None,
-        append a blank layer at the top."""
-        layer = [[None for x in range(len(self[0][0]))]
-                 for y in range(len(self[0]))]
-        if z is None:
-            self.append(layer)
-        else:
-            self.insert(z, layer)
-
-    def replace_entity(self, entity, x, y, z):
-        """Place 'entity' at (x, y, z), replacing an existing entity if
-        neccesary."""
-        self[z][y][x] = entity
-        self._update_entity(entity, x, y, z)
-
-    def add_entity(self, entity, x, y, z):
-        """Attempt to place 'entity' at (x, y, z), but raise a
-        WorldError if an entity already exists there."""
-        if self[z][y][x] is not None:
-            raise WorldError(
-                'Entity already exists in room {}[{}][{}][{}]'.format(
-                self.name, z, y, x))
-        self.replace_entity(entity, x, y, z)
+    def iswalkable(self, x, y):
+        """Return True if, for every layer, (x, y) is in bounds and is
+        either None or a walkable entity, else return False.
+        """
+        if (x < 0 or x >= len(self[0][0])) or (y < 0 or y >= len(self[0])):
+            return False
+        for layer in self:
+            e = layer[y][x]
+            if e != None and not e.walkable:
+                return False
+        return True
 
     def focus(self):
         """Focus the room, preparing it for rendering."""
@@ -53,6 +40,47 @@ class Room(list):
                     entity = self[z][y][x]
                     if entity is not None:
                         self._update_entity(entity, x, y, z)
+
+    def get_coords(self, entity):
+        x = entity.x / TILE_SIZE
+        y = entity.y / TILE_SIZE
+        if entity.group is None:
+            z = None
+        else:
+            z = entity.group.order
+        return x, y, z
+
+    def add_layer(self, z=None):
+        """If z is an integer, insert a blank layer at z. If z is None,
+        append a blank layer at the top.
+        """
+        layer = [[None for x in range(len(self[0][0]))]
+                 for y in range(len(self[0]))]
+        if z is None:
+            self.append(layer)
+            self.groups.append(OrderedGroup(len(self.groups)))
+        else:
+            self.insert(z, layer)
+            self.groups.insert(z, OrderedGroup(z))
+            for group in self.groups[z + 1:]:
+                group.order += 1
+
+    def replace_entity(self, entity, x, y, z):
+        """Place 'entity' at (x, y, z), replacing an existing entity if
+        neccesary.
+        """
+        self[z][y][x] = entity
+        self._update_entity(entity, x, y, z)
+
+    def add_entity(self, entity, x, y, z):
+        """Attempt to place 'entity' at (x, y, z), but raise a
+        WorldError if an entity already exists there.
+        """
+        if self[z][y][x] is not None:
+            raise WorldError(
+                'Entity already exists in room {}[{}][{}][{}]'.format(
+                self.name, z, y, x))
+        self.replace_entity(entity, x, y, z)
 
 
 class World(dict):
@@ -82,4 +110,19 @@ class World(dict):
         except WorldError:
             self.focus.add_layer(z)
             self.focus.replace_entity(entity, x, y, z)
+
+    def pop_entity(self, x, y, z):
+        entity = self.focus[z][y][x]
+        self.focus[z][y][x] = None
+        return entity
+    
+    def step_entity(self, entity, xstep, ystep):
+        x, y, z = self.focus.get_coords(entity)
+        newx = x + xstep
+        newy = y + ystep
+        if not self.focus.iswalkable(newx, newy):
+            return
+        self.pop_entity(x, y, z)
+        self.add_entity(entity, newx, newy, z)
+
 

@@ -197,7 +197,7 @@ class WorldLoader(object):
         return Room(room_name, pyglet.graphics.Batch(), layers)
 
     def load_world(self):
-        """Load and return a World instance and a Hero instance."""
+        """Load and return a World instance and the player entity instance."""
         rooms = dict((room_name, self.load_room(room_name))
                  for room_name in self.atlas.rooms)
         starting_room = self.atlas.starting_room

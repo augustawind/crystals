@@ -1,4 +1,5 @@
 import pyglet
+from pyglet.window import key
 
 from crystals import game
 from crystals import gui
@@ -42,6 +43,7 @@ class TestWorldMode(WorldTestCase):
         self.player = entity.Entity(
             'character', 'player', False, pyglet.image.load(
             os.path.join(IMAGE_PATH, 'character', 'cow.png')))
+        self.room2.add_entity(self.player, 1, 1, 1)
         self.worldmode = game.WorldMode(self.window, self.world_, self.player)
 
     def test_init(self):
@@ -56,8 +58,12 @@ class TestWorldMode(WorldTestCase):
         assert self.worldmode.batch == self.worldmode.world.focus.batch
 
     def test_on_text_motion(self):
-        self.worldmode.on_text_motion(key.MOTION_LEFT)
-        self.wo
+        x1, y1 = self.worldmode.player.position
+        self.worldmode.on_text_motion(key.MOTION_DOWN)
+        x2, y2 = self.worldmode.player.position
+        assert self.room2[1][2][1] == self.player
+        assert x2 == x1 + world.TILE_SIZE
+        assert y2 == y1 + world.TILE_SIZE
 
 
 class TestGame(object):
