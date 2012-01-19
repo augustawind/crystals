@@ -5,7 +5,6 @@ import pyglet
 from pyglet.window import key
 
 from crystals.gui import Menu
-from crystals.data import ImageDict
 from crystals.data import WorldLoader
 from crystals.data import RES_PATH
 from crystals.entity import Entity
@@ -47,10 +46,10 @@ class MainMenu(GameMode, Menu):
 class WorldMode(GameMode):
     """Game mode where the player explores the game world."""
 
-    def __init__(self, window, world, hero):
+    def __init__(self, window, world, player):
         GameMode.__init__(self, window)
         self.world = world
-        self.hero = hero
+        self.player = player
 
     def activate(self):
         self.batch = self.world.focus.batch
@@ -68,7 +67,7 @@ class Game(object):
 
         self.main_menu = MainMenu(self.window, self.new_game)
         self.world = None
-        self.hero = None
+        self.player = None
 
     def run(self):
         """Run the game, activating the main menu."""
@@ -81,9 +80,6 @@ class Game(object):
         self.window.clear()
 
         loader = WorldLoader(RES_PATH)
-        world = loader.load_world()
-
-        images = ImageDict('character', os.path.join(RES_PATH, 'image'))
-        hero = Entity('character', 'hero', False, images['human-peasant'])
-        self.world = WorldMode(self.window, world, hero)
+        world, player = loader.load_world()
+        self.world = WorldMode(self.window, world, player)
         self.world.activate()

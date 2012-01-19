@@ -1,7 +1,6 @@
 """tools for loading variable game data and resources"""
 import os
 import sys
-
 import pyglet
 from pyglet.gl import *
 
@@ -12,7 +11,8 @@ from crystals.world import World
 
 RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 ARCHETYPES = ('terrain', 'feature', 'item', 'character') # entity categories
-IGNORE_SYMBOL = '.' # character to ignore when reading maps
+PLAYER_SYMBOL = '@' # char that represents the player
+IGNORE_SYMBOL = '.' # char to ignore when reading maps
 
 # Parameter names for all entities
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
@@ -73,6 +73,8 @@ class WorldLoader(object):
         self.atlas = __import__('atlas')
         self.symbols = self.atlas.symbols # Default symbols
 
+        self.player = None
+
     def _validate_res_path(self, res_path):
         """Raise a ResourceError if res_path is invalid."""
         image_path = os.path.join(res_path, 'image')
@@ -100,10 +102,11 @@ class WorldLoader(object):
         generated from the config file. If no data is found, return an
         empty dict.
         """
-        if not hasattr(self.configs[archetype], room_name):
-            return {}
-        config = getattr(self.configs[archetype], room_name).entities
-        defaults = self.defaults[archetype]
+        if hasattr(self.configs[archetype], room_name):
+            config = getattr(self.configs[archetype], room_name).entities
+            defaults = self.defaults[archetype]
+        else:
+            config = {}
 
         archetype_args = {}
         for clsname, clscfg in config.iteritems():
@@ -133,6 +136,16 @@ class WorldLoader(object):
                 # Map an Entity instance to a unique identifier
                 key = clsname + '-' + specname
                 archetype_args[key] = params
+
+        if archetype == 'character':
+            archetype_args['player'] = self.configs[archetype].player.copy()
+            archetype_args['player']['archetype'] = archetype
+            image_name = archetype_args['player']['image']
+            archetype_args['player']['image'] = self.images[
+                archetype][image_name]
+
+            for key in archetype_args.iterkeys():
+                archetype_args[key]['walkable'] = False
 
         return archetype_args
 
@@ -168,21 +181,26 @@ class WorldLoader(object):
                     # Place None if IGNORE_SYMBOL is encountered
                     if symbol == IGNORE_SYMBOL:
                         entity_ = None
-                    # Else place an entity
                     else:
-                        key = symbols[symbol] 
-                        kwargs = entity_args[key]
-                        entity_ = entity.Entity(**kwargs)
+                        # Place the player if PLAYER_SYMBOL is encountered
+                        if symbol == PLAYER_SYMBOL:
+                            kwargs = entity_args['player']
+                            entity_ = entity.Entity(**kwargs)
+                            self.player = entity_
+                        else:
+                            key = symbols[symbol] 
+                            kwargs = entity_args[key]
+                            entity_ = entity.Entity(**kwargs)
                     layers[-1][-1].append(entity_)
 
         # The room gets a unique batch
         return Room(room_name, pyglet.graphics.Batch(), layers)
 
     def load_world(self):
-        """Load and return a World instance."""
+        """Load and return a World instance and a Hero instance."""
         rooms = dict((room_name, self.load_room(room_name))
                  for room_name in self.atlas.rooms)
         starting_room = self.atlas.starting_room
         world = World(rooms, starting_room)
         
-        return world
+        return world, self.player

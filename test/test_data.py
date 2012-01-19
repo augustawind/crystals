@@ -92,16 +92,19 @@ class TestWorldLoader(TestCase):
         entity_args = self.loader.load_entity_args('TestRoom1')
         assert all(type(key) == str for key in entity_args.iterkeys())
         assert all(type(value) == dict for value in entity_args.itervalues())
-        archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
-        assert len(entity_args) == len(archetype_args)
+        terrain_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
+        character_args = self.loader.load_archetype_args(
+            'TestRoom1', 'character')
+        assert len(entity_args) == len(terrain_args) + len(character_args)
 
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom1')
         assert isinstance(room1, crystals.world.Room)
                 
     def test_load_world(self):
-        world = self.loader.load_world()
+        world, hero = self.loader.load_world()
         assert isinstance(world, crystals.world.World)
+        assert isinstance(hero, entity.Entity)
 
         # rough integrity test for room.grid ---------------------------
         room1 = world['TestRoom1']
@@ -122,13 +125,14 @@ class TestWorldLoader(TestCase):
              [vwall, floorb, floorb]
             ],
             [[floora, floora, floora],
-             [floora, None, floora],
+             [floora, hero, floora],
              [floora, None, None]]]
 
         for layer1, layer2 in zip(room1, room2):
             for row1, row2 in zip(layer1, layer2):
                 for e1, e2 in zip(row1, row2):
                     if e1 != None and e2 != None:
+                        print e1.name, '~', e2.name
                         assert e1.name == e2.name
                         assert e1.walkable == e2.walkable
                         assert e1.batch == e2.batch

@@ -67,6 +67,12 @@ class World(dict):
         self.focus.focus()
     
     def add_entity(self, entity, x, y, z=None):
+        """Add an entity at [z][y][x] in the focused room.
+        
+        If z is None, add a layer to the top and put the entity there.
+        Otherwise, if no entity exists at [z][y][x], place it there,
+        else insert a new layer at z and place it there.
+        """
         if z is None:
             self.focus.add_layer()
             self.focus.replace_entity(entity, x, y, -1)
