@@ -57,13 +57,21 @@ class TestWorldMode(WorldTestCase):
         self.worldmode.activate()
         assert self.worldmode.batch == self.worldmode.world.focus.batch
 
-    def test_on_text_motion(self):
+    def test_on_text_motion_moves_player(self):
         x1, y1 = self.worldmode.player.position
-        self.worldmode.on_text_motion(key.MOTION_DOWN)
+        self.worldmode.on_text_motion(key.MOTION_UP)
         x2, y2 = self.worldmode.player.position
         assert self.room2[1][2][1] == self.player
-        assert x2 == x1 + world.TILE_SIZE
+        assert x2 == x1
         assert y2 == y1 + world.TILE_SIZE
+
+    def test_on_text_motion_does_nothing(self):
+        x1, y1 = self.worldmode.player.position
+        self.worldmode.on_text_motion(key.MOTION_LEFT)
+        x2, y2 = self.worldmode.player.position
+        assert self.room2[1][1][1] == self.player
+        assert x2 == x1
+        assert y2 == y1
 
 
 class TestGame(object):
