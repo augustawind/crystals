@@ -179,7 +179,7 @@ class TextFeed(object):
         self.box = Box(self.x, self.y, self.width, self.height, self.batch,
                        color, show_box)
 
-        # Create a label for each line in the textfeed
+        # Create a label for each line in the textfeed -----------------
         label_x = x + margin
         label_width = width - (margin * 2)
         label_height = max(font_size, line_height)
@@ -203,7 +203,6 @@ class TextFeed(object):
         if updated:
             return
 
-        # All labels display text
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
         labeltext = [text,] + [self.labels[i - 1].text
