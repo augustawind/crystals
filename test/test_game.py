@@ -49,13 +49,13 @@ class TestWorldMode(WorldTestCase):
     def test_init(self):
         assert isinstance(self.worldmode, game.GameMode)
         assert self.worldmode.window == self.window
-        assert self.worldmode.batch != self.worldmode.world.focus.batch
+        assert self.worldmode.batch == self.worldmode.world.focus.batch
+        
         assert self.worldmode.world == self.world_
         assert self.worldmode.player == self.player
 
     def test_activate(self):
         self.worldmode.activate()
-        assert self.worldmode.batch == self.worldmode.world.focus.batch
 
     def test_on_text_motion_moves_player(self):
         x1, y1 = self.worldmode.player.position

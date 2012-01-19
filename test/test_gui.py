@@ -6,6 +6,7 @@ import pyglet
 
 from test.helpers import *
 from crystals import gui
+from crystals.world import TILE_SIZE
 
 class TestBox(TestCase):
 
@@ -177,11 +178,23 @@ class TestTextFeed(TestCase):
     def test_labels(self):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
                                 self.batch)
-        assert len(textfeed.labels) == len(range(0, self.window.height, 24))
+        assert len(textfeed.labels) == len(
+            range(0, self.window.height, TILE_SIZE)) - 1
+
+    def test_activate(self):
+        textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
+                                pyglet.graphics.Batch())
+        assert all(label.batch is not self.batch for label in textfeed.labels)
+        assert textfeed.box.batch is not self.batch
+        textfeed.batch = self.batch
+        textfeed.activate()
+        assert all(label.batch is self.batch for label in textfeed.labels)
+        assert textfeed.box.batch is self.batch
 
     def test_update(self):
-        textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
-                                self.batch)
+        textfeed = gui.TextFeed(
+            5, 5, self.window.width - 5, self.window.height - 5, self.batch,
+            True)
         assert all(label.text == '' for label in textfeed.labels)
 
         text = 'Hello, world!!!'

@@ -50,15 +50,15 @@ class TestRoom(WorldTestCase):
         wall1 = wall()
         room._update_entity(wall1, 2, 1, 0)
         assert wall1.batch == room.batch
-        assert wall1.x == 2 * world.TILE_SIZE
-        assert wall1.y == 1 * world.TILE_SIZE
+        assert wall1.x == world.ORIGIN_X + (2 * world.TILE_SIZE)
+        assert wall1.y == world.ORIGIN_Y + world.TILE_SIZE
         assert wall1.group.order == 0
 
         floor1 = floor()
         room._update_entity(floor1, 0, 0, 0)
         assert floor1.batch == room.batch
-        assert floor1.x == 0
-        assert floor1.y == 0
+        assert floor1.x == world.ORIGIN_X
+        assert floor1.y == world.ORIGIN_Y
         assert floor1.group.order == 0
 
     def test_iswalkable(self):
@@ -74,8 +74,8 @@ class TestRoom(WorldTestCase):
                 for x in range(len(layer[y])):
                     if layer[y][x] is None:
                         continue
-                    assert layer[y][x].x == x * world.TILE_SIZE
-                    assert layer[y][x].y == y * world.TILE_SIZE
+                    assert layer[y][x].x == x * world.TILE_SIZE + world.ORIGIN_X
+                    assert layer[y][x].y == y * world.TILE_SIZE + world.ORIGIN_Y
 
     def test_get_coords(self):
         room = self.get_room()[0]

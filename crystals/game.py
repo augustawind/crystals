@@ -4,7 +4,7 @@ import os.path
 import pyglet
 from pyglet.window import key
 
-from crystals.gui import Menu
+from crystals import gui
 from crystals.data import WorldLoader
 from crystals.data import RES_PATH
 from crystals.entity import Entity
@@ -31,12 +31,12 @@ class GameMode(object):
         self.batch.draw()
 
 
-class MainMenu(GameMode, Menu):
+class MainMenu(GameMode, gui.Menu):
     """Game mode that displays a menu. Greets the player."""
 
     def __init__(self, window, new_game):
         GameMode.__init__(self, window)
-        Menu.__init__(
+        gui.Menu.__init__(
             self, 0, 0, window.width, window.height, self.batch,
             ['new game', 'quit'],
             [new_game, pyglet.app.exit],
@@ -50,9 +50,23 @@ class WorldMode(GameMode):
         GameMode.__init__(self, window)
         self.world = world
         self.player = player
+        self.batch = self.world.focus.batch
+        
+        tf_margin = 10
+        tf_x = tf_y = tf_margin
+        tf_width = window.width - (tf_margin * 2)
+        tf_height = 100
+        self.textfeed = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
+                                     self.batch, show_box=True)
+        self.textfeed.update('Welcome...')
+        self.textfeed.update('Welcome...')
+        self.textfeed.update('Welcome...')
+        self.textfeed.update('Welcome...')
+        self.textfeed.update('Welcome...')
+        self.textfeed.update('Welcome...')
 
     def activate(self):
-        self.batch = self.world.focus.batch
+        self.textfeed.activate()
         GameMode.activate(self)
 
     def on_text_motion(self, motion):

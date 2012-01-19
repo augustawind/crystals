@@ -183,14 +183,21 @@ class TextFeed(object):
         label_x = x + margin
         label_width = width - (margin * 2)
         label_height = max(font_size, line_height)
+        y1 = y + ((height - (margin * 2)) % label_height) / 2 
+        y2 = height - y1
 
         self.labels = []
-        for label_y in range(y, height, label_height):
+        for label_y in range(y1, y2, label_height):
             self.labels.append(pyglet.text.Label(
                 '', font_name, font_size, bold, italic, color,
                 label_x, label_y, label_width, label_height,
                 halign='center', multiline=False, batch=self.batch))
             self.labels[-1].content_valign = 'center'
+
+    def activate(self):
+        for label in self.labels:
+            label.batch = self.batch
+        self.box.batch = self.batch
 
     def update(self, text):
         """Add some text to the textfeed, scrolling up if necessary."""

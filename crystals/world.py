@@ -1,7 +1,9 @@
 """creation and mutation of the game world"""
 from pyglet.graphics import OrderedGroup
 
-TILE_SIZE = 24
+TILE_SIZE = 24 # Width and height of each tile, in pixels
+ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
+ORIGIN_Y = 124 # of room display, in pixels
 
 class WorldError(Exception):
     pass
@@ -18,7 +20,9 @@ class Room(list):
     def _update_entity(self, entity, x, y, z):
         entity.batch = self.batch
         entity.group = self.groups[z]
-        entity.set_position(x * TILE_SIZE, y * TILE_SIZE)
+        newx = x * TILE_SIZE + ORIGIN_X
+        newy = y * TILE_SIZE + ORIGIN_Y
+        entity.set_position(newx, newy)
 
     def iswalkable(self, x, y):
         """Return True if, for every layer, (x, y) is in bounds and is
@@ -42,8 +46,8 @@ class Room(list):
                         self._update_entity(entity, x, y, z)
 
     def get_coords(self, entity):
-        x = entity.x / TILE_SIZE
-        y = entity.y / TILE_SIZE
+        x = (entity.x - ORIGIN_X) / TILE_SIZE
+        y = (entity.y - ORIGIN_Y) / TILE_SIZE
         if entity.group is None:
             z = None
         else:
