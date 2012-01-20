@@ -129,7 +129,7 @@ class TestWorldLoader(TestCase):
              [floora, None, None]]]
 
         for layer1, layer2 in zip(room1, room2):
-            for row1, row2 in zip(layer1, layer2):
+            for row1, row2 in zip(layer1, reversed(layer2)):
                 for e1, e2 in zip(row1, row2):
                     if e1 != None and e2 != None:
                         assert e1.name == e2.name

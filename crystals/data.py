@@ -42,7 +42,7 @@ class WorldLoader(object):
     """Loads the game world."""
 
     def __init__(self, res_path=RES_PATH):
-        # Ensure data and resource paths are valid self._validate_res_path(res_path)
+        # Ensure data and resource paths are valid
 
         # Load images
         image_path = os.path.join(res_path, 'image')
@@ -184,7 +184,7 @@ class WorldLoader(object):
         layers = []
         for layer in atlas.maps:
             layers.append([])
-            for row in layer.strip().split('\n'):
+            for row in reversed(layer.strip().split('\n')):
                 layers[-1].append([])
                 for symbol in row.strip():
                     # Place None if IGNORE_SYMBOL is encountered
