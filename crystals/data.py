@@ -31,30 +31,18 @@ class ImageDict(dict):
         Images can then be accessed dict-style, where each key is an
         image's filename without the extension, e.g. 'goblin.png' --> 'goblin'.
         """
-        glEnable(GL_TEXTURE_2D)
-
         path = os.path.join(path, archetype)
         for filename in os.listdir(path):
             key = filename.rsplit('.', 1)[0]
             image = pyglet.image.load(os.path.join(path, filename))
-
-            texture = image.get_texture()
-            glBindTexture(GL_TEXTURE_2D, texture.id)
-            texture.width = TILE_SIZE
-            texture.height = TILE_SIZE
-
             self[key] = image
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-        glDisable(GL_TEXTURE_2D)
 
 
 class WorldLoader(object):
     """Loads the game world."""
 
     def __init__(self, res_path=RES_PATH):
-        # Ensure data and resource paths are valid
-        self._validate_res_path(res_path)
+        # Ensure data and resource paths are valid self._validate_res_path(res_path)
 
         # Load images
         image_path = os.path.join(res_path, 'image')
@@ -75,6 +63,12 @@ class WorldLoader(object):
 
         self.player = None
 
+        glEnable(GL_TEXTURE_2D) # Needed for smooth image scaling
+
+    def __del__(self):
+        """Revert GL changes."""
+        glDisable(GL_TEXTURE_2D)
+
     def _validate_res_path(self, res_path):
         """Raise a ResourceError if res_path is invalid."""
         image_path = os.path.join(res_path, 'image')
@@ -94,6 +88,14 @@ class WorldLoader(object):
                                     archetype + "'")
         if not os.path.exists(os.path.join(world_path, 'atlas.py')):
             raise ResourceError("World path must contain module 'atlas'")
+
+    def _scale_image(self, image):
+        """Scale `image` to TILE_SIZE x TILE_SIZE."""
+        texture = image.get_texture()
+        glBindTexture(GL_TEXTURE_2D, texture.id)
+        texture.width = TILE_SIZE
+        texture.height = TILE_SIZE
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
     def load_archetype_args(self, room_name, archetype):
         """Load the arguments for each entity for a given room and archetype.
@@ -137,15 +139,22 @@ class WorldLoader(object):
                 key = clsname + '-' + specname
                 archetype_args[key] = params
 
+
+        # Character-specific parameters
         if archetype == 'character':
+            # Player parameters
             archetype_args['player'] = self.configs[archetype].player.copy()
             archetype_args['player']['archetype'] = archetype
             image_name = archetype_args['player']['image']
             archetype_args['player']['image'] = self.images[
                 archetype][image_name]
 
-            for key in archetype_args.iterkeys():
-                archetype_args[key]['walkable'] = False
+            for args in archetype_args.itervalues():
+                args['walkable'] = False
+        
+        # Scale all images
+        for args in archetype_args.itervalues():
+            self._scale_image(args['image'])
 
         return archetype_args
 
@@ -201,5 +210,6 @@ class WorldLoader(object):
                  for room_name in self.atlas.rooms)
         starting_room = self.atlas.starting_room
         world = World(rooms, starting_room)
+
         
         return world, self.player
