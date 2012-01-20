@@ -181,16 +181,15 @@ class WorldLoader(object):
                     # Place None if IGNORE_SYMBOL is encountered
                     if symbol == IGNORE_SYMBOL:
                         entity_ = None
+                    # Place the player if PLAYER_SYMBOL is encountered
+                    elif symbol == PLAYER_SYMBOL:
+                        kwargs = entity_args['player']
+                        entity_ = entity.Entity(**kwargs)
+                        self.player = entity_
                     else:
-                        # Place the player if PLAYER_SYMBOL is encountered
-                        if symbol == PLAYER_SYMBOL:
-                            kwargs = entity_args['player']
-                            entity_ = entity.Entity(**kwargs)
-                            self.player = entity_
-                        else:
-                            key = symbols[symbol] 
-                            kwargs = entity_args[key]
-                            entity_ = entity.Entity(**kwargs)
+                        key = symbols[symbol] 
+                        kwargs = entity_args[key]
+                        entity_ = entity.Entity(**kwargs)
                     layers[-1][-1].append(entity_)
 
         # The room gets a unique batch

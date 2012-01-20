@@ -54,24 +54,18 @@ class Menu(object):
                  show_box=False, margin=10, padding=10, 
                  font_name='monospace', font_size=16, bold=False,
                  italic=False, color=COLOR_WHITE):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
         self.batch = batch
-        self.text = text
         self.functions = functions
         self.selection = -1
 
-        self.box = Box(self.x, self.y, self.width, self.height, self.batch,
-                       color, show_box)
+        self.box = Box(x, y, width, height, batch, color, show_box)
 
         # Create menu items -------------------------------------------
         # Each item is represented by a Box and a Label ---------------
-        box_x = self.x + margin
-        box_y = self.y + margin
-        box_width = self.width - (margin * 2)
-        box_height = (self.height / len(text)) - (margin * 2)
+        box_x = x + margin
+        box_y = y + margin
+        box_width = width - (margin * 2)
+        box_height = (height / len(text)) - (margin * 2)
 
         label_width = box_width - (padding * 2)
         label_height = box_height - (padding * 2)
@@ -80,9 +74,9 @@ class Menu(object):
 
         self.boxes = []
         self.labels = []
-        for i in range(len(self.text)):
+        for i in range(len(text)):
             self.boxes.append(
-                Box(box_x, box_y, box_width, box_height, self.batch,
+                Box(box_x, box_y, box_width, box_height, batch,
                          color, show=False))
 
             step = box_height + (margin * 2)
@@ -90,10 +84,10 @@ class Menu(object):
             label_y += step
 
             self.labels.append(pyglet.text.Label(
-                self.text[i], font_name, font_size, bold, italic, color,
+                text[i], font_name, font_size, bold, italic, color,
                 label_x, label_y, label_width, label_height,
                 anchor_x='center', anchor_y='center',
-                halign='center', multiline=False, batch=self.batch))
+                halign='center', multiline=False, batch=batch))
             self.labels[-1].content_valign = 'center'
 
     def hit_test(self, x, y, box):
@@ -120,7 +114,7 @@ class Menu(object):
         If the next index exceeds the highest item index, use the
         lowest index in the sequence.
         """
-        if self.selection < len(self.text) - 1:
+        if self.selection < len(self.labels) - 1:
             self.select_item(self.selection + 1)
         else:
             self.select_item(0)
@@ -134,7 +128,7 @@ class Menu(object):
         if self.selection > 0:
             self.select_item(self.selection - 1)
         else:
-            self.select_item(len(self.text) - 1)
+            self.select_item(len(self.labels) - 1)
 
     def deselect(self):
         """Deselect the current menu item if it is currently selected,
@@ -170,21 +164,17 @@ class TextFeed(object):
     def __init__(self, x, y, width, height, batch, show_box=False,
                  margin=10, line_height=24, font_name='monospace',
                  font_size=16, bold=False, italic=False, color=COLOR_WHITE):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
         self.batch = batch
 
-        self.box = Box(self.x, self.y, self.width, self.height, self.batch,
-                       color, show_box)
+        self.box = Box(x, y, width, height, batch, color, show_box)
 
         # Create a label for each line in the textfeed -----------------
         label_x = x + margin
         label_width = width - (margin * 2)
         label_height = max(font_size, line_height)
-        y1 = y + ((height - (margin * 2)) % label_height) / 2 
-        y2 = height - y1
+        margin += ((height - margin) % label_height) / 2
+        y1 = y + margin
+        y2 = y1 + height - (margin * 2)
 
         self.labels = []
         for label_y in range(y1, y2, label_height):

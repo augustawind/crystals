@@ -62,14 +62,8 @@ class TestMenu(TestCase):
 
     def test_init(self):
         assert isinstance(self.menu, gui.Menu)
-        assert self.menu.x == self.x
-        assert self.menu.y == self.y
-        assert self.menu.width == self.width
-        assert self.menu.height == self.height
         assert self.menu.batch == self.batch
-        assert self.menu.text == self.text
         assert self.menu.functions == self.functions
-        assert len(self.menu.functions) == len(self.menu.text)
         assert self.menu.selection == -1
 
         assert isinstance(self.menu.box, gui.Box)
