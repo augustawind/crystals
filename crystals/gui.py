@@ -6,7 +6,7 @@ COLOR_WHITE = (255, 255, 255, 255)
 COLOR_RED = (255, 0, 0, 255)
 
 class Box(object):
-    """A rectangle that serves as a line border."""
+    """An empty rectangle."""
 
     def __init__(self, x, y, width, height, batch, color=COLOR_WHITE,
                  show=False):
@@ -49,6 +49,10 @@ class Box(object):
 
 
 class Menu(object):
+    """A menu of vertically stacked text buttons.
+
+    When a button is clicked, its corresponding function is called.
+    """
 
     def __init__(self, x, y, width, height, batch, text, functions,
                  show_box=False, margin=10, padding=10, 
@@ -159,7 +163,7 @@ class Menu(object):
 
 
 class TextFeed(object):
-    """A self-scrolling pane of text."""
+    """A box that can output text."""
 
     def __init__(self, x, y, width, height, batch, show_box=False,
                  margin=10, line_height=24, font_name='monospace',
@@ -185,12 +189,13 @@ class TextFeed(object):
             self.labels[-1].content_valign = 'center'
 
     def activate(self):
+        """Prepare for rendering."""
         for label in self.labels:
             label.batch = self.batch
         self.box.batch = self.batch
 
     def update(self, text):
-        """Add some text to the textfeed, scrolling up if necessary."""
+        """Add some text, scrolling up if the the feed is full."""
         updated = False
         for label in reversed(self.labels):
             if not label.text:
