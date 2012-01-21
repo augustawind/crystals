@@ -59,7 +59,7 @@ class WorldLoader(object):
                 self.defaults[archetype] = self.configs[archetype].entities
 
         self.atlas = __import__('atlas')
-        self.symbols = self.atlas.symbols # Default symbols
+        self.mapkey = self.atlas.mapkey # Default map key
 
         self.player = None
 
@@ -177,8 +177,8 @@ class WorldLoader(object):
         """Load and return a Room instance, given a room name."""
         entity_args = self.load_entity_args(room_name)
         atlas = getattr(self.atlas, room_name)
-        symbols = self.symbols.copy()
-        symbols.update(atlas.symbols)
+        mapkey = self.mapkey.copy()
+        mapkey.update(atlas.mapkey)
 
         # Build the room
         layers = []
@@ -196,7 +196,7 @@ class WorldLoader(object):
                         entity_ = entity.Entity(**kwargs)
                         self.player = entity_
                     else:
-                        key = symbols[symbol] 
+                        key = mapkey[symbol] 
                         kwargs = entity_args[key]
                         entity_ = entity.Entity(**kwargs)
                     layers[-1][-1].append(entity_)

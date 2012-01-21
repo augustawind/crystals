@@ -1,4 +1,7 @@
-symbols = {
+rooms = ['BlueRoom']
+starting_room = 'BlueRoom'
+
+mapkey = {
     '+': 'floor-smooth',
     ',': 'floor-rough',
 
@@ -18,10 +21,29 @@ symbols = {
 
 class BlueRoom:
 
-    symbols = {
-        '*': 'floor-blue'}
+    portalkey = {
+        'r': 'RedRoom'
+    }
 
-    portals = ()
+    portals = (
+    """
+...........
+...........
+...........
+...........
+...........
+.........r.
+...........
+...........
+...........
+...........
+...........
+    """
+    )
+
+    mapkey = {
+        '*': 'floor-blue'
+    }
     
     maps = (
     """
@@ -42,8 +64,8 @@ class BlueRoom:
 |.........|
 |....Y....|
 |.........|
-|....l<...|
-|.Y.l7l.Y.|
+|....l....|
+|.Y.l7l..<|
 |....l....|
 |.........|
 |....Y....|
@@ -53,13 +75,4 @@ class BlueRoom:
 
 
 class RedRoom:
-
-    symbols = {}
-
-    portals = ()
-
-    maps = ()
-
-
-rooms = ['BlueRoom']
-starting_room = 'BlueRoom'
+    pass

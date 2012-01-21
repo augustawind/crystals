@@ -1,4 +1,7 @@
-symbols = {
+rooms = ['TestRoom1']
+starting_room = 'TestRoom1'
+
+mapkey = {
     '|': 'wall-vert',
     '-': 'wall-horiz',
     '+': 'floor-smooth',
@@ -7,7 +10,11 @@ symbols = {
 
 class TestRoom1:
 
-    symbols = {}
+    portalkey = {}
+
+    portals = ()
+
+    mapkey = {}
     
     maps = (
     """
@@ -20,7 +27,3 @@ class TestRoom1:
         .@. 
         ...
     """)
-
-
-rooms = ['TestRoom1']
-starting_room = 'TestRoom1'
