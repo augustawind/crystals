@@ -97,12 +97,17 @@ class WorldLoader(object):
         texture.height = TILE_SIZE
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-    def load_archetype_args(self, room_name, archetype):
-        """Load the arguments for each entity for a given room and archetype.
+    def load_entity(self, kwargs):
+        """Return an entity instance, given its parameters."""
+        self._scale_image(kwargs['image'])
+        return entity.Entity(**kwargs)
+
+    def load_general_entity_args(self, room_name, archetype):
+        """Return a dict of archetype-independent argument dicts for entities,
+        given a room name and archetype.
         
-        Return a dict object mapping argument tuples to unique names
-        generated from the config file. If no data is found, return an
-        empty dict.
+        The returned dict maps argument tuples to unique names
+        generated from the config file.
         """
         if hasattr(self.configs[archetype], room_name):
             config = getattr(self.configs[archetype], room_name).entities
@@ -110,7 +115,7 @@ class WorldLoader(object):
         else:
             config = {}
 
-        archetype_args = {}
+        entity_args = {}
         for clsname, clscfg in config.iteritems():
             # Load entity class parameters
             clsparams = {}
@@ -137,41 +142,48 @@ class WorldLoader(object):
                 
                 # Map an Entity instance to a unique identifier
                 key = clsname + '-' + specname
-                archetype_args[key] = params
-
-
-        # Character-specific parameters
-        if archetype == 'character':
-            # Player parameters
-            archetype_args['player'] = self.configs[archetype].player.copy()
-            archetype_args['player']['archetype'] = archetype
-            image_name = archetype_args['player']['image']
-            archetype_args['player']['image'] = self.images[
-                archetype][image_name]
-
-            for args in archetype_args.itervalues():
-                args['walkable'] = False
-        
-        # Scale all images
-        for args in archetype_args.itervalues():
-            self._scale_image(args['image'])
-
-        return archetype_args
-
-    def load_entity_args(self, room_name):
-        """Load the arguments for each entity for a given room for
-        every archetype.
-
-        Return a dict object mapping argument tuples to unique names
-        generated from the config file. If no data is found, raise an
-        exception.
-        """
-        entity_args = {}
-        for archetype in ARCHETYPES:
-            archetype_args = self.load_archetype_args(room_name, archetype)
-            entity_args.update(archetype_args)
+                entity_args[key] = params
 
         return entity_args
+    
+    def load_terrain_args(self, room_name):
+        """Return argument dicts for terrain entities, given a room name."""
+        return self.load_general_entity_args(room_name, 'terrain')
+
+    def load_feature_args(self, room_name):
+        """Return argument dicts for feature entities, given a room name."""
+        return self.load_general_entity_args(room_name, 'feature')
+
+    def load_item_args(self, room_name):
+        """Return argument dicts for item entities, given a room name."""
+        return self.load_general_entity_args(room_name, 'item')
+    
+    def load_character_args(self, room_name):
+        """Return argument dicts for character entities, given a room name."""
+        archetype = 'character'
+        args = self.load_general_entity_args(room_name, archetype)
+
+        # Player
+        args['player'] = self.configs[archetype].player.copy()
+        args['player']['archetype'] = archetype
+        image_name = args['player']['image']
+        args['player']['image'] = self.images[
+            archetype][image_name]
+
+        # All characters 
+        for key in args:
+            args[key]['walkable'] = False
+
+        return args
+
+    def load_entity_args(self, room_name):
+        """Return argument dicts for all entities, given a room name."""
+        args = {}
+        for argsloader in (self.load_terrain_args, self.load_feature_args,
+                           self.load_item_args, self.load_character_args):
+            entity_args = argsloader(room_name)
+            args.update(entity_args)
+        return args
 
     def load_room(self, room_name):
         """Load and return a Room instance, given a room name."""
@@ -192,13 +204,12 @@ class WorldLoader(object):
                         entity_ = None
                     # Place the player if PLAYER_SYMBOL is encountered
                     elif symbol == PLAYER_SYMBOL:
-                        kwargs = entity_args['player']
-                        entity_ = entity.Entity(**kwargs)
+                        entity_ = self.load_entity(entity_args['player'])
                         self.player = entity_
                     else:
                         key = mapkey[symbol] 
                         kwargs = entity_args[key]
-                        entity_ = entity.Entity(**kwargs)
+                        entity_ = self.load_entity(entity_args[key])
                     layers[-1][-1].append(entity_)
 
         # The room gets a unique batch

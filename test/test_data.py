@@ -67,35 +67,50 @@ class TestWorldLoader(TestCase):
         self.loader._validate_res_path(
             os.path.join('test', 'res_invalid-world'))
 
-    def test_load_archetype_args(self):
-        archetype_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
-        assert all(type(key) == str for key in archetype_args.iterkeys())
-        assert all(type(value) == dict for value in archetype_args.itervalues())
+    def test_load_entity(self):
+        assert isinstance(
+            self.loader.load_entity(
+                dict(archetype='', name='', walkable=True,
+                     image=data.ImageDict('item', IMAGE_PATH)['meat'])),
+                entity.Entity)
+
+    def test_load_general_entity_args(self):
+        archetype = 'terrain'
+
+        args = getattr(
+            self.loader, 'load_' + archetype + '_args')('TestRoom1')
+        assert all(type(key) == str for key in args.iterkeys())
+        assert all(type(value) == dict for value in args.itervalues())
 
         keys = ('wall-horiz', 'wall-vert', 'floor-rough', 'floor-smooth')
-        names = ('a wall', 'towering wall', 'cobbled floor', 'a smooth floor')
+        names = (
+            'a wall', 'towering wall', 'cobbled floor', 'a smooth floor')
         walkables = (False, False, True, True)
                   
         for key, name, walkable in zip(keys, names, walkables):
-            entity_ = entity.Entity(**archetype_args[key])
+            entity_ = entity.Entity(**args[key])
             assert isinstance(entity_, entity.Entity)
             assert isinstance(entity_, pyglet.sprite.Sprite)
             assert entity_.name == name
             assert entity_.walkable == walkable
 
-            entity_.batch = self.batch
-            entity_.position = [random.randint(200, 400)] * 2
+    def test_load_terrain_args(self):
+        self.loader.load_terrain_args('TestRoom1')
 
-        #self.run_app()
+    def test_load_feature_args(self):
+        self.loader.load_feature_args('TestRoom1')
 
-    def test_load_entity_args_(self):
-        entity_args = self.loader.load_entity_args('TestRoom1')
-        assert all(type(key) == str for key in entity_args.iterkeys())
-        assert all(type(value) == dict for value in entity_args.itervalues())
-        terrain_args = self.loader.load_archetype_args('TestRoom1', 'terrain')
-        character_args = self.loader.load_archetype_args(
-            'TestRoom1', 'character')
-        assert len(entity_args) == len(terrain_args) + len(character_args)
+    def test_load_item_args(self):
+        self.loader.load_item_args('TestRoom1')
+
+    def test_load_character_args(self):
+        self.loader.load_character_args('TestRoom1')
+        # ...
+
+    def test_load_entity_args(self):
+        args = self.loader.load_entity_args('TestRoom1')
+        assert all(type(key) == str for key in args.iterkeys())
+        assert all(type(value) == dict for value in args.itervalues())
 
     def test_load_room(self):
         room1 = self.loader.load_room('TestRoom1')

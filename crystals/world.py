@@ -87,7 +87,16 @@ class Room(list):
         self.replace_entity(entity, x, y, z)
 
 
+class Portal(object):
+    """A two-way portal between two rooms."""
+
+    def __init__(self, from_room, to_room):
+        self.from_room = from_room
+        self.to_room = to_room
+
+
 class World(dict):
+    """A collection of rooms linked by portals."""
 
     def __init__(self, rooms, current_room):
         dict.__init__(self, rooms)

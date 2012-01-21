@@ -129,11 +129,18 @@ class TestRoom(WorldTestCase):
         room.add_entity(self.dummy_entity(), 0, 0, 0)
 
 
+class TestPortal(WorldTestCase):
+
+    def test_init(self):
+        from_room = self.get_room()[0]
+        to_room = self.get_room()[0]
+        portal = world.Portal(from_room, to_room)
+
 
 class TestWorld(WorldTestCase):
 
     def setup(self):
-        super(TestWorld, self).setup()
+        WorldTestCase.setup(self)
         self.room1, n1, l1, self.wall1, self.floor1 = self.get_room()
         self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2.name = 'b room'
