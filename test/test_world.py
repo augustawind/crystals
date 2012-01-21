@@ -94,13 +94,14 @@ class TestRoom(WorldTestCase):
         for group in room.groups:
             assert group.order == room.groups.index(group)
 
-        roomlen = len(room)
-        grouplen = len(room.groups)
-        room.add_layer()
-        assert all(e == None for row in room[-1] for e in row)
-        assert len(room.groups) == grouplen + 1
-        for group in room.groups:
-            assert group.order == room.groups.index(group)
+        for z in (None, len(room)):
+            roomlen = len(room)
+            grouplen = len(room.groups)
+            room.add_layer(z)
+            assert all(e == None for row in room[-1] for e in row)
+            assert len(room.groups) == grouplen + 1
+            for group in room.groups:
+                assert group.order == room.groups.index(group)
 
     def dummy_entity(self):
         images = ImageDict('terrain', IMAGE_PATH)
@@ -154,7 +155,7 @@ class TestWorld(WorldTestCase):
         floor = self.floor1()
         nlayers = len(self.world.focus)
         self.world.add_entity(floor, 1, 1, 0)
-        assert self.world.focus[0][1][1] == floor
+        assert self.world.focus[1][1][1] == floor
         assert len(self.world.focus) == nlayers + 1
 
     def test_add_entity3(self):
@@ -172,4 +173,4 @@ class TestWorld(WorldTestCase):
     def test_step_entity(self):
         entity_ = self.room2[0][0][0]
         self.world.step_entity(entity_, 1, 2)
-        assert self.room2[0][2][1] == entity_
+        assert self.room2[1][2][1] == entity_

@@ -1,32 +1,40 @@
 symbols = {
-    '|': 'wall-vert',
-    '-': 'wall-horiz',
     '+': 'floor-smooth',
     ',': 'floor-rough',
+
+    '<': 'stairs-up',
+    '>': 'stairs-down',
 
     '?': 'tree-green',
     'Y': 'tree-yellow',
     'l': 'tree-leafless',
     '7': 'tree-dead',
-    '!': 'tree-jungle'}
+    '!': 'tree-jungle',
+
+    '|': 'wall-vert',
+    '-': 'wall-horiz'
+}
 
 
 class BlueRoom:
 
-    symbols = {}
+    symbols = {
+        '*': 'floor-blue'}
+
+    portals = ()
     
     maps = (
     """
 +++++++++++
-+,++,+,++,+
-++,++,++,++
-+++,+++,+++
-+,++,+,++,+
-++,++,++,++
-+,++,+,++,+
-+++,+++,+++
-++,++,++,++
-+,++,+,++,+
++,++,*,++,+
+++,++*++,++
++++,+*+,+++
++,++***++,+
++*********+
++,++***++,+
++++,+*+,+++
+++,++*++,++
++,++,*,++,+
 +++++++++++
     """,
     """
@@ -34,7 +42,7 @@ class BlueRoom:
 |.........|
 |....Y....|
 |.........|
-|....l....|
+|....l<...|
 |.Y.l7l.Y.|
 |....l....|
 |.........|
@@ -42,6 +50,15 @@ class BlueRoom:
 |......@..|
 |||||||||||
     """)
+
+
+class RedRoom:
+
+    symbols = {}
+
+    portals = ()
+
+    maps = ()
 
 
 rooms = ['BlueRoom']

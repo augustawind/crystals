@@ -149,7 +149,7 @@ class TestMenu(TestCase):
                         x, y, dx, dy, self.menu.selection,
                         self.menu.boxes.index(box))
         self.menu.on_mouse_motion(
-            self.menu.boxes[-1].x * 2, self.menu.boxes[-1].y * 2, dx, dy)
+            self.menu.boxes[-1].width * 2, self.menu.boxes[-1].y * 2, dx, dy)
         assert self.menu.selection == -1
 
     def test_on_mouse_release(self):

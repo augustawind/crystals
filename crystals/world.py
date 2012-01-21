@@ -55,12 +55,12 @@ class Room(list):
         return x, y, z
 
     def add_layer(self, z=None):
-        """If z is an integer, insert a blank layer at z. If z is None,
-        append a blank layer at the top.
+        """If z is None or too large, append a blank layer at the top.
+        If z is an integer, insert a blank layer at z. 
         """
         layer = [[None for x in range(len(self[0][0]))]
                  for y in range(len(self[0]))]
-        if z is None:
+        if z is None or z >= len(self):
             self.append(layer)
             self.groups.append(OrderedGroup(len(self.groups)))
         else:
@@ -101,17 +101,19 @@ class World(dict):
     def add_entity(self, entity, x, y, z=None):
         """Add an entity at [z][y][x] in the focused room.
         
-        If z is None, add a layer to the top and put the entity there.
-        Otherwise, if no entity exists at [z][y][x], place it there,
-        else insert a new layer at z and place it there.
+        If z is None, add a layer to the top and put the
+        entity there. Otherwise, if no entity exists at [z][y][x],
+        place it there, else insert a new layer at z + 1 and place it there.
         """
         if z is None:
+            z = -1
             self.focus.add_layer()
             self.focus.replace_entity(entity, x, y, -1)
             return
         try:
             self.focus.add_entity(entity, x, y, z)
         except WorldError:
+            z += 1
             self.focus.add_layer(z)
             self.focus.replace_entity(entity, x, y, z)
 

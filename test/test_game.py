@@ -80,8 +80,6 @@ class TestGame(object):
         self.game = game.Game()
 
     def test_init(self):
-        assert type(self.game.win_width) == int
-        assert type(self.game.win_height) == int
         assert isinstance(self.game.window, pyglet.window.Window)
         assert isinstance(self.game.main_menu, game.MainMenu)
         assert self.game.world == None

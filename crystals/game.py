@@ -81,9 +81,9 @@ class Game(object):
     """The main application object. Runs the game."""
 
     def __init__(self):
-        self.win_width = 600
-        self.win_height = 400
-        self.window = pyglet.window.Window(self.win_width, self.win_height)
+        window_width = 400
+        window_height = 400
+        self.window = pyglet.window.Window(window_width, window_height)
         self.window.clear()
 
         self.main_menu = MainMenu(self.window, self.new_game)

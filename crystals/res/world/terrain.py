@@ -1,4 +1,28 @@
 entities = {
+    'bookcase': {
+        'params': {
+            'name': 'a bookcase',
+            'walkable': False,
+            'image': 'bookcase'
+        },
+        'front': {},
+        'left': {'variant': 'left'},
+        'right': {'variant': 'right'}
+    },
+    'cave': {
+        'params': {
+            'name': 'a cave',
+            'walkable': True,
+            'image': 'cave',
+        },
+        'dirt': {'variant': 'brown'},
+        'stone': {'variant': 'grey'},
+        'door': {
+            'name': 'a closed door',
+            'walkable': False,
+            'variant': 'door'
+        }
+    },
     'door': {
         'open': {
             'name': 'an open door',
@@ -11,6 +35,7 @@ entities = {
     },
     'floor': {
         'params': {
+            'name': 'a floor',
             'walkable': True
         },
         'rough': {
@@ -20,9 +45,22 @@ entities = {
             'name': 'a smooth floor',
             'image': 'floor-b'}
     },
+    'house': {
+        'params': {
+            'name': 'a house',
+            'walkable': True,
+            'image': 'house'
+        },
+        'a': {'variant': 'a'},
+        'b': {'variant': 'b'},
+        'c': {'variant': 'c'},
+        'd': {'variant': 'd'}
+    },
     'stairs': {
         'params': {
-            'walkable': True
+            'name': 'a staircase',
+            'walkable': True,
+            'image': 'stairs'
         },
         'up': {
             'name': 'an ascending staircase',
@@ -36,8 +74,8 @@ entities = {
             'name': 'a tree',
             'walkable': False
         },
-        'green': {
-            'image': 'tree-green'},
+        'green': {'image': 'tree-green'},
+        'jungle': {'image': 'tree-jungle'},
         'yellow': {
             'name': 'a yellow tree',
             'image': 'tree-yellow'},
@@ -46,9 +84,7 @@ entities = {
             'image': 'tree-leafless'},
         'dead': {
             'name': 'a dead tree',
-            'image': 'tree-dead'},
-        'jungle': {
-            'image': 'tree-jungle'}
+            'image': 'tree-dead'}
     },
     'wall': {
         'params': {
@@ -68,17 +104,23 @@ class BlueRoom:
     entities = {
         'floor': {
             'params': {
-                'variant': 'grey'
+                'variant': 'brown'
             },
             'rough': {},
-            'smooth': {}
-            },
+            'smooth': {},
+            'blue': {
+                'image': 'floor-b',
+                'variant': 'blue'}
+        },
         'wall': {
             'params': {
                 'variant': 'blue'
             },
             'horiz': {},
             'vert': {},
+        },
+        'stairs': {
+            'up': {'variant': 'blue'}
         },
         'tree': {
             'yellow': {},
@@ -87,4 +129,38 @@ class BlueRoom:
             'dead': {},
             'jungle': {}
         }
+    }
+
+class RedRoom:
+
+    entities = {
+        'bookcase': {
+            'front': {},
+            'left': {},
+            'right': {}
+        },
+        'floor': {
+            'params': {
+                'variant': 'grey'
+            },
+            'rough': {},
+            'smooth': {},
+            'red': {'image': 'floor-b-red'}
+        },
+        'house': {
+            'a': {},
+            'b': {},
+            'c': {},
+            'd': {}
+        },
+        'stairs': {
+            'down': {'variant': 'red'}
+        },
+        'wall': {
+            'params': {
+                'variant': 'red'
+            },
+            'horiz': {},
+            'vert': {},
+        },
     }

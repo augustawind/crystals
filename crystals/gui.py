@@ -62,7 +62,7 @@ class Menu(object):
         self.functions = functions
         self.selection = -1
 
-        self.box = Box(x, y, width, height, batch, color, show_box)
+        self.box = Box(x, y, height, batch, color, show_box)
 
         # Create menu items -------------------------------------------
         # Each item is represented by a Box and a Label ---------------
@@ -70,22 +70,22 @@ class Menu(object):
         box_y = y + margin
         box_width = width - (margin * 2)
         box_height = (height / len(text)) - (margin * 2)
+        y_step = box_height + (margin * 2)
+        box_ycoords = reversed(range(box_y, height, y_step))
 
         label_width = box_width - (padding * 2)
         label_height = box_height - (padding * 2)
         label_x = (box_x + box_width) / 2
-        label_y = box_y - label_height
+        label_y = (box_y + box_height) / 2
+        label_ycoords = reversed(range(label_y, height, y_step))
 
         self.boxes = []
         self.labels = []
-        for i in range(len(text)):
+        for i, box_y, label_y in zip(
+                range(len(text)), box_ycoords, label_ycoords):
             self.boxes.append(
-                Box(box_x, box_y, box_width, box_height, batch,
-                         color, show=False))
-
-            step = box_height + (margin * 2)
-            box_y += step
-            label_y += step
+                Box(box_x, box_y, box_width, box_height, batch, color,
+                    show=False))
 
             self.labels.append(pyglet.text.Label(
                 text[i], font_name, font_size, bold, italic, color,
