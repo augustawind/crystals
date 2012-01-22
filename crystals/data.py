@@ -26,14 +26,14 @@ class ImageDict(dict):
     """Loads game images."""
 
     def __init__(self, archetype, path=os.path.join(RES_PATH, 'image')):
-        """Load all images in res_path/archetype, and scale them to TILE_SIZE.
+        """Load all images in res_path/archetype.
 
         Images can then be accessed dict-style, where each key is an
         image's filename without the extension, e.g. 'goblin.png' --> 'goblin'.
         """
         path = os.path.join(path, archetype)
         for filename in os.listdir(path):
-            key = filename.rsplit('.', 1)[0]
+            key = os.path.splitext(filename)[0]
             image = pyglet.image.load(os.path.join(path, filename))
             self[key] = image
 
