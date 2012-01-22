@@ -207,8 +207,7 @@ class TextFeed(object):
 
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
-        labeltext = [text,] + [self.labels[i - 1].text
-                               for i in range(1, len(self.labels))]
-        for i in range(len(self.labels)):
-            self.labels[i].text = labeltext[i]
+        for i in reversed(range(1, len(self.labels))):
+            self.labels[i].text = self.labels[i - 1].text
+        self.labels[0].text = text
 
