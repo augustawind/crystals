@@ -20,7 +20,6 @@ glEnable(GL_TEXTURE_2D)
 
 class ResourceError(Exception):
     """Exception class for errors in loading game resources."""
-    pass
 
 
 class InsertPath(object):
@@ -91,11 +90,11 @@ def _load_entity(kwargs):
 
 def _load_global_entity_args(room_name, archetype, config, defaults,
                              imagedict):
-    """Return a dict of archetype-independent argument dicts for entities,
-    given a room name and archetype.
-    
-    The returned dict maps argument tuples to unique names
-    generated from the config file.
+    """Return a dict of archetype-independent Entity keyword arguments
+    mapped to their entities's  id names, respectively, given a room
+    name, an archetype, a dict of entity config objects for the
+    archetype, a dict of entity defaults dicts for the archetype, and an
+    ImageDict of the given archetype.
     """
     try:
         config = getattr(config, room_name).entities
@@ -135,25 +134,37 @@ def _load_global_entity_args(room_name, archetype, config, defaults,
 
 
 def _load_terrain_args(room_name, config, defaults, imagedict):
-    """Return argument dicts for terrain entities, given a room name."""
+    """Return keyword argument for all terrain entities for the given room.
+    
+    See `_load_global_entity_args`.
+    """
     archetype = 'terrain'
     return _load_global_entity_args(room_name, 'terrain', config, defaults,
                                     imagedict)
 
 def _load_feature_args(room_name, config, defaults, imagedict):
-    """Return argument dicts for feature entities, given a room name."""
+    """Return keyword argument for all feature entities for the given room.
+    
+    See `_load_global_entity_args`.
+    """
     archetype = 'feature'
     return _load_global_entity_args(room_name, 'feature', config, defaults,
                                     imagedict)
 
 def _load_item_args(room_name, config, defaults, imagedict):
-    """Return argument dicts for item entities, given a room name."""
+    """Return keyword argument for all item entities for the given room.
+    
+    See `_load_global_entity_args`.
+    """
     archetype = 'item'
     return _load_global_entity_args(room_name, 'item', config, defaults,
                                     imagedict)
 
 def _load_character_args(room_name, config, defaults, imagedict):
-    """Return argument dicts for character entities, given a room name."""
+    """Return keyword argument for all character entities for the given room.
+    
+    See `_load_global_entity_args`.
+    """
     archetype = 'character'
     args = _load_global_entity_args(room_name, archetype, config, defaults,
                                     imagedict)
@@ -164,7 +175,11 @@ def _load_character_args(room_name, config, defaults, imagedict):
 
 
 def _load_entity_args(room_name, configs, defaults, image_path):
-    """Return argument dicts for all entities, given a room name."""
+    """Return a dict of Entity keyword arguments mapped to its Entity's
+    id name, given a room name, a dict of entity config objects for each
+    archetype, a dict of entity defaults dicts for each archetype,
+    and an image path.
+    """
     args = {}
     for archetype in ARCHETYPES:
         argsloader = getattr(sys.modules[__name__],
@@ -177,7 +192,10 @@ def _load_entity_args(room_name, configs, defaults, image_path):
 
 
 def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
-    """Load and return a Room instance, given a room name."""
+    """Return a Room instance, given an atlas object, a dict of entity
+    config objects for each archetype, a dict of entity defaults dicts
+    for each archetype, an image path, and a player Entity instance.
+    """
     room_name = atlas.__name__
     entity_args = _load_entity_args(room_name, configs, defaults, image_path)
 
@@ -211,7 +229,9 @@ def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
 
 
 def _load_player(config, image_path):
-    """Return an instance of the player character entity."""
+    """Load and return an instance of the player character entity,
+    given a dict of parameters and an image path.
+    """
     kwargs = config.copy()
     kwargs['archetype'] = 'character'
     kwargs['walkable'] = False
@@ -220,20 +240,22 @@ def _load_player(config, image_path):
     return _load_entity(kwargs)
 
 
-def _load_configs(res_path):
-    """Load and return entity data modules in res_path."""
+def _load_configs():
+    """Import modules 'terrain', 'item', 'feature', and 'character',
+    and return two dicts, one mapping each module to its name and one
+    mapping each module's `entities` attribute to its name.
+    """
     configs = {}
     defaults = {}
     for archetype in ARCHETYPES:
         configs[archetype] =  __import__(archetype)
-        if hasattr(configs[archetype], 'entities'):
-            defaults[archetype] = configs[archetype].entities
+        defaults[archetype] = configs[archetype].entities
 
     return configs, defaults
 
 
-def _load_atlas(res_path):
-    """Load and return module 'atlas' in res_path."""
+def _load_atlas():
+    """Import and return module 'atlas'."""
     return __import__('atlas')
     
 
@@ -250,8 +272,8 @@ def load_setting(res_path=RES_PATH):
 
     world_path = os.path.join(res_path, 'world')
     with InsertPath(world_path):
-        configs, defaults = _load_configs(res_path)
-        atlas = _load_atlas(res_path)
+        configs, defaults = _load_configs()
+        atlas = _load_atlas()
 
     # Load player
     player = _load_player(configs['character'].player, image_path)
