@@ -191,7 +191,7 @@ def _load_entity_args(room_name, configs, defaults, image_path):
     return args
 
 
-def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
+def _load_room(atlas, default_mapkey, configs, defaults, player, image_path):
     """Return a Room instance, given an atlas object, a dict of entity
     config objects for each archetype, a dict of entity defaults dicts
     for each archetype, an image path, and a player Entity instance.
@@ -228,18 +228,6 @@ def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
     return Room(room_name, pyglet.graphics.Batch(), layers)
 
 
-def _load_player(config, image_path):
-    """Load and return an instance of the player character entity,
-    given a dict of parameters and an image path.
-    """
-    kwargs = config.copy()
-    kwargs['archetype'] = 'character'
-    kwargs['walkable'] = False
-    image_name = kwargs['image']
-    kwargs['image'] = ImageDict('character', image_path)[image_name]
-    return _load_entity(kwargs)
-
-
 def _load_configs():
     """Import modules 'terrain', 'item', 'feature', and 'character',
     and return two dicts, one mapping each module to its name and one
@@ -257,7 +245,38 @@ def _load_configs():
 def _load_atlas():
     """Import and return module 'atlas'."""
     return __import__('atlas')
-    
+
+
+def _load_player(config, image_path):
+    """Load and return an instance of the player character entity,
+    given a dict of parameters and an image path.
+    """
+    kwargs = config.copy()
+    kwargs['archetype'] = 'character'
+    kwargs['walkable'] = False
+    image_name = kwargs['image']
+    kwargs['image'] = ImageDict('character', image_path)[image_name]
+
+    return _load_entity(kwargs)
+
+
+def _load_world(configs, defaults, atlas, player, image_path):
+    """Load and return a World instance."""
+    # Load rooms
+    rooms = {}
+    for room_name in atlas.rooms:
+        room_atlas = getattr(atlas, room_name)
+        default_mapkey = atlas.mapkey
+        rooms[room_name] = _load_room(room_atlas, default_mapkey, configs,
+                                     defaults, player, image_path)
+
+    # Load world
+    starting_room = atlas.starting_room
+    portals = [] # Waiting for portal implementation
+    world = World(rooms, portals, starting_room)
+
+    return world
+
 
 def load_setting(res_path=RES_PATH):
     """
@@ -266,10 +285,8 @@ def load_setting(res_path=RES_PATH):
     # Ensure data and resource paths are valid
     _validate_res_path(res_path)
 
-    # Load images
+    # Load resources
     image_path = os.path.join(res_path, 'image')
-    images = dict((a, ImageDict(a, image_path)) for a in ARCHETYPES)
-
     world_path = os.path.join(res_path, 'world')
     with InsertPath(world_path):
         configs, defaults = _load_configs()
@@ -278,17 +295,7 @@ def load_setting(res_path=RES_PATH):
     # Load player
     player = _load_player(configs['character'].player, image_path)
 
-    # Load rooms
-    rooms = {}
-    for room_name in atlas.rooms:
-        room_atlas = getattr(atlas, room_name)
-        default_mapkey = atlas.mapkey
-        rooms[room_name] = _load_room(room_atlas, default_mapkey, configs,
-                                     defaults, image_path, player)
-
     # Load world
-    starting_room = atlas.starting_room
-    portals = [] # Waiting for portal implementation
-    world = World(rooms, portals, starting_room)
+    world = _load_world(configs, defaults, atlas, player, image_path)
 
     return world, player

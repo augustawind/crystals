@@ -155,7 +155,7 @@ def test__load_room():
         default_mapkey = cfg.atlas.mapkey
         player = None
         room1 = data._load_room(room_atlas, default_mapkey, cfg.configs,
-                                cfg.defaults, IMAGE_PATH, player)
+                                cfg.defaults, player, IMAGE_PATH)
     assert isinstance(room1, crystals.world.Room)
 
 def test__load_player():
@@ -177,14 +177,18 @@ def test__load_configs():
 def test__load_atlas():
     with ConfigContext() as cfg:
         atlas = data._load_atlas()
-            
-def test_load_setting():
-    with ConfigContext() as cfg:
-        world, player = data.load_setting()
-        assert isinstance(world, crystals.world.World)
-        assert isinstance(player, entity.Entity)
 
-        # rough integrity test for room.grid ---------------------------
+
+def test__load_world():
+    with ConfigContext() as cfg:
+        player = entity.Entity('character', 'player', False,
+                                data.ImageDict('character', IMAGE_PATH)['cow'],
+                                None)
+        world = data._load_world(cfg.configs, cfg.defaults, cfg.atlas,
+                                 player, IMAGE_PATH)
+        assert isinstance(world, crystals.world.World)
+
+        # rough integrity test for a room in the world -----------------
         room1 = world['TestRoom1']
         archetype = 'terrain'
         img = data.ImageDict(archetype, IMAGE_PATH)
@@ -214,3 +218,10 @@ def test_load_setting():
                         assert e1.walkable == e2.walkable
                         assert e1.batch == e2.batch
                         assert e1.batch == e2.batch
+
+            
+def test_load_setting():
+    with ConfigContext() as cfg:
+        world, player = data.load_setting()
+        assert isinstance(world, crystals.world.World)
+        assert isinstance(player, entity.Entity)
