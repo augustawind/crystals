@@ -145,7 +145,8 @@ class TestWorld(WorldTestCase):
         self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2.name = 'b room'
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.world = world.World(self.rooms, 'b room')
+        self.portal = world.Portal('a room', 'b room')
+        self.world = world.World(self.rooms, [self.portal], 'b room')
 
     def test_init(self):
         assert self.world == self.rooms
@@ -181,3 +182,7 @@ class TestWorld(WorldTestCase):
         entity_ = self.room2[0][0][0]
         self.world.step_entity(entity_, 1, 2)
         assert self.room2[1][2][1] == entity_
+
+    def test_portal_entity(self):
+        entity_ = self.room2[1][1][1]
+        self.world.portal_entity(entity_, self.portal)

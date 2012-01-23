@@ -39,7 +39,8 @@ class TestWorldMode(WorldTestCase):
         self.room1 = self.get_room()[0]
         self.room2 = self.get_room()[0]
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.world_ = world.World(self.rooms, 'b room')
+        self.portal = world.Portal(self.room1, self.room2)
+        self.world_ = world.World(self.rooms, [self.portal], 'b room')
         self.player = entity.Entity(
             'character', 'player', False, pyglet.image.load(
             os.path.join(IMAGE_PATH, 'character', 'cow.png')))

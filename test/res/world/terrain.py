@@ -81,3 +81,15 @@ class TestRoom1:
             'vert': {'name': 'towering wall'},
         }
     }
+
+
+class TestRoom2:
+
+    entities = {
+        'floor': {
+            'rough': {'variant': 'red'}
+            },
+        'stairs': {
+            'down': {'variant': 'red'}
+        }
+    }

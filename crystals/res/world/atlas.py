@@ -25,7 +25,7 @@ class BlueRoom:
         'r': 'RedRoom'
     }
 
-    portals = (
+    portals = [
     """
 ...........
 ...........
@@ -39,13 +39,13 @@ class BlueRoom:
 ...........
 ...........
     """
-    )
+    ]
 
     mapkey = {
         '*': 'floor-blue'
     }
     
-    maps = (
+    maps = [
     """
 +++++++++++
 +,++,*,++,+
@@ -71,7 +71,7 @@ class BlueRoom:
 |....Y....|
 |......@..|
 |||||||||||
-    """)
+    """]
 
 
 class RedRoom:

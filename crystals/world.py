@@ -98,7 +98,7 @@ class Portal(object):
 class World(dict):
     """A collection of rooms linked by portals."""
 
-    def __init__(self, rooms, current_room):
+    def __init__(self, rooms, portal, current_room):
         dict.__init__(self, rooms)
         self.focus = None
         self.set_focus(current_room)
@@ -132,6 +132,7 @@ class World(dict):
         return entity
     
     def step_entity(self, entity, xstep, ystep):
+        """Move entity from current position by (xstep, ystep)."""
         x, y, z = self.focus.get_coords(entity)
         newx = x + xstep
         newy = y + ystep
@@ -140,4 +141,6 @@ class World(dict):
         self.pop_entity(x, y, z)
         self.add_entity(entity, newx, newy, z)
 
+    def portal_entity(self, entity, portal):
+        """Transfer entity to the portal's destination."""
 

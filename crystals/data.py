@@ -17,9 +17,25 @@ IGNORE_SYMBOL = '.' # char to ignore when reading maps
 # Parameter names for all entities
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
+glEnable(GL_TEXTURE_2D)
+
 class ResourceError(Exception):
     """Exception class for errors in loading game resources."""
     pass
+
+
+class InsertPath(object):
+    """Context manager that inserts a given path into sys.path, then
+    removes it."""
+
+    def __init__(self, path):
+        self.path = path
+
+    def __enter__(self):
+        sys.path.insert(0, self.path)
+
+    def __exit__(self, exc_type, exc_value, exc_traceback):
+        sys.path.remove(self.path)
 
 
 class ImageDict(dict):
@@ -38,189 +54,217 @@ class ImageDict(dict):
             self[key] = image
 
 
-class WorldLoader(object):
-    """Loads the game world."""
+def _validate_res_path(res_path):
+    """Raise a ResourceError if res_path is invalid."""
+    image_path = os.path.join(res_path, 'image')
+    if not os.path.exists(image_path):
+        raise ResourceError("Resource path must contain " +
+                             "subdirectory 'image'")
+    world_path = os.path.join(res_path, 'world')
+    if not os.path.exists(world_path):
+        raise ResourceError("Resource path must contain subdirectory " +
+                            "'world'")
+    for archetype in ARCHETYPES:
+        if not os.path.exists(os.path.join(image_path, archetype)):
+            raise ResourceError("Image path must contain subdirectory '" +
+                                archetype + "'")
+        if not os.path.exists(os.path.join(world_path, archetype + '.py')):
+            raise ResourceError("World path must contain module '" +
+                                archetype + "'")
+    if not os.path.exists(os.path.join(world_path, 'atlas.py')):
+        raise ResourceError("World path must contain module 'atlas'")
 
-    def __init__(self, res_path=RES_PATH):
-        # Ensure data and resource paths are valid
 
-        # Load images
-        image_path = os.path.join(res_path, 'image')
-        self.images = dict((a, ImageDict(a, image_path)) for a in ARCHETYPES)
-        
-        # Load world data
-        world_path = os.path.join(res_path, 'world')
-        sys.path.insert(0, world_path) # Add world directory to PYTHONPATH
-        self.configs = {}
-        self.defaults = {}
-        for archetype in ARCHETYPES:
-            self.configs[archetype] =  __import__(archetype)
-            if hasattr(self.configs[archetype], 'entities'):
-                self.defaults[archetype] = self.configs[archetype].entities
+def _scale_image(image):
+    """Scale `image` to TILE_SIZE x TILE_SIZE."""
+    texture = image.get_texture()
+    glBindTexture(GL_TEXTURE_2D, texture.id)
+    texture.width = TILE_SIZE
+    texture.height = TILE_SIZE
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
-        self.atlas = __import__('atlas')
-        self.mapkey = self.atlas.mapkey # Default map key
 
-        self.player = None
+def _load_entity(kwargs):
+    """Return an entity instance, given its parameters."""
+    _scale_image(kwargs['image'])
+    return entity.Entity(**kwargs)
 
-        glEnable(GL_TEXTURE_2D) # Needed for smooth image scaling
 
-    def __del__(self):
-        """Revert GL changes."""
-        glDisable(GL_TEXTURE_2D)
-
-    def _validate_res_path(self, res_path):
-        """Raise a ResourceError if res_path is invalid."""
-        image_path = os.path.join(res_path, 'image')
-        if not os.path.exists(image_path):
-            raise ResourceError("Resource path must contain " +
-                                 "subdirectory 'image'")
-        world_path = os.path.join(res_path, 'world')
-        if not os.path.exists(world_path):
-            raise ResourceError("Resource path must contain subdirectory " +
-                                "'world'")
-        for archetype in ARCHETYPES:
-            if not os.path.exists(os.path.join(image_path, archetype)):
-                raise ResourceError("Image path must contain subdirectory '" +
-                                    archetype + "'")
-            if not os.path.exists(os.path.join(world_path, archetype + '.py')):
-                raise ResourceError("World path must contain module '" +
-                                    archetype + "'")
-        if not os.path.exists(os.path.join(world_path, 'atlas.py')):
-            raise ResourceError("World path must contain module 'atlas'")
-
-    def _scale_image(self, image):
-        """Scale `image` to TILE_SIZE x TILE_SIZE."""
-        texture = image.get_texture()
-        glBindTexture(GL_TEXTURE_2D, texture.id)
-        texture.width = TILE_SIZE
-        texture.height = TILE_SIZE
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-    def load_entity(self, kwargs):
-        """Return an entity instance, given its parameters."""
-        self._scale_image(kwargs['image'])
-        return entity.Entity(**kwargs)
-
-    def load_general_entity_args(self, room_name, archetype):
-        """Return a dict of archetype-independent argument dicts for entities,
-        given a room name and archetype.
-        
-        The returned dict maps argument tuples to unique names
-        generated from the config file.
-        """
-        if hasattr(self.configs[archetype], room_name):
-            config = getattr(self.configs[archetype], room_name).entities
-            defaults = self.defaults[archetype]
-        else:
-            config = {}
-
-        entity_args = {}
-        for clsname, clscfg in config.iteritems():
-            # Load entity class parameters
-            clsparams = {}
-            clsdefaults = defaults.get(clsname, {})
-            if 'params' in clsdefaults:
-                clsparams.update(clsdefaults['params']) # Add defaults
-            clsparams.update(clscfg.get('params', {})) # Add room-specifics
-
-            for specname, speccfg in clscfg.iteritems():
-                if specname == 'params':
-                    continue
-                # Load entity specific parameters
-                params = clsparams.copy()
-                specdefaults = clsdefaults.get(specname, {})
-                params.update(specdefaults) # Add defaults
-                params.update(speccfg) # Add room-specifics
-
-                params['archetype'] = archetype
-                if 'variant' in params:
-                    # Combine image and variant params to get the image name
-                    params['image'] += '-' + params.pop('variant')
-                # Replace the image name with the actual image object
-                params['image'] = self.images[archetype][params['image']]
-                
-                # Map an Entity instance to a unique identifier
-                key = clsname + '-' + specname
-                entity_args[key] = params
-
-        return entity_args
+def _load_global_entity_args(room_name, archetype, config, defaults,
+                             imagedict):
+    """Return a dict of archetype-independent argument dicts for entities,
+    given a room name and archetype.
     
-    def load_terrain_args(self, room_name):
-        """Return argument dicts for terrain entities, given a room name."""
-        return self.load_general_entity_args(room_name, 'terrain')
+    The returned dict maps argument tuples to unique names
+    generated from the config file.
+    """
+    try:
+        config = getattr(config, room_name).entities
+    except AttributeError:
+        config = {}
 
-    def load_feature_args(self, room_name):
-        """Return argument dicts for feature entities, given a room name."""
-        return self.load_general_entity_args(room_name, 'feature')
+    entity_args = {}
+    for clsname, clscfg in config.iteritems():
+        # Load entity class parameters
+        clsparams = {}
+        clsdefaults = defaults.get(clsname, {})
+        if 'params' in clsdefaults:
+            clsparams.update(clsdefaults['params']) # Add defaults
+        clsparams.update(clscfg.get('params', {})) # Add room-specifics
 
-    def load_item_args(self, room_name):
-        """Return argument dicts for item entities, given a room name."""
-        return self.load_general_entity_args(room_name, 'item')
+        for specname, speccfg in clscfg.iteritems():
+            if specname == 'params':
+                continue
+            # Load entity specific parameters
+            specparams = clsparams.copy()
+            specdefaults = clsdefaults.get(specname, {})
+            specparams.update(specdefaults) # Add defaults
+            specparams.update(speccfg) # Add room-specifics
+
+            specparams['archetype'] = archetype
+            if 'variant' in specparams:
+                # Combine image and variant specparams to get the image name
+                specparams['image'] += '-' + specparams.pop('variant')
+            # Replace the image name with the actual image object
+            specparams['image'] = imagedict[specparams['image']]
+            
+            # Map an Entity instance to a unique identifier
+            key = clsname + '-' + specname
+            entity_args[key] = specparams
+
+    return entity_args
+
+
+def _load_terrain_args(room_name, config, defaults, imagedict):
+    """Return argument dicts for terrain entities, given a room name."""
+    archetype = 'terrain'
+    return _load_global_entity_args(room_name, 'terrain', config, defaults,
+                                    imagedict)
+
+def _load_feature_args(room_name, config, defaults, imagedict):
+    """Return argument dicts for feature entities, given a room name."""
+    archetype = 'feature'
+    return _load_global_entity_args(room_name, 'feature', config, defaults,
+                                    imagedict)
+
+def _load_item_args(room_name, config, defaults, imagedict):
+    """Return argument dicts for item entities, given a room name."""
+    archetype = 'item'
+    return _load_global_entity_args(room_name, 'item', config, defaults,
+                                    imagedict)
+
+def _load_character_args(room_name, config, defaults, imagedict):
+    """Return argument dicts for character entities, given a room name."""
+    archetype = 'character'
+    args = _load_global_entity_args(room_name, archetype, config, defaults,
+                                    imagedict)
+    for key in args:
+        args[key]['walkable'] = False
+
+    return args
+
+
+def _load_entity_args(room_name, configs, defaults, image_path):
+    """Return argument dicts for all entities, given a room name."""
+    args = {}
+    for archetype in ARCHETYPES:
+        argsloader = getattr(sys.modules[__name__],
+                             '_load_{}_args'.format(archetype))
+        imagedict = ImageDict(archetype, image_path)
+        entity_args = argsloader(room_name, configs.get(archetype, {}),
+                                 defaults.get(archetype, {}), imagedict)
+        args.update(entity_args)
+    return args
+
+
+def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
+    """Load and return a Room instance, given a room name."""
+    room_name = atlas.__name__
+    entity_args = _load_entity_args(room_name, configs, defaults, image_path)
+
+    # Build the room
+    layers = []
+    for layer in atlas.maps:
+        layers.append([])
+        for row in reversed(layer.strip().split('\n')):
+            layers[-1].append([])
+            for symbol in row.strip():
+                # Place None if IGNORE_SYMBOL is encountered
+                if symbol == IGNORE_SYMBOL:
+                    entity_ = None
+                # Place the player if PLAYER_SYMBOL is encountered
+                elif symbol == PLAYER_SYMBOL:
+                    entity_ = player
+                else:
+                    # If symbol is not found in room.mapkey, check
+                    # default_mapkey
+                    key = atlas.mapkey.get(symbol, default_mapkey[symbol])
+
+                    kwargs = entity_args[key]
+                    entity_ = _load_entity(entity_args[key])
+                layers[-1][-1].append(entity_)
+
+    # The room gets a unique batch
+    return Room(room_name, pyglet.graphics.Batch(), layers)
+
+
+def _load_player(config, image_path):
+    """Return an instance of the player character entity."""
+    kwargs = config.copy()
+    kwargs['archetype'] = 'character'
+    kwargs['walkable'] = False
+    image_name = kwargs['image']
+    kwargs['image'] = ImageDict('character', image_path)[image_name]
+    return _load_entity(kwargs)
+
+
+def _load_configs(res_path):
+    """Load and return entity data modules in res_path."""
+    configs = {}
+    defaults = {}
+    for archetype in ARCHETYPES:
+        configs[archetype] =  __import__(archetype)
+        if hasattr(configs[archetype], 'entities'):
+            defaults[archetype] = configs[archetype].entities
+
+    return configs, defaults
+
+
+def _load_atlas(res_path):
+    """Load and return module 'atlas' in res_path."""
+    return __import__('atlas')
     
-    def load_character_args(self, room_name):
-        """Return argument dicts for character entities, given a room name."""
-        archetype = 'character'
-        args = self.load_general_entity_args(room_name, archetype)
 
-        # Player
-        args['player'] = self.configs[archetype].player.copy()
-        args['player']['archetype'] = archetype
-        image_name = args['player']['image']
-        args['player']['image'] = self.images[
-            archetype][image_name]
+def load_setting(res_path=RES_PATH):
+    """
+    Load and return a World instance and the player character instance.
+    """
+    # Ensure data and resource paths are valid
+    _validate_res_path(res_path)
 
-        # All characters 
-        for key in args:
-            args[key]['walkable'] = False
+    # Load images
+    image_path = os.path.join(res_path, 'image')
+    images = dict((a, ImageDict(a, image_path)) for a in ARCHETYPES)
 
-        return args
+    world_path = os.path.join(res_path, 'world')
+    with InsertPath(world_path):
+        configs, defaults = _load_configs(res_path)
+        atlas = _load_atlas(res_path)
 
-    def load_entity_args(self, room_name):
-        """Return argument dicts for all entities, given a room name."""
-        args = {}
-        for argsloader in (self.load_terrain_args, self.load_feature_args,
-                           self.load_item_args, self.load_character_args):
-            entity_args = argsloader(room_name)
-            args.update(entity_args)
-        return args
+    # Load player
+    player = _load_player(configs['character'].player, image_path)
 
-    def load_room(self, room_name):
-        """Load and return a Room instance, given a room name."""
-        entity_args = self.load_entity_args(room_name)
-        atlas = getattr(self.atlas, room_name)
-        mapkey = self.mapkey.copy()
-        mapkey.update(atlas.mapkey)
+    # Load rooms
+    rooms = {}
+    for room_name in atlas.rooms:
+        room_atlas = getattr(atlas, room_name)
+        default_mapkey = atlas.mapkey
+        rooms[room_name] = _load_room(room_atlas, default_mapkey, configs,
+                                     defaults, image_path, player)
 
-        # Build the room
-        layers = []
-        for layer in atlas.maps:
-            layers.append([])
-            for row in reversed(layer.strip().split('\n')):
-                layers[-1].append([])
-                for symbol in row.strip():
-                    # Place None if IGNORE_SYMBOL is encountered
-                    if symbol == IGNORE_SYMBOL:
-                        entity_ = None
-                    # Place the player if PLAYER_SYMBOL is encountered
-                    elif symbol == PLAYER_SYMBOL:
-                        entity_ = self.load_entity(entity_args['player'])
-                        self.player = entity_
-                    else:
-                        key = mapkey[symbol] 
-                        kwargs = entity_args[key]
-                        entity_ = self.load_entity(entity_args[key])
-                    layers[-1][-1].append(entity_)
+    # Load world
+    starting_room = atlas.starting_room
+    portals = [] # Waiting for portal implementation
+    world = World(rooms, portals, starting_room)
 
-        # The room gets a unique batch
-        return Room(room_name, pyglet.graphics.Batch(), layers)
-
-    def load_world(self):
-        """Load and return a World instance and the player entity instance."""
-        rooms = dict((room_name, self.load_room(room_name))
-                 for room_name in self.atlas.rooms)
-        starting_room = self.atlas.starting_room
-        world = World(rooms, starting_room)
-
-        
-        return world, self.player
+    return world, player
