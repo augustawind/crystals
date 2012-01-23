@@ -13,7 +13,6 @@ RES_PATH = os.path.join('crystals', 'res') # default path to game resources
 ARCHETYPES = ('terrain', 'feature', 'item', 'character') # entity categories
 PLAYER_SYMBOL = '@' # char that represents the player
 IGNORE_SYMBOL = '.' # char to ignore when reading maps
-
 # Parameter names for all entities
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
@@ -198,7 +197,10 @@ def _load_room(atlas, default_mapkey, configs, defaults, image_path, player):
                 else:
                     # If symbol is not found in room.mapkey, check
                     # default_mapkey
-                    key = atlas.mapkey.get(symbol, default_mapkey[symbol])
+                    if symbol in atlas.mapkey:
+                        key = atlas.mapkey[symbol]
+                    else:
+                        key = default_mapkey[symbol]
 
                     kwargs = entity_args[key]
                     entity_ = _load_entity(entity_args[key])
