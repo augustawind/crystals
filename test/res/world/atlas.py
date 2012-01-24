@@ -28,13 +28,11 @@ class TestRoom1:
     portalkey = {
         '2': 'TestRoom2'}
 
-    portals = [
-    """
+    portals = """
 ...
 ...
 ..2
     """
-    ]
 
 
 class TestRoom2:
@@ -61,12 +59,10 @@ class TestRoom2:
     portalkey = {
         '1': 'TestRoom1'}
 
-    portals = [
-    """
+    portals = """
 .....
 .....
 ..1..
 .....
 .....
     """
-    ]

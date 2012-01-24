@@ -134,7 +134,7 @@ class TestPortal(WorldTestCase):
     def test_init(self):
         from_room = self.get_room()[0]
         to_room = self.get_room()[0]
-        portal = world.Portal(from_room, to_room)
+        portal = world.Portal(0, 0, from_room, to_room)
 
 
 class TestWorld(WorldTestCase):
@@ -145,7 +145,7 @@ class TestWorld(WorldTestCase):
         self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2.name = 'b room'
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.portal = world.Portal('a room', 'b room')
+        self.portal = world.Portal(0, 0, None, None)
         self.world = world.World(self.rooms, [self.portal], 'b room')
 
     def test_init(self):

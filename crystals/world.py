@@ -90,7 +90,9 @@ class Room(list):
 class Portal(object):
     """A two-way portal between two rooms."""
 
-    def __init__(self, from_room, to_room):
+    def __init__(self, x, y, from_room, to_room):
+        self.x = x
+        self.y = y
         self.from_room = from_room
         self.to_room = to_room
 

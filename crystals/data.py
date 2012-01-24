@@ -6,6 +6,7 @@ from pyglet.gl import *
 
 from crystals import entity
 from crystals.world import TILE_SIZE
+from crystals.world import Portal
 from crystals.world import Room
 from crystals.world import World
 
@@ -191,6 +192,25 @@ def _load_entity_args(room_name, configs, defaults, image_path):
     return args
 
 
+def _load_portals(from_room, portalmap, portalkey, rooms):
+    """Return a list of portals, given a symbolic map string `portalmap`,
+    indicating the portals' coordinates in the room, and a dict `portalkey`
+    mapping the destination rooms of each portal to the map symbols.
+    """
+    maplist = list(reversed(portalmap.strip().split('\n')))
+    portals = []
+    for y in range(len(maplist)):
+        row = maplist[y]
+        for x in range(len(row)):
+            symbol = row[x]
+            if symbol in portalkey:
+                to_room = rooms[portalkey[symbol]]
+                portal = Portal(x, y, from_room, to_room)
+                portals.append(portal)
+
+    return portals
+
+
 def _load_room(atlas, default_mapkey, configs, defaults, player, image_path):
     """Return a Room instance, given an atlas object, a dict of entity
     config objects for each archetype, a dict of entity defaults dicts
@@ -228,25 +248,6 @@ def _load_room(atlas, default_mapkey, configs, defaults, player, image_path):
     return Room(room_name, pyglet.graphics.Batch(), layers)
 
 
-def _load_configs():
-    """Import modules 'terrain', 'item', 'feature', and 'character',
-    and return two dicts, one mapping each module to its name and one
-    mapping each module's `entities` attribute to its name.
-    """
-    configs = {}
-    defaults = {}
-    for archetype in ARCHETYPES:
-        configs[archetype] =  __import__(archetype)
-        defaults[archetype] = configs[archetype].entities
-
-    return configs, defaults
-
-
-def _load_atlas():
-    """Import and return module 'atlas'."""
-    return __import__('atlas')
-
-
 def _load_player(config, image_path):
     """Load and return an instance of the player character entity,
     given a dict of parameters and an image path.
@@ -276,6 +277,25 @@ def _load_world(configs, defaults, atlas, player, image_path):
     world = World(rooms, portals, starting_room)
 
     return world
+
+
+def _load_configs():
+    """Import modules 'terrain', 'item', 'feature', and 'character',
+    and return two dicts, one mapping each module to its name and one
+    mapping each module's `entities` attribute to its name.
+    """
+    configs = {}
+    defaults = {}
+    for archetype in ARCHETYPES:
+        configs[archetype] =  __import__(archetype)
+        defaults[archetype] = configs[archetype].entities
+
+    return configs, defaults
+
+
+def _load_atlas():
+    """Import and return module 'atlas'."""
+    return __import__('atlas')
 
 
 def load_setting(res_path=RES_PATH):

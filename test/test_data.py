@@ -149,6 +149,18 @@ def test__load_entity_args():
     assert all(type(key) == str for key in args.iterkeys())
     assert all(type(value) == dict for value in args.itervalues())
 
+def test__load_portals():
+    room1 = crystals.world.Room('TestRoom1', None, [['']])
+    room2 = crystals.world.Room('TestRoom2', None, [['']])
+    rooms = {'TestRoom1': room1, 'TestRoom2': room2}
+    with ConfigContext() as cfg:
+        for name, room in rooms.iteritems():
+            atlas = getattr(cfg.atlas, name)
+            portals = data._load_portals(room, atlas.portals, atlas.portalkey,
+                                         rooms)
+            assert all(isinstance(p, crystals.world.Portal) for p in portals)
+            assert portals[0].from_room.name == name
+
 def test__load_room():
     with ConfigContext() as cfg:
         room_atlas = cfg.atlas.TestRoom1
@@ -163,21 +175,6 @@ def test__load_player():
         config = cfg.configs['character'].player
         player = data._load_player(config, IMAGE_PATH)
     assert isinstance(player, entity.Entity)
-
-def test__load_configs():
-    with ConfigContext() as cfg:
-        configs, defaults = data._load_configs()
-        assert type(cfg.configs) == dict
-        assert all(a in cfg.configs for a in data.ARCHETYPES)
-        assert all(a in cfg.defaults for a in data.ARCHETYPES)
-        assert all(type(c.entities) == dict for c in cfg.configs.itervalues())
-        assert all(c.entities == d for c, d in
-                   zip(cfg.configs.itervalues(), cfg.defaults.itervalues()))
-
-def test__load_atlas():
-    with ConfigContext() as cfg:
-        atlas = data._load_atlas()
-
 
 def test__load_world():
     with ConfigContext() as cfg:
@@ -219,7 +216,20 @@ def test__load_world():
                         assert e1.batch == e2.batch
                         assert e1.batch == e2.batch
 
-            
+def test__load_configs():
+    with ConfigContext() as cfg:
+        configs, defaults = data._load_configs()
+        assert type(cfg.configs) == dict
+        assert all(a in cfg.configs for a in data.ARCHETYPES)
+        assert all(a in cfg.defaults for a in data.ARCHETYPES)
+        assert all(type(c.entities) == dict for c in cfg.configs.itervalues())
+        assert all(c.entities == d for c, d in
+                   zip(cfg.configs.itervalues(), cfg.defaults.itervalues()))
+
+def test__load_atlas():
+    with ConfigContext() as cfg:
+        atlas = data._load_atlas()
+
 def test_load_setting():
     with ConfigContext() as cfg:
         world, player = data.load_setting()
