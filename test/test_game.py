@@ -39,8 +39,10 @@ class TestWorldMode(WorldTestCase):
         self.room1 = self.get_room()[0]
         self.room2 = self.get_room()[0]
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.portal = world.Portal(0, 0, self.room1, self.room2)
-        self.world_ = world.World(self.rooms, [self.portal], 'b room')
+        self.portal1 = world.Portal(0, 0, self.room1, self.room2)
+        self.portal2 = world.Portal(0, 0, self.room2, self.room1)
+        self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
+                                  'b room')
         self.player = entity.Entity(
             'character', 'player', False, pyglet.image.load(
             os.path.join(IMAGE_PATH, 'character', 'cow.png')))
@@ -57,6 +59,15 @@ class TestWorldMode(WorldTestCase):
 
     def test_activate(self):
         self.worldmode.activate()
+
+    def test_portal_player(self):
+        room = self.worldmode.world.focus
+        x, y, z = room.get_coords(self.worldmode.player)
+        self.worldmode.portal_player(self.portal2)
+        assert room[z][y][x] != self.worldmode.player
+        assert self.worldmode.world.focus == self.room1
+        x, y, z = self.room1.get_coords(self.worldmode.player)
+        assert self.room1[z][y][x] == self.worldmode.player
 
     def test_on_text_motion_moves_player(self):
         x1, y1 = self.worldmode.player.position
