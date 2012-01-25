@@ -279,11 +279,7 @@ def _load_world(configs, defaults, atlas, player, image_path):
         portals[room_name] = _load_portals(
             room, portalmap, portalkey, rooms)
 
-    # Load world
-    starting_room = atlas.starting_room
-    world = World(rooms, portals, starting_room)
-
-    return world
+    return World(rooms, portals, atlas.starting_room)
 
 
 def _load_configs():

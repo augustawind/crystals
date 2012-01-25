@@ -145,9 +145,9 @@ class TestWorld(WorldTestCase):
         self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
         self.room2.name = 'b room'
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.portal = world.Portal(0, 0, None, None)
-        self.world = world.World(self.rooms, [self.portal], 'b room')
-
+        self.portals = [world.Portal(1, 2, self.room1, self.room2),
+            world.Portal(1, 1, self.room2, self.room1)]
+        self.world = world.World(self.rooms, self.portals, 'b room') 
     def test_init(self):
         assert self.world == self.rooms
         assert self.world.focus == self.room2
@@ -184,5 +184,9 @@ class TestWorld(WorldTestCase):
         assert self.room2[1][2][1] == entity_
 
     def test_portal_entity(self):
-        entity_ = self.room2[1][1][1]
-        self.world.portal_entity(entity_, self.portal)
+        x, y, z = (1, 1, 0)
+        entity_ = self.room2[z][y][x]
+        self.world.portal_entity(entity_, self.portals[1])
+        assert self.room2[z][y][x] != entity_
+        x, y, z = self.room1.get_coords(entity_)
+        assert self.room1[z][y][x] == entity_

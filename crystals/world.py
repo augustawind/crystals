@@ -46,6 +46,7 @@ class Room(list):
                         self._update_entity(entity, x, y, z)
 
     def get_coords(self, entity):
+        """Return x, y, and z coordinates of the given entity in the room."""
         x = (entity.x - ORIGIN_X) / TILE_SIZE
         y = (entity.y - ORIGIN_Y) / TILE_SIZE
         if entity.group is None:
@@ -109,28 +110,34 @@ class World(dict):
         self.focus = self[room_name]
         self.focus.focus()
     
-    def add_entity(self, entity, x, y, z=None):
-        """Add an entity at [z][y][x] in the focused room.
+    def add_entity(self, entity, x, y, z=None, room=None):
+        """Add the given entity to the given room at (x, y, z).
         
         If z is None, add a layer to the top and put the
         entity there. Otherwise, if no entity exists at [z][y][x],
         place it there, else insert a new layer at z + 1 and place it there.
+
+        If room is None, add the entity to the focused room.
         """
+        if room is None:
+            room = self.focus
         if z is None:
             z = -1
-            self.focus.add_layer()
-            self.focus.replace_entity(entity, x, y, -1)
+            room.add_layer()
+            room.replace_entity(entity, x, y, -1)
             return
         try:
-            self.focus.add_entity(entity, x, y, z)
+            room.add_entity(entity, x, y, z)
         except WorldError:
             z += 1
-            self.focus.add_layer(z)
-            self.focus.replace_entity(entity, x, y, z)
+            room.add_layer(z)
+            room.replace_entity(entity, x, y, z)
 
-    def pop_entity(self, x, y, z):
-        entity = self.focus[z][y][x]
-        self.focus[z][y][x] = None
+    def pop_entity(self, x, y, z, room=None):
+        if room is None:
+            room = self.focus
+        entity = room[z][y][x]
+        room[z][y][x] = None
         return entity
     
     def step_entity(self, entity, xstep, ystep):
@@ -144,5 +151,11 @@ class World(dict):
         self.add_entity(entity, newx, newy, z)
 
     def portal_entity(self, entity, portal):
-        """Transfer entity to the portal's destination."""
-
+        """Transfer entity from its current room to the portal's
+        destination.
+        """
+        x, y, z = self.focus.get_coords(entity)
+        self.pop_entity(x, y, z)
+        x = portal.x
+        y = portal.y
+        self.add_entity(entity, x, y, z, portal.to_room)
