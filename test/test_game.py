@@ -39,8 +39,8 @@ class TestWorldMode(WorldTestCase):
         self.room1 = self.get_room()[0]
         self.room2 = self.get_room()[0]
         self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.portal1 = world.Portal(0, 0, self.room1, self.room2)
-        self.portal2 = world.Portal(0, 0, self.room2, self.room1)
+        self.portal1 = world.Portal(1, 1, self.room1, self.room2)
+        self.portal2 = world.Portal(1, 2, self.room2, self.room1)
         self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
                                   'b room')
         self.player = entity.Entity(
@@ -70,12 +70,20 @@ class TestWorldMode(WorldTestCase):
         assert self.room1[z][y][x] == self.worldmode.player
 
     def test_on_text_motion_moves_player(self):
+        self.world_.portals.remove(self.portal2)
         x1, y1 = self.worldmode.player.position
         self.worldmode.on_text_motion(key.MOTION_UP)
         x2, y2 = self.worldmode.player.position
         assert self.room2[1][2][1] == self.player
         assert x2 == x1
         assert y2 == y1 + world.TILE_SIZE
+
+    def test_on_text_motion_portals_player(self):
+        assert self.worldmode.world.focus == self.room2
+        self.worldmode.on_text_motion(key.MOTION_UP)
+        assert self.worldmode.world.focus == self.room1
+        x, y, z = self.worldmode.world.focus.get_coords(self.worldmode.player)
+        assert x, y == (self.portal1.x, self.portal1.y)
 
     def test_on_text_motion_does_nothing(self):
         x1, y1 = self.worldmode.player.position

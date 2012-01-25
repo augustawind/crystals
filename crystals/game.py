@@ -83,6 +83,11 @@ class WorldMode(GameMode):
                         key.MOTION_UP: (0, 1)}[motion]
         self.world.step_entity(self.player, xstep, ystep)
 
+        x, y, z = self.world.focus.get_coords(self.player)
+        portal = self.world.get_portal(x, y)
+        if portal:
+            self.portal_player(portal)
+
 
 class Game(object):
     """The main application object. Runs the game."""

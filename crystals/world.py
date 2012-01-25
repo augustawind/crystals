@@ -101,14 +101,28 @@ class Portal(object):
 class World(dict):
     """A collection of rooms linked by portals."""
 
-    def __init__(self, rooms, portal, current_room):
+    def __init__(self, rooms, portals, current_room):
         dict.__init__(self, rooms)
+        self.portals = portals
         self.focus = None
         self.set_focus(current_room)
 
     def set_focus(self, room_name):
         self.focus = self[room_name]
         self.focus.focus()
+
+    def get_portal(self, x, y, room=None):
+        """If a portal exists at (x, y) in the given room, return that
+        portal. Else, return None.
+
+        If room is None, use the focused room.
+        """
+        if room is None:
+            room = self.focus
+        for portal in self.portals:
+            if portal.from_room is room and portal.x is x and portal.y is y:
+                return portal
+        return None
     
     def add_entity(self, entity, x, y, z=None, room=None):
         """Add the given entity to the given room at (x, y, z).

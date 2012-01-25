@@ -148,9 +148,15 @@ class TestWorld(WorldTestCase):
         self.portals = [world.Portal(1, 2, self.room1, self.room2),
             world.Portal(1, 1, self.room2, self.room1)]
         self.world = world.World(self.rooms, self.portals, 'b room') 
+
     def test_init(self):
         assert self.world == self.rooms
         assert self.world.focus == self.room2
+
+    def test_get_portal(self):
+        assert self.world.get_portal(1, 1) == self.portals[1]
+        assert self.world.get_portal(1, 2) == None
+        assert self.world.get_portal(1, 2, room=self.room1) == self.portals[0]
 
     def test_add_entity1(self):
         wall = self.wall1()
