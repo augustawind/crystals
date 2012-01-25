@@ -272,12 +272,12 @@ def _load_world(configs, defaults, atlas, player, image_path):
                                       defaults, player, image_path)
 
     # Load portals
-    portals = {}
+    portals = []
     for room_name, room in rooms.iteritems():
         portalmap = getattr(atlas, room_name).portals
         portalkey = getattr(atlas, room_name).portalkey
-        portals[room_name] = _load_portals(
-            room, portalmap, portalkey, rooms)
+        portals.extend(_load_portals(
+            room, portalmap, portalkey, rooms))
 
     return World(rooms, portals, atlas.starting_room)
 

@@ -127,7 +127,7 @@ class World(dict):
     def add_entity(self, entity, x, y, z=None, room=None):
         """Add the given entity to the given room at (x, y, z).
         
-        If z is None, add a layer to the top and put the
+        If z is None, or out of range, add a layer to the top and put the
         entity there. Otherwise, if no entity exists at [z][y][x],
         place it there, else insert a new layer at z + 1 and place it there.
 
@@ -135,7 +135,7 @@ class World(dict):
         """
         if room is None:
             room = self.focus
-        if z is None:
+        if z is None or z >= len(room):
             z = -1
             room.add_layer()
             room.replace_entity(entity, x, y, -1)
@@ -170,6 +170,9 @@ class World(dict):
         """
         x, y, z = self.focus.get_coords(entity)
         self.pop_entity(x, y, z)
-        x = portal.x
-        y = portal.y
+
+        for portal1 in self.portals:
+            if portal1.from_room == portal.to_room:
+                x = portal1.x
+                y = portal1.y
         self.add_entity(entity, x, y, z, portal.to_room)

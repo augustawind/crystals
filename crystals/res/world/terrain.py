@@ -145,7 +145,10 @@ class RedRoom:
             },
             'rough': {},
             'smooth': {},
-            'red': {'image': 'floor-b-red'}
+            'red': {
+                'image': 'floor-b',
+                'variant': 'red'
+            }
         },
         'house': {
             'a': {},

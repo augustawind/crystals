@@ -69,12 +69,16 @@ class WorldMode(GameMode):
         self.textfeed.activate()
         GameMode.activate(self)
 
+    def set_focus(self, room_name):
+        self.world.set_focus(room_name)
+        self.batch = self.world.focus.batch
+
     def portal_player(self, portal):
         """Transfer the player to the portal's destination, then set
         that room as the focus.
         """
         self.world.portal_entity(self.player, portal)
-        self.world.focus = portal.to_room
+        self.set_focus(portal.to_room.name)
 
     def on_text_motion(self, motion):
         xstep, ystep = {key.MOTION_LEFT: (-1, 0),
