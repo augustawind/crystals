@@ -1,4 +1,4 @@
-rooms = ['TestRoom1']
+rooms = ['TestRoom1', 'TestRoom2']
 starting_room = 'TestRoom1'
 
 mapkey = {
@@ -37,7 +37,7 @@ class TestRoom1:
 
 class TestRoom2:
 
-    mapkey = {'<': 'stairs-up'}
+    mapkey = {'>': 'stairs-down'}
     
     maps = [
     """
@@ -50,7 +50,7 @@ class TestRoom2:
     """
 .....
 .....
-..<..
+..>..
 .....
 .....
     """

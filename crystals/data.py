@@ -269,11 +269,18 @@ def _load_world(configs, defaults, atlas, player, image_path):
         room_atlas = getattr(atlas, room_name)
         default_mapkey = atlas.mapkey
         rooms[room_name] = _load_room(room_atlas, default_mapkey, configs,
-                                     defaults, player, image_path)
+                                      defaults, player, image_path)
+
+    # Load portals
+    portals = {}
+    for room_name, room in rooms.iteritems():
+        portalmap = getattr(atlas, room_name).portals
+        portalkey = getattr(atlas, room_name).portalkey
+        portals[room_name] = _load_portals(
+            room, portalmap, portalkey, rooms)
 
     # Load world
     starting_room = atlas.starting_room
-    portals = [] # Waiting for portal implementation
     world = World(rooms, portals, starting_room)
 
     return world
@@ -314,7 +321,6 @@ def load_setting(res_path=RES_PATH):
 
     # Load player
     player = _load_player(configs['character'].player, image_path)
-
     # Load world
     world = _load_world(configs, defaults, atlas, player, image_path)
 
