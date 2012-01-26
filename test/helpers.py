@@ -6,6 +6,8 @@ import pyglet
 RES_PATH = os.path.join('test', 'res')
 IMAGE_PATH = os.path.join(RES_PATH, 'image')
 
+dummy_image = pyglet.image.load(os.path.join(IMAGE_PATH, 'item', 'sack.png'))
+
 class TestCase(object):
 
     def setup(self):

@@ -5,6 +5,7 @@ TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels
 
+
 class WorldError(Exception):
     pass
 
