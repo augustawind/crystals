@@ -12,3 +12,12 @@ class Action(object):
         if self.nactions < 1:
             return
         self.nactions -= 1
+
+
+class Alert(Action):
+    """Action which writes something to an output stream, presumably
+    the game's infobox."""
+
+    def __init__(self, nactions, text):
+        Action.__init__(self, nactions)
+        self.text = text

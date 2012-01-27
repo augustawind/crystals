@@ -21,3 +21,10 @@ class TestAction(object):
         assert action.nactions == 0
         action.execute(entity_)
         assert action.nactions == 0
+
+class TestAlert(object):
+
+    def test_init(self):
+        nactions = 3
+        text = 'Hello, world!'
+        alert = interaction.Alert(nactions, text)
