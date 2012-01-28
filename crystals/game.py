@@ -10,9 +10,10 @@ from crystals import gui
 from crystals.entity import Entity
 from crystals.world import World
 
-# Use the resource directory in the test suite when debugging
 if __debug__:
+    # Use the resource path used in the test suite 
     from test.helpers import RES_PATH
+
 
 class GameMode(object):
     """Abstract class for top-level game objects with event handlers."""
@@ -90,8 +91,13 @@ class WorldMode(GameMode):
     def step_player(self, xstep, ystep):
         """Step the player (`xstep`, `ystep`) tiles from her current
         position.
+
+        If successful and the new position hosts a portal, portal
+        the player.
         """
-        self.world.step_entity(self.player, xstep, ystep)
+        success = self.world.step_entity(self.player, xstep, ystep)
+        if not success:
+            return
 
         x, y, z = self.world.focus.get_coords(self.player)
         portal = self.world.get_portal(x, y)

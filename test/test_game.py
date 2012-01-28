@@ -60,7 +60,7 @@ class TestWorldMode(WorldTestCase):
     def test_activate(self):
         self.worldmode.activate()
 
-    def test_step_player(self):
+    def test_step_player_no_portal(self):
         self.world_.portals.remove(self.portal2)
         x1, y1 = self.worldmode.player.position
         self.worldmode.step_player(0, 1)
@@ -68,6 +68,11 @@ class TestWorldMode(WorldTestCase):
         assert self.room2[1][2][1] == self.player
         assert x2 == x1
         assert y2 == y1 + world.TILE_SIZE
+
+    def test_step_player_with_portal(self):
+        x1, y1 = self.worldmode.player.position
+        self.worldmode.step_player(0, 1)
+        assert self.room2[1][2][1] != self.player
 
     def test_portal_player(self):
         room = self.worldmode.world.focus

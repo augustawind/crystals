@@ -37,7 +37,9 @@ class TestRoom1:
 
 class TestRoom2:
 
-    mapkey = {'>': 'stairs-down'}
+    mapkey = {
+        '>': 'stairs-down',
+        'T': 'enemy-troll'}
     
     maps = [
     """
@@ -50,7 +52,7 @@ class TestRoom2:
     """
 .....
 .....
-..>..
+.T>..
 .....
 .....
     """

@@ -160,14 +160,20 @@ class World(dict):
         return entity
     
     def step_entity(self, entity, xstep, ystep):
-        """Move entity from current position by (xstep, ystep)."""
+        """Move entity from current position by (xstep, ystep).
+        
+        Return True if the move was successful, False if the
+        destination is unwalkable.
+        """
         x, y, z = self.focus.get_coords(entity)
         newx = x + xstep
         newy = y + ystep
         if not self.focus.iswalkable(newx, newy):
-            return
+            return False
+
         self.pop_entity(x, y, z)
         self.add_entity(entity, newx, newy, z)
+        return True
 
     def portal_entity(self, entity, portal):
         """Transfer entity from its current room to the portal's

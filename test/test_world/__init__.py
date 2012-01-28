@@ -184,10 +184,18 @@ class TestWorld(WorldTestCase):
         assert entity_.name == self.wall2().name
         assert self.world.focus[0][0][0] == None
 
-    def test_step_entity(self):
+    def test_step_entity_with_walkable_destination(self):
         entity_ = self.room2[0][0][0]
-        self.world.step_entity(entity_, 1, 2)
+        stepped = self.world.step_entity(entity_, 1, 2)
+        assert self.room2[0][0][0] != entity_
         assert self.room2[1][2][1] == entity_
+        assert stepped
+
+    def test_step_entity_with_unwalkable_destination(self):
+        entity_ = self.room2[0][0][0]
+        stepped = self.world.step_entity(entity_, -1, 0)
+        assert self.room2[0][0][0] == entity_
+        assert not stepped
 
     def test_portal_entity(self):
         x, y, z = (1, 1, 0)
