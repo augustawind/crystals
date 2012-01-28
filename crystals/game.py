@@ -66,10 +66,12 @@ class WorldMode(GameMode):
         self.infobox.write('Welcome...')
 
     def activate(self):
+        """Activate world mode."""
         self.infobox.activate()
         GameMode.activate(self)
 
     def set_focus(self, room_name):
+        """Set the room with name `room_name` as the focus."""
         self.world.set_focus(room_name)
         self.batch = self.world.focus.batch
 
@@ -81,6 +83,7 @@ class WorldMode(GameMode):
         self.set_focus(portal.to_room.name)
 
     def on_text_motion(self, motion):
+        """Process user input."""
         xstep, ystep = {key.MOTION_LEFT: (-1, 0),
                         key.MOTION_RIGHT: (1, 0),
                         key.MOTION_DOWN: (0, -1),
