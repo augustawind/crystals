@@ -60,6 +60,15 @@ class TestWorldMode(WorldTestCase):
     def test_activate(self):
         self.worldmode.activate()
 
+    def test_step_player(self):
+        self.world_.portals.remove(self.portal2)
+        x1, y1 = self.worldmode.player.position
+        self.worldmode.step_player(0, 1)
+        x2, y2 = self.worldmode.player.position
+        assert self.room2[1][2][1] == self.player
+        assert x2 == x1
+        assert y2 == y1 + world.TILE_SIZE
+
     def test_portal_player(self):
         room = self.worldmode.world.focus
         x, y, z = room.get_coords(self.worldmode.player)
@@ -69,25 +78,25 @@ class TestWorldMode(WorldTestCase):
         x, y, z = self.room1.get_coords(self.worldmode.player)
         assert self.room1[z][y][x] == self.worldmode.player
 
-    def test_on_text_motion_moves_player(self):
+    def test_on_key_press_moves_player(self):
         self.world_.portals.remove(self.portal2)
         x1, y1 = self.worldmode.player.position
-        self.worldmode.on_text_motion(key.MOTION_UP)
+        self.worldmode.on_key_press(key.MOTION_UP, 0)
         x2, y2 = self.worldmode.player.position
         assert self.room2[1][2][1] == self.player
         assert x2 == x1
         assert y2 == y1 + world.TILE_SIZE
 
-    def test_on_text_motion_portals_player(self):
+    def test_on_key_press_portals_player(self):
         assert self.worldmode.world.focus == self.room2
-        self.worldmode.on_text_motion(key.MOTION_UP)
+        self.worldmode.on_key_press(key.MOTION_UP, 0)
         assert self.worldmode.world.focus == self.room1
         x, y, z = self.worldmode.world.focus.get_coords(self.worldmode.player)
         assert x, y == (self.portal1.x, self.portal1.y)
 
-    def test_on_text_motion_does_nothing(self):
+    def test_on_key_press_does_nothing(self):
         x1, y1 = self.worldmode.player.position
-        self.worldmode.on_text_motion(key.MOTION_LEFT)
+        self.worldmode.on_key_press(key.MOTION_LEFT, 0)
         x2, y2 = self.worldmode.player.position
         assert self.room2[1][1][1] == self.player
         assert x2 == x1

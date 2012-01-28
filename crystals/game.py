@@ -65,6 +65,18 @@ class WorldMode(GameMode):
         self.infobox.write('Welcome...')
         self.infobox.write('Welcome...')
 
+        # Define possible user inputs and their effects.
+        # Values are each a tuple of a callable followed optionally by 
+        # arguments.
+        self.inputdict = {
+            key.MOTION_LEFT: (self.step_player, -1, 0),
+            key.MOTION_RIGHT: (self.step_player, 1, 0),
+            key.MOTION_DOWN: (self.step_player, 0, -1),
+            key.MOTION_UP: (self.step_player, 0, 1),
+
+            key.SPACE: (self.interact,),
+        }
+
     def activate(self):
         """Activate world mode."""
         self.infobox.activate()
@@ -75,6 +87,17 @@ class WorldMode(GameMode):
         self.world.set_focus(room_name)
         self.batch = self.world.focus.batch
 
+    def step_player(self, xstep, ystep):
+        """Step the player (`xstep`, `ystep`) tiles from her current
+        position.
+        """
+        self.world.step_entity(self.player, xstep, ystep)
+
+        x, y, z = self.world.focus.get_coords(self.player)
+        portal = self.world.get_portal(x, y)
+        if portal:
+            self.portal_player(portal)
+
     def portal_player(self, portal):
         """Transfer the player to the portal's destination, then set
         that room as the focus.
@@ -82,18 +105,14 @@ class WorldMode(GameMode):
         self.world.portal_entity(self.player, portal)
         self.set_focus(portal.to_room.name)
 
-    def on_text_motion(self, motion):
-        """Process user input."""
-        xstep, ystep = {key.MOTION_LEFT: (-1, 0),
-                        key.MOTION_RIGHT: (1, 0),
-                        key.MOTION_DOWN: (0, -1),
-                        key.MOTION_UP: (0, 1)}[motion]
-        self.world.step_entity(self.player, xstep, ystep)
+    def interact(self):
+        """Interact with an entity in the world."""
 
-        x, y, z = self.world.focus.get_coords(self.player)
-        portal = self.world.get_portal(x, y)
-        if portal:
-            self.portal_player(portal)
+    def on_key_press(self, key, modifiers):
+        """Process user input."""
+        if key not in self.inputdict:
+            return
+        self.inputdict[key][0](*self.inputdict[key][1:])
 
 
 class Game(object):
