@@ -126,7 +126,7 @@ def _load_global_entity_args(room_name, archetype, config, defaults,
                 specparams['image'] += '-' + specparams.pop('variant')
             # Replace the image name with the actual image object
             specparams['image'] = imagedict[specparams['image']]
-            
+
             # Map an Entity instance to a unique identifier
             key = clsname + '-' + specname
             entity_args[key] = specparams

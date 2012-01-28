@@ -8,42 +8,48 @@ from test.helpers import *
 from crystals import gui
 from crystals.world import TILE_SIZE
 
-class TestBox(TestCase):
+
+class TestBox(object):
 
     def setup(self):
-        super(TestBox, self).setup()
+        self.batch = pyglet.graphics.Batch()
         self.args = (0, 0, 50, 50, self.batch, gui.COLOR_RED)
         self.box = gui.Box(*self.args)
 
-    def teardown(self):
-        super(TestBox, self).teardown()
-        self.box.hide()
+    def TestInit_IfShowIsFalse_DontShowBox(self):
+        assert not self.box.box
 
-    def test_init(self):
-        assert isinstance(self.box, gui.Box)
-        assert (self.box.x, self.box.y, self.box.width, self.box.height,
-                self.box.batch, self.box.color) == self.args
-        assert (self.box.box is None or isinstance(self.box.box, VertexList))
+    def TestInit_IfShowIsTrue_ShowBox(self):
+        self.args += (True,)
+        self.box = gui.Box(*self.args) 
+        assert isinstance(self.box.box, VertexList)
 
-    def test_visible(self):
+    def TestVisible_IfBoxEvalsFalse_ReturnFalse(self):
         assert not self.box.visible
-        self.box.show()
+
+    def TestVisible_IfBoxEvalsTrue_ReturnTrue(self):
+        self.box.box = True
         assert self.box.visible
 
-    def test_show(self):
+    def TestShow_IfBoxNotVisible_ShowBox(self):
         self.box.show()
         assert isinstance(self.box.box, VertexList)
 
-    def test_hide(self):
+    def TestHide_IfBoxIsVisible_HideBox(self):
         self.box.show()
         self.box.hide()
-        assert self.box.box is None
+        assert not self.box.box
+
+    def TestHide_IfBoxIsNotVisible_DoNothing(self):
+        self.box.hide()
+        assert not self.box.box
 
 
-class TestMenu(TestCase):
+class TestMenu(PygletTestCase):
 
     def setup(self):
-        super(TestMenu, self).setup()
+        PygletTestCase.setup(self)
+
         self.x, self.y = 0, 0
         self.width, self.height = 350, 300
         self.text = ['Here Lies Text', 'the next text is hexed', 'inTEXTicated']
@@ -167,7 +173,7 @@ class TestMenu(TestCase):
                 assert self.test_number == None 
 
 
-class TestTextFeed(TestCase):
+class TestTextFeed(PygletTestCase):
 
     def test_labels(self):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,

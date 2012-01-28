@@ -24,12 +24,12 @@ class Box(object):
     @property
     def visible(self):
         """Return True if the box is visible."""
-        return self.box is not None
+        return bool(self.box)
 
     def show(self):
-        """Show the box. If it's already visible, do nothing."""
+        """Show the box. If it's already visible, hide it first."""
         if self.visible:
-            return
+            self.hide()
         x2 = self.x + self.width
         y2 = self.y + self.height
         size = 8

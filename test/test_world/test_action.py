@@ -1,7 +1,7 @@
 from nose.tools import raises
 
 from crystals import *
-from test.helpers import *
+from test.util import *
 
 
 def dummy_entity():

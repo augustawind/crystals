@@ -6,7 +6,7 @@ from crystals import gui
 from crystals import entity
 from crystals import world
 from test.test_world import WorldTestCase
-from test.helpers import *
+from test.util import *
 
 class TestGameMode(object):
 
@@ -86,6 +86,8 @@ class TestWorldMode(WorldTestCase):
     def test_interact(self):
         room = self.worldmode.world.focus
         self.worldmode.step_player(0, 1)
+        self.worldmode.step_player(-1, 0)
+        self.worldmode.interact()
 
     def test_on_key_press_moves_player(self):
         self.world_.portals.remove(self.portal2)

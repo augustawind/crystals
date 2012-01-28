@@ -8,7 +8,7 @@ from nose.tools import *
 import crystals
 from crystals import data
 from crystals import entity
-from test.helpers import *
+from test.util import *
 
 @raises(data.ResourceError)
 def test_ResourceError():

@@ -107,7 +107,8 @@ class WorldMode(GameMode):
         self.set_focus(portal.to_room.name)
 
     def interact(self):
-        """Interact with an entity in the world."""
+        """If an interactable entity is in front of the player, make
+        her interact with it. Else, do nothing."""
 
     def on_key_press(self, key, modifiers):
         """Process user input."""

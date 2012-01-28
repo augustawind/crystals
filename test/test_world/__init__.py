@@ -3,10 +3,10 @@ from nose.tools import *
 from crystals import world
 from crystals import entity
 from crystals.data import ImageDict
-from test.helpers import *
+from test.util import *
 from test.test_data import IMAGE_PATH
 
-class WorldTestCase(TestCase):
+class WorldTestCase(PygletTestCase):
 
     def __init__(self):
         super(WorldTestCase, self).__init__()

@@ -5,7 +5,7 @@ import pyglet
 
 from crystals import entity
 from crystals.world import action
-from test.helpers import *
+from test.util import *
 
 class TestEntity(object):
 
