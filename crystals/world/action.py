@@ -1,4 +1,4 @@
-"""interaction between the player and other entities"""
+"""actions that entities commit"""
 
 
 class Action(object):
