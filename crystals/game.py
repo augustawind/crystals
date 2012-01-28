@@ -60,11 +60,6 @@ class WorldMode(GameMode):
         self.infobox = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
                                      self.batch, show_box=True)
         self.infobox.write('Welcome...')
-        self.infobox.write('Welcome...')
-        self.infobox.write('Welcome...')
-        self.infobox.write('Welcome...')
-        self.infobox.write('Welcome...')
-        self.infobox.write('Welcome...')
 
         # Define possible user inputs and their effects.
         # Values are each a tuple of a callable followed optionally by 

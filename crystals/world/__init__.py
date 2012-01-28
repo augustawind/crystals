@@ -160,11 +160,15 @@ class World(dict):
         return entity
     
     def step_entity(self, entity, xstep, ystep):
-        """Move entity from current position by (xstep, ystep).
+        """Move entity from its current position by (xstep, ystep),
+        changing the position of the entity to reflect the direction of
+        the attempted move. 
         
-        Return True if the move was successful, False if the
-        destination is unwalkable.
+        Return True if the move was successful, else False.
         """
+        entity.pos = (xstep / abs(xstep) if xstep else 0,
+                      ystep / abs(ystep) if ystep else 0)
+
         x, y, z = self.focus.get_coords(entity)
         newx = x + xstep
         newy = y + ystep

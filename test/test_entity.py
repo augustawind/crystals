@@ -16,13 +16,14 @@ class TestEntity(object):
         actions = [action.Alert(2, 'whoa!', sys.stdout)]
 
         entity_ = entity.Entity('item', 'an entity', True, image, batch,
-                                actions=actions) 
+                                pos=(1, 1), actions=actions) 
         assert isinstance(entity_, pyglet.sprite.Sprite)
         assert entity_.image.texture == image.texture
         assert entity_.archetype == 'item'
         assert entity_.name == 'an entity'
         assert entity_.walkable is True
         assert entity_.batch is batch
+        assert entity_.pos == (1, 1)
         assert entity_.actions is actions
         
         entity_ = entity.Entity('item', 'an entity', True, image)

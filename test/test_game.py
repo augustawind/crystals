@@ -83,6 +83,10 @@ class TestWorldMode(WorldTestCase):
         x, y, z = self.room1.get_coords(self.worldmode.player)
         assert self.room1[z][y][x] == self.worldmode.player
 
+    def test_interact(self):
+        room = self.worldmode.world.focus
+        self.worldmode.step_player(0, 1)
+
     def test_on_key_press_moves_player(self):
         self.world_.portals.remove(self.portal2)
         x1, y1 = self.worldmode.player.position
