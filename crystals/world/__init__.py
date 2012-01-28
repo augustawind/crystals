@@ -1,6 +1,10 @@
 """creation and mutation of the game world"""
 from pyglet.graphics import OrderedGroup
 
+import action
+
+__all__ = ['Room', 'World', 'action']
+
 TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels

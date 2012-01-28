@@ -7,11 +7,11 @@ class TestAction(object):
     
     def test_init(self):
         nactions = 3
-        action = interaction.Action(nactions)
+        action = world.action.Action(nactions)
 
     def test_execute(self):
         nactions = 3
-        action = interaction.Action(nactions)
+        action = world.action.Action(nactions)
         entity_ = entity.Entity('', '', False, dummy_image, None)
 
         for i in reversed(range(nactions)):
@@ -27,4 +27,4 @@ class TestAlert(object):
     def test_init(self):
         nactions = 3
         text = 'Hello, world!'
-        alert = interaction.Alert(nactions, text)
+        alert = world.action.Alert(nactions, text)
