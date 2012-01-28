@@ -185,7 +185,7 @@ class TestTextFeed(TestCase):
         assert all(label.batch is self.batch for label in textfeed.labels)
         assert textfeed.box.batch is self.batch
 
-    def test_update(self):
+    def test_write(self):
         textfeed = gui.TextFeed(
             5, 5, self.window.width - 5, self.window.height - 5, self.batch,
             True)
@@ -193,12 +193,12 @@ class TestTextFeed(TestCase):
 
         text = 'Hello, world!!!'
         for i in range(len(textfeed.labels) - 1):
-            textfeed.update(text)
+            textfeed.write(text)
             assert textfeed.labels[-(i + 1)].text == text
             assert all(label.text == '' for label in textfeed.labels[:-(i + 1)])
 
-        textfeed.update(text)
+        textfeed.write(text)
         assert all(label.text == text for label in textfeed.labels)
-        textfeed.update('Goodbye, cruel world...')
+        textfeed.write('Goodbye, cruel world...')
         assert textfeed.labels[0].text == 'Goodbye, cruel world...'
         assert all(label.text == text for label in textfeed.labels[1:])

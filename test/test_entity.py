@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pyglet
 
@@ -12,7 +13,7 @@ class TestEntity(object):
         image = pyglet.image.load(
             os.path.join(IMAGE_PATH, 'item', 'sack.png'))
         batch = pyglet.graphics.Batch()
-        actions = [action.Alert(2, 'whoa!')]
+        actions = [action.Alert(2, 'whoa!', sys.stdout)]
 
         entity_ = entity.Entity('item', 'an entity', True, image, batch,
                                 actions=actions) 
@@ -26,4 +27,3 @@ class TestEntity(object):
         
         entity_ = entity.Entity('item', 'an entity', True, image)
         assert entity_.batch == None
-

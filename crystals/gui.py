@@ -194,7 +194,7 @@ class TextFeed(object):
             label.batch = self.batch
         self.box.batch = self.batch
 
-    def update(self, text):
+    def write(self, text):
         """Add some text, scrolling up if the the feed is full."""
         updated = False
         for label in reversed(self.labels):

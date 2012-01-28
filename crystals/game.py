@@ -56,17 +56,17 @@ class WorldMode(GameMode):
         tf_x = tf_y = tf_margin
         tf_width = window.width - (tf_margin * 2)
         tf_height = 100
-        self.textfeed = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
+        self.infobox = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
                                      self.batch, show_box=True)
-        self.textfeed.update('Welcome...')
-        self.textfeed.update('Welcome...')
-        self.textfeed.update('Welcome...')
-        self.textfeed.update('Welcome...')
-        self.textfeed.update('Welcome...')
-        self.textfeed.update('Welcome...')
+        self.infobox.write('Welcome...')
+        self.infobox.write('Welcome...')
+        self.infobox.write('Welcome...')
+        self.infobox.write('Welcome...')
+        self.infobox.write('Welcome...')
+        self.infobox.write('Welcome...')
 
     def activate(self):
-        self.textfeed.activate()
+        self.infobox.activate()
         GameMode.activate(self)
 
     def set_focus(self, room_name):
