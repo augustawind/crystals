@@ -196,14 +196,10 @@ class TextFeed(object):
 
     def write(self, text):
         """Add some text, scrolling up if the the feed is full."""
-        updated = False
         for label in reversed(self.labels):
             if not label.text:
                 label.text = text
-                updated = True
-                break
-        if updated:
-            return
+                return
 
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
