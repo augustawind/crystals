@@ -12,7 +12,7 @@ from crystals.world import World
 
 if __debug__:
     # Use the resource path used in the test suite 
-    from test.helpers import RES_PATH
+    from test.util import RES_PATH
 
 
 class GameMode(object):

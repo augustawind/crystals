@@ -4,7 +4,7 @@ from nose.tools import *
 from pyglet.graphics.vertexdomain import VertexList
 import pyglet
 
-from test.helpers import *
+from test.util import *
 from crystals import gui
 from crystals.world import TILE_SIZE
 
