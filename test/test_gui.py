@@ -66,15 +66,18 @@ class TestMenu(PygletTestCase):
             self.x, self.y, self.width, self.height, self.batch,
             self.text, self.functions, **self.kwargs)
 
-    def test_init(self):
+    def TestInit_CheckSimpleAttrs(self):
         assert isinstance(self.menu, gui.Menu)
         assert self.menu.batch == self.batch
         assert self.menu.functions == self.functions
         assert self.menu.selection == -1
-
         assert isinstance(self.menu.box, gui.Box)
-        assert all(isinstance(box, gui.Box) for box in self.menu.boxes)
 
+    def TestInit_AllBoxesInheritFromGuiBoxClass(self):
+        for box in self.menu.boxes:
+            assert isinstance(box, gui.Box)
+
+    def TestInit_LabelAttrsHaveExpectedValues(self):
         for i in range(len(self.menu.labels)):
             label = self.menu.labels[i]
             assert isinstance(label, pyglet.text.Label)
@@ -89,7 +92,7 @@ class TestMenu(PygletTestCase):
             assert label.multiline == False
             assert label.batch == self.batch
 
-    def test_hit_test(self):
+    def TestHitTest_WithinBounds_ReturnsTrue(self):
         for box in self.menu.boxes:
             x1 = box.x
             y1 = box.y
@@ -100,38 +103,50 @@ class TestMenu(PygletTestCase):
                     (x1, y1), (x1, y2 - 1), (x2 - 1, y1), (x2 - 1, y2 - 1)):
                 assert self.menu.hit_test(x, y, box), 'i=' + str(
                     self.menu.boxes.index(box))
+
+    def TestHitTest_OutOfBounds_ReturnsFalse(self):
+        for box in self.menu.boxes:
+            x1 = box.x
+            y1 = box.y
+            x2 = x1 + box.width
+            y2 = y1 + box.height
             for x, y in (
                     (x1 + x2, y1 + y2), (x1, y2), (x2, y1), (x2, y2)):
                 assert not self.menu.hit_test(x, y, box), 'i=' + str(
                     self.menu.boxes.index(box))
 
-    def test_select_item(self):
+    def TestSelectItem_ValidInput_DeselectCurrentItem(self):
         old_i = self.menu.selection
         self.menu.select_item(1)
-        assert not isinstance(self.menu.boxes[old_i].box,
-                              pyglet.graphics.vertexdomain.VertexList)
+        assert not self.menu.boxes[old_i].box
 
+    def TestSelectItem_ValidInput_SelectGivenItem(self):
+        self.menu.select_item(1)
         new_i = self.menu.selection
-        assert new_i == 1
         assert isinstance(self.menu.boxes[new_i].box,
                           pyglet.graphics.vertexdomain.VertexList)
 
-    def test_select_next(self):
+    def TestSelectNext_ShortOfLastItem_SelectNextItem(self):
         self.menu.select_item(0)
         self.menu.select_next()
         assert self.menu.selection == 1
-        self.menu.select_next()
+
+    def TestSelectNext_LastItemSurpassed_SelectFirstItem(self):
+        self.menu.select_item(2)
         self.menu.select_next()
         assert self.menu.selection == 0
 
-    def test_select_prev(self):
+    def TestSelectPrev_ShortOfFirstItem_SelectPrevItem(self):
         self.menu.select_item(1)
         self.menu.select_prev()
         assert self.menu.selection == 0
+
+    def TestSelectPrev_FirstItemSurpassed_SelectLastItem(self):
+        self.menu.select_item(0)
         self.menu.select_prev()
         assert self.menu.selection == len(self.text) - 1
 
-    def test_deselect(self):
+    def TestDeselect_ItemSelected_DeselectItem(self):
         self.menu.select_item(1)
         self.menu.deselect()
         assert self.menu.selection == -1
