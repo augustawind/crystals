@@ -1,16 +1,12 @@
 """actions that entities commit"""
-import abc
 
 
 class Action(object):
     """An action that can be committed by an entity in the world."""
 
-    __metaclass__ = abc.ABCMeta
-
     def __init__(self, nactions):
         self.nactions = nactions
     
-    @abc.abstractmethod
     def execute(self, entity):
         """Execute the action, given the entity responsible for it."""
         if self.nactions < 1:
@@ -20,7 +16,8 @@ class Action(object):
 
 class Alert(Action):
     """Action which writes given text to a given output stream,
-    presumably the game's infobox."""
+    presumably the game's infobox.
+    """
 
     def __init__(self, nactions, text, output):
         Action.__init__(self, nactions)

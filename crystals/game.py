@@ -108,7 +108,8 @@ class WorldMode(GameMode):
 
     def interact(self):
         """If an interactable entity is in front of the player, make
-        her interact with it. Else, do nothing."""
+        her interact with it. Else, do nothing.
+        """
 
     def on_key_press(self, key, modifiers):
         """Process user input."""

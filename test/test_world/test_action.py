@@ -4,11 +4,12 @@ from crystals import *
 from test.util import *
 
 
-def dummy_entity():
+def _DummyEntity():
     return entity.Entity('', '', False, dummy_image, None)
 
 
-class Output(object):
+class _OutputStream(object):
+    """Dummy output stream."""
 
     def __init__(self):
         self.text = ''
@@ -17,46 +18,43 @@ class Output(object):
         self.last = text
 
 
-class ConcreteAction(world.action.Action):
-
-    def execute(self, entity):
-        world.action.Action.execute(self, entity)
-
-
 class TestAction(object):
     
-    def test_init(self):
+    def TestInit(self):
         nactions = 3
-        action = ConcreteAction(nactions)
+        action = world.action.Action(nactions)
 
-    def test_execute(self):
+    def TestExecute_NActionsPositive_DecrementNActions(self):
         nactions = 3
-        action = ConcreteAction(nactions)
-
-        entity_ = dummy_entity()
+        action = world.action.Action(nactions)
+        entity_ = _DummyEntity()
         for i in reversed(range(nactions)):
+
             action.execute(entity_)
             assert action.nactions == i
 
-        assert action.nactions == 0
+    def TestExecute_NActionsZero_DoNothing(self):
+        entity_ = _DummyEntity()
+        action = world.action.Action(0)
+
         action.execute(entity_)
         assert action.nactions == 0
 
 
 class TestAlert(object):
 
-    def test_init(self):
+    def TestInit(self):
         nactions = 3
         text = 'Hello, world!'
-        output = Output()
+        output = _OutputStream()
         alert = world.action.Alert(nactions, text, output)
 
-    def test_execute(self):
+    def TestExecute_ValidOutputStream_WriteToOutput(self):
         nactions = 1
         text = 'whoa!'
-        output = Output()
+        output = _OutputStream()
         alert = world.action.Alert(nactions, text, output)
+        entity_ = _DummyEntity()
 
-        entity_ = dummy_entity()
         alert.execute(entity_)
         assert output.last == text
