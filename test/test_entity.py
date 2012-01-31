@@ -9,7 +9,7 @@ from test.util import *
 
 class TestEntity(object):
 
-    def test_init(self):
+    def TestInit_AttrsHaveExpectedValues(self):
         image = pyglet.image.load(
             os.path.join(IMAGE_PATH, 'item', 'sack.png'))
         batch = pyglet.graphics.Batch()
@@ -25,6 +25,3 @@ class TestEntity(object):
         assert entity_.batch is batch
         assert entity_.pos == (1, 1)
         assert entity_.actions is actions
-        
-        entity_ = entity.Entity('item', 'an entity', True, image)
-        assert entity_.batch == None
