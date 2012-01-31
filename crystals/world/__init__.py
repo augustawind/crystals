@@ -153,6 +153,7 @@ class World(dict):
             room.replace_entity(entity, x, y, z)
 
     def pop_entity(self, x, y, z, room=None):
+        """Remove and return the entity at (x, y, z)."""
         if room is None:
             room = self.focus
         entity = room[z][y][x]

@@ -173,10 +173,15 @@ class TestRoom(WorldTestCase):
 
 class TestPortal(WorldTestCase):
 
-    def test_init(self):
+    def TestInit_AttrsHaveExpectedValues(self):
         from_room = self.roomgen.next()
         to_room = self.roomgen.next()
         portal = world.Portal(0, 0, from_room, to_room)
+
+        assert portal.x == 0
+        assert portal.y == 0
+        assert portal.from_room is from_room
+        assert portal.to_room is to_room
 
 
 class TestWorld(WorldTestCase):
@@ -200,72 +205,85 @@ class TestWorld(WorldTestCase):
 
         self.world = world.World(self.roomdict, self.portals, 'room1') 
 
-    def test_init(self):
+    def TestInit_AttrsHaveExpectedValues(self):
         assert self.world == self.roomdict
         assert self.world.focus == self.rooms[1]
 
-    def test_get_portal(self):
+    def TestGetPortal_PortalAtCoords_ReturnPortal(self):
         assert self.world.get_portal(1, 1) == self.portals[1]
-        assert self.world.get_portal(1, 2) == None
-        assert self.world.get_portal(1, 2, room=self.rooms[0]) == self.portals[0]
 
-    def test_add_entity1(self):
+    def TestGetPortal_NoPortalAtCoords_ReturnNone(self):
+        assert self.world.get_portal(1, 2) == None
+
+    def TestGetPortal_OtherRoomGiven_ReturnPortal(self):
+        assert self.world.get_portal(1, 2, self.rooms[0]) == self.portals[0]
+
+    def TestAddEntity_ZIsNone_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[0]()
         nlayers = len(self.world.focus)
-        self.world.add_entity(wall, 1, 1)
+        self.world.add_entity(wall, 1, 1, None)
+        assert len(self.world.focus) == nlayers + 1
         assert self.world.focus[-1][1][1] == wall
-        assert len(self.world.focus) == nlayers + 1
 
-    def test_add_entity2(self):
-        floor = self.floors[0]()
-        nlayers = len(self.world.focus)
-        self.world.add_entity(floor, 1, 1, 0)
-        assert self.world.focus[1][1][1] == floor
-        assert len(self.world.focus) == nlayers + 1
-
-    def test_add_entity3(self):
+    def TestAddEntity_ZOutOfRange_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[1]()
         nlayers = len(self.world.focus)
         self.world.add_entity(wall, 1, 1, 1)
-        assert self.world.focus[1][1][1] == wall
         assert len(self.world.focus) == nlayers
+        assert self.world.focus[1][1][1] == wall
 
-    def test_pop_entity(self):
-        entity_ = self.world.pop_entity(0, 0, 0)
-        assert entity_.name == self.walls[1]().name
+    def TestAddEntity_ZInRangeAndEntityAtXYZ_AddLayerAboveZAndPlaceThere(self):
+        floor = self.floors[0]()
+        nlayers = len(self.world.focus)
+        self.world.add_entity(floor, 1, 1, 0)
+        assert len(self.world.focus) == nlayers + 1
+        assert self.world.focus[1][1][1] == floor
+
+    def TestPopEntity_EntityCoordsGiven_RemoveEntity(self):
+        self.world.pop_entity(0, 0, 0)
         assert self.world.focus[0][0][0] == None
 
-    def test_step_entity_changes_pos(self):
+    def TestPopEntity_EntityCoordsGiven_ReturnEntity(self):
+        entity_ = self.world.pop_entity(0, 0, 0)
+        assert entity_.name == self.walls[1]().name
+
+    def TestStepEntity_WalkableCoordsGiven_ChangeEntityPos(self):
         entity_ = self.rooms[1][0][0][0]
-        positions = ((1, 0), (0, 1), (-1, 0), (0, -1))
+        positions = ((1, 0), (-1, 0), (0, -1))
         for posx, posy in positions:
             self.world.step_entity(entity_, posx, posy)
             assert entity_.pos == (posx, posy)
 
-    def test_step_entity_moves_entity_dest_walkable(self):
+    def TestStepEntity_UnwalkableCoordsGiven_ChangeEntityPos(self):
+        entity_ = self.rooms[1][0][0][0]
+        posx, posy = 0, 1
+        self.world.step_entity(entity_, posx, posy)
+        assert entity_.pos == (posx, posy)
+
+    def TestStepEntity_DestWalkable_MoveEntity(self):
         entity_ = self.rooms[1][0][0][0]
         self.world.step_entity(entity_, 1, 2)
         assert self.rooms[1][0][0][0] != entity_
         assert self.rooms[1][1][2][1] == entity_
 
-    def test_step_entity_doesnt_move_entity_dest_unwalkable(self):
+    def TestStepEntity_DestWalkable_ReturnTrue(self):
+        entity_ = self.rooms[1][0][0][0]
+        assert self.world.step_entity(entity_, 1, 2)
+
+    def TestStepEntity_DestUnwalkable_DontMoveEntity(self):
         entity_ = self.rooms[1][0][0][0]
         self.world.step_entity(entity_, -1, 0)
         assert self.rooms[1][0][0][0] == entity_
 
-    def test_step_entity_returns_true_dest_walkable(self):
+    def TestStepEntity_DestUnwalkable_ReturnFalse(self):
         entity_ = self.rooms[1][0][0][0]
-        assert self.world.step_entity(entity_, 1, 2)
+        assert not self.world.step_entity(entity_, -1, 0)
 
-    def test_step_entity_returns_false_dest_unwalkable(self):
-        entity_ = self.rooms[1][0][0][0]
-        stepped = self.world.step_entity(entity_, -1, 0)
-        assert not stepped
-
-    def test_portal_entity(self):
+    def TestPortalEntity_GivenValidInputs_MoveEntityToPortalDest(self):
         x, y, z = (1, 1, 0)
         entity_ = self.rooms[1][z][y][x]
         self.world.portal_entity(entity_, self.portals[1])
         assert self.rooms[1][z][y][x] != entity_
+
         x, y, z = self.rooms[0].get_coords(entity_)
         assert self.rooms[0][z][y][x] == entity_
