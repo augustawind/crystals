@@ -98,52 +98,77 @@ class TestRoom(WorldTestCase):
         room = self.roomgen.next()
         entity_ = room[0][0][0]
         x, y, z = room.get_coords(entity_)
+
         assert (x, y, z) == (0, 0, 0)
 
-    def test_add_layer(self):
+    def _layer_is_empty(self, layer):
+        for y in range(len(layer)):
+            for x in range(len(layer[y])):
+                if layer[y][x] is not None:
+                    return False
+        return True
+    
+    def _group_order_matches_index(self, room):
+        for group in room.groups:
+            if group.order != room.groups.index(group):
+                return False
+        return True
+
+    def TestAddLayer_ZWithinCurrentNLayers_AddLayer(self):
         room = self.roomgen.next()
-        
         roomlen = len(room)
         grouplen = len(room.groups)
         room.add_layer(0)
+
         assert len(room) == roomlen + 1
         assert len(room.groups) == grouplen + 1
-        for group in room.groups:
-            assert group.order == room.groups.index(group)
+        assert self._layer_is_empty(room[0])
+        assert self._group_order_matches_index(room)
 
-        for z in (None, len(room)):
-            roomlen = len(room)
-            grouplen = len(room.groups)
-            room.add_layer(z)
-            assert all(e == None for row in room[-1] for e in row)
-            assert len(room.groups) == grouplen + 1
-            for group in room.groups:
-                assert group.order == room.groups.index(group)
+    def TestAddLayer_ZIsNone_AppendLayerToTop(self):
+        room = self.roomgen.next()
+        roomlen = len(room)
+        grouplen = len(room.groups)
+        room.add_layer(None)
 
-    def dummy_entity(self):
+        assert len(room) == roomlen + 1
+        assert len(room.groups) == grouplen + 1
+        assert self._layer_is_empty(room[-1])
+        assert self._group_order_matches_index(room)
+
+    def TestAddLayer_ZIsGTCurrentNLayer_AppendLayerToTop(self):
+        room = self.roomgen.next()
+        roomlen = len(room)
+        grouplen = len(room.groups)
+        room.add_layer(len(room))
+
+        assert len(room) == roomlen + 1
+        assert len(room.groups) == grouplen + 1
+        assert self._layer_is_empty(room[-1])
+        assert self._group_order_matches_index(room)
+
+    def _DummyEntity(self):
         images = ImageDict('terrain', IMAGE_PATH)
         return entity.Entity('terrain', 'tree', False, images['tree-green'],
                              pyglet.graphics.Batch())
 
-    def test_replace_entity(self):
+    def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):
         room = self.roomgen.next()
-        dummy = self.dummy_entity()
+        dummy = self._DummyEntity()
         room.replace_entity(dummy, 0, 0, 0)
         assert room[0][0][0] == dummy
 
-    def test_add_entity(self):
+    def TestAddEntity_NoEntityAtDest_PlaceEntityAtGivenDest(self):
         room = self.roomgen.next()
-        dummy = self.dummy_entity()
-
+        dummy = self._DummyEntity()
         room.add_entity(dummy, 1, 1, 1)
         assert room[1][1][1] == dummy 
-        assert dummy.batch == room.batch
-        assert dummy.group == room.groups[1]
 
     @raises(world.WorldError)
-    def test_add_entity_is_safe(self):
+    def TestAddEntity_EntityAtDest_RaiseWorldError(self):
         room = self.roomgen.next()
-        room.add_entity(self.dummy_entity(), 0, 0, 0)
+        dummy = self._DummyEntity()
+        room.add_entity(dummy, 0, 0, 0)
 
 
 class TestPortal(WorldTestCase):
