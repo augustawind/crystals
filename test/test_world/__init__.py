@@ -8,13 +8,14 @@ from crystals.data import ImageDict
 from test.util import *
 from test.test_data import IMAGE_PATH
 
+
 class WorldTestCase(object):
 
     def __init__(self):
         super(WorldTestCase, self).__init__()
 
+    def setup(self):
         self.roomgen = self.getroom()
-        #self.roomgen.next()
 
     def getroom(self):
         for i in count(0):
@@ -47,35 +48,42 @@ def test_WorldError():
 
 class TestRoom(WorldTestCase):
 
-    def test_init(self):
+    def TestInit_AttrsHaveExpectedValues(self):
         room = self.roomgen.next()
+
         assert room == self.rm_layers
         assert room.batch == self.batch
-        assert all(isinstance(group, pyglet.graphics.OrderedGroup)
-                   for group in room.groups)
+        for group in room.groups:
+            assert isinstance(group, pyglet.graphics.OrderedGroup)
 
-    def test__update_entity(self):
+    def TestUpdateEntity_ValidInputs_AddEntityToRoomBatch(self):
         room = self.roomgen.next()
-        wall1 = self.Wall()
-        room._update_entity(wall1, 2, 1, 0)
-        assert wall1.batch == room.batch
-        assert wall1.x == world.ORIGIN_X + (2 * world.TILE_SIZE)
-        assert wall1.y == world.ORIGIN_Y + world.TILE_SIZE
-        assert wall1.group.order == 0
+        wall = self.Wall()
+        room._update_entity(wall, 2, 1, 0)
+        assert wall.batch == room.batch
 
-        floor1 = self.Floor()
-        room._update_entity(floor1, 0, 0, 0)
-        assert floor1.batch == room.batch
-        assert floor1.x == world.ORIGIN_X
-        assert floor1.y == world.ORIGIN_Y
-        assert floor1.group.order == 0
-
-    def test_iswalkable(self):
+    def TestUpdateEntity_ValidInputs_UpdateSpriteCoords(self):
         room = self.roomgen.next()
-        assert not room.iswalkable(0, 0)
+        wall = self.Wall()
+        room._update_entity(wall, 2, 1, 0)
+        assert wall.x == world.ORIGIN_X + (2 * world.TILE_SIZE)
+        assert wall.y == world.ORIGIN_Y + world.TILE_SIZE
+
+    def TestUpdateEntity_ValidInputs_UpdateOrderedGroup(self):
+        room = self.roomgen.next()
+        wall = self.Wall()
+        room._update_entity(wall, 2, 1, 0)
+        assert wall.group.order == 0
+
+    def TestIsWalkable_GivenWalkableCoords_ReturnTrue(self):
+        room = self.roomgen.next()
         assert room.iswalkable(1, 1)
 
-    def test_focus(self):
+    def TestIsWalkable_GivenUnwalkableCoords_ReturnFalse(self):
+        room = self.roomgen.next()
+        assert not room.iswalkable(0, 0)
+
+    def TestFocus_UpdateEntitySpritePositions(self):
         room = self.roomgen.next()
         room.focus()
         for layer in room:
@@ -86,7 +94,7 @@ class TestRoom(WorldTestCase):
                     assert layer[y][x].x == x * world.TILE_SIZE + world.ORIGIN_X
                     assert layer[y][x].y == y * world.TILE_SIZE + world.ORIGIN_Y
 
-    def test_get_coords(self):
+    def TestGetCoords_GivenValidEntity_ReturnEntityCoords(self):
         room = self.roomgen.next()
         entity_ = room[0][0][0]
         x, y, z = room.get_coords(entity_)
@@ -149,6 +157,8 @@ class TestPortal(WorldTestCase):
 class TestWorld(WorldTestCase):
 
     def setup(self):
+        WorldTestCase.setup(self)
+
         self.rooms = []
         self.roomdict = {}
         self.walls = []

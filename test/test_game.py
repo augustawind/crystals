@@ -29,14 +29,16 @@ class TestMainMenu(object):
 class TestWorldMode(WorldTestCase):
 
     def setup(self):
+        WorldTestCase.setup(self)
+
         self.window = pyglet.window.Window()
-        self.room1 = self.roomiter.next()
-        self.room2 = self.roomiter.next()
-        self.rooms = {'a room': self.room1, 'b room': self.room2}
+        self.room1 = self.roomgen.next()
+        self.room2 = self.roomgen.next()
+        self.rooms = {self.room1.name: self.room1, self.room2.name: self.room2}
         self.portal1 = world.Portal(1, 1, self.room1, self.room2)
         self.portal2 = world.Portal(1, 2, self.room2, self.room1)
         self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
-                                  'b room')
+                                  self.room2.name)
         self.player = entity.Entity(
             'character', 'player', False, pyglet.image.load(
             os.path.join(IMAGE_PATH, 'character', 'cow.png')))
