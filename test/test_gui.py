@@ -1,8 +1,10 @@
+from random import randint
 from itertools import permutations
 
-from nose.tools import *
-from pyglet.graphics.vertexdomain import VertexList
 import pyglet
+from pyglet.graphics.vertexdomain import VertexList
+from pyglet.window import mouse
+from nose.tools import *
 
 from test.util import *
 from crystals import gui
@@ -66,7 +68,7 @@ class TestMenu(PygletTestCase):
             self.x, self.y, self.width, self.height, self.batch,
             self.text, self.functions, **self.kwargs)
 
-    def TestInit_CheckSimpleAttrs(self):
+    def TestInit_AttrsHaveExpectedValues(self):
         assert isinstance(self.menu, gui.Menu)
         assert self.menu.batch == self.batch
         assert self.menu.functions == self.functions
@@ -151,75 +153,109 @@ class TestMenu(PygletTestCase):
         self.menu.deselect()
         assert self.menu.selection == -1
 
-    def get_box_data(self):
-        """Convenience function for test_on_mouse_motion and
-           test_on_mouse_release."""
-        return [(box, box.x, box.y) for box in self.menu.boxes]
+    def _iter_box_data(self):
+        return iter((box, box.x, box.y) for box in self.menu.boxes)
 
-    def test_on_mouse_motion(self):
-        for box, x, y in self.get_box_data():
-            for dx, dy in permutations((-1, 0, 1), 2):
+    def _iter_directions(self):
+        return permutations((-1, 0, 1), 2)
+
+    def TestOnMouseMotion_CursorInBoundsOfBox_SelectThatItem(self):
+        for box, x, y in self._iter_box_data():
+            for dx, dy in self._iter_directions():
                 self.menu.on_mouse_motion(x, y, dx, dy)
-                assert self.menu.selection == self.menu.boxes.index(box), \
-                    'x={}, y={}, dx={}, dy={}, s={}, i={}'.format(
-                        x, y, dx, dy, self.menu.selection,
-                        self.menu.boxes.index(box))
-                self.menu.on_mouse_motion(x, y + box.height, dx, dy)
-                assert self.menu.selection != self.menu.boxes.index(box), \
-                    'x={}, y={}, dx={}, dy={}, s={}, i={}'.format(
-                        x, y, dx, dy, self.menu.selection,
-                        self.menu.boxes.index(box))
-        self.menu.on_mouse_motion(
-            self.menu.boxes[-1].width * 2, self.menu.boxes[-1].y * 2, dx, dy)
-        assert self.menu.selection == -1
+                assert self.menu.selection == self.menu.boxes.index(box)
 
-    def test_on_mouse_release(self):
-        self.menu.select_item(-1)
-        n = self.menu.on_mouse_release(0, 0, 1, 0)
-        assert n == None
-        for i in range(3):
+    def TestOnMouseMotion_CursorOutOfBoundsOfBox_SelectOtherItem(self):
+        for box, x, y in self._iter_box_data():
+            for dx, dy in self._iter_directions():
+                self.menu.on_mouse_motion(x, y + box.height, dx, dy)
+                assert self.menu.selection != self.menu.boxes.index(box)
+
+    def TestOnMouseMotion_CursorOutOfBoundsAllBoxes_DeselectAllItems(self):
+        for dx, dy in self._iter_directions():
+            self.menu.on_mouse_motion(self.menu.boxes[-1].width * 2,
+                                      self.menu.boxes[-1].y * 2, dx, dy)
+            assert self.menu.selection == -1
+
+    def TestOnMouseRelelase_ItemSelected_CallItemFunction(self):
+        for i in range(len(self.functions)):
             self.menu.select_item(i)
-            self.test_number = None
-            self.menu.on_mouse_release(0, 0, 1, 0)  # see self.functions
+            self.menu.on_mouse_release(0, 0, mouse.LEFT, 0)
             assert self.test_number == i
-            for mouse_button in (2, 4):
-                self.test_number = None
-                n = self.menu.on_mouse_release(0, 0, mouse_button, 0)
-                assert self.test_number == None 
+
+    def TestOnMouseRelease_NoItemSelected_DontCallItemFunction(self):
+        self.menu.select_item(-1)
+        self.menu.on_mouse_release(0, 0, mouse.LEFT, 0)
+        assert self.test_number is None
+
+    def TestOnMouseRelease_OtherMouseBtnsUsed_DontCallItemFunction(self):
+        for btn in (mouse.MIDDLE, mouse.RIGHT):
+            self.menu.select_item(0)
+            self.menu.on_mouse_release(0, 0, btn, 0)
+            assert self.test_number is None
 
 
 class TestTextFeed(PygletTestCase):
 
-    def test_labels(self):
+    def TestInit_NumberOfLabelsReflectsTileSize(self):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
                                 self.batch)
         assert len(textfeed.labels) == len(
             range(0, self.window.height, TILE_SIZE)) - 1
 
-    def test_activate(self):
+    def TestActivate_BatchChanged_AddAllLabelsToNewBatch(self):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
                                 pyglet.graphics.Batch())
-        assert all(label.batch is not self.batch for label in textfeed.labels)
-        assert textfeed.box.batch is not self.batch
+        for label in textfeed.labels:
+            assert label.batch is not self.batch
+
         textfeed.batch = self.batch
         textfeed.activate()
-        assert all(label.batch is self.batch for label in textfeed.labels)
+        for label in textfeed.labels:
+            assert label.batch is self.batch
+
+    def TestActivate_BatchChanged_AddBoxToNewBatch(self):
+        textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
+                                pyglet.graphics.Batch())
+        assert textfeed.box.batch is not self.batch
+
+        textfeed.batch = self.batch
+        textfeed.activate()
         assert textfeed.box.batch is self.batch
 
-    def test_write(self):
+    def TestWrite_BlankLabelsExist_AddTextToClosestBlankLabelToTop(self):
         textfeed = gui.TextFeed(
-            5, 5, self.window.width - 5, self.window.height - 5, self.batch,
-            True)
-        assert all(label.text == '' for label in textfeed.labels)
-
-        text = 'Hello, world!!!'
+            0, 0, self.window.width, self.window.height, self.batch)
+        text = 'Hello, world!'
         for i in range(len(textfeed.labels) - 1):
-            textfeed.write(text)
-            assert textfeed.labels[-(i + 1)].text == text
-            assert all(label.text == '' for label in textfeed.labels[:-(i + 1)])
+            label = textfeed.labels[-i - 1]
+            assert label.text == ''
 
-        textfeed.write(text)
-        assert all(label.text == text for label in textfeed.labels)
-        textfeed.write('Goodbye, cruel world...')
-        assert textfeed.labels[0].text == 'Goodbye, cruel world...'
-        assert all(label.text == text for label in textfeed.labels[1:])
+            textfeed.write(text)
+            assert label.text == text
+
+    def TestWrite_BlankLabelsExist_NonBlankLabelsUntouched(self):
+        textfeed = gui.TextFeed(
+            0, 0, self.window.width, self.window.height, self.batch)
+        text = ['T' * i for i in range(1, len(textfeed.labels) + 1)]
+        for i in range(len(textfeed.labels)):
+            textfeed.write(text[i])
+            for j in range(i):
+                assert textfeed.labels[-1 - j].text == text[j]
+
+            for label in textfeed.labels[:-i - 1]:
+                assert label.text == '', i
+
+    def TestWrite_NoBlankLabelsExist_InsertTextInBottom(self):
+        textfeed = gui.TextFeed(
+            0, 0, self.window.width, self.window.height, self.batch)
+        text1 = 'Hello, world!'
+        for i in range(len(textfeed.labels)):
+            textfeed.write(text1)
+        text2 = 'Goodbye, cruel world...'
+        for i in range(len(textfeed.labels)):
+            textfeed.write(text2)
+            assert textfeed.labels[i].text == text2
+
+            for label in textfeed.labels[i + 1:]:
+                assert label.text == text1
