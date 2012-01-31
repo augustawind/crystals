@@ -1,3 +1,5 @@
+from itertools import count
+
 from nose.tools import *
 
 from crystals import world
@@ -6,29 +8,36 @@ from crystals.data import ImageDict
 from test.util import *
 from test.test_data import IMAGE_PATH
 
-class WorldTestCase(PygletTestCase):
+class WorldTestCase(object):
 
     def __init__(self):
         super(WorldTestCase, self).__init__()
-        self.img = ImageDict('terrain', IMAGE_PATH)
 
-    def get_room(self):
-        name = 'a room'
-        wall = lambda: entity.Entity(
-            'terrain', 'wall', False, self.img['wall-vert-blue'])
-        floor = lambda: entity.Entity(
-            'terrain', 'floor', True, self.img['floor-b-red'])
-        layers = [
-            [[wall(), wall(), wall()],
-             [wall(), floor(), wall()],
-             [wall(), floor(), floor()]],
-            [[None, None, None],
-             [None, None, None],
-             [None, None, wall()]]]
-        room = world.Room(name, self.batch, layers)
-        room.focus()
+        self.roomgen = self.getroom()
+        #self.roomgen.next()
 
-        return room, name, layers, wall, floor
+    def getroom(self):
+        for i in count(0):
+            self.imagedict = ImageDict('terrain', IMAGE_PATH)
+            self.rm_name = 'room{}'.format(i)
+            self.Wall = lambda: entity.Entity(
+                'terrain', 'wall{}'.format(i), False,
+                self.imagedict['wall-vert-blue'])
+            self.Floor = lambda: entity.Entity(
+                'terrain', 'floor{}'.format(i), True,
+                 self.imagedict['floor-b-red'])
+            self.rm_layers = [
+                [[self.Wall(), self.Wall(), self.Wall()],
+                 [self.Wall(), self.Floor(), self.Wall()],
+                 [self.Wall(), self.Floor(), self.Floor()]],
+                [[None, None, None],
+                 [None, None, None],
+                 [None, None, self.Wall()]]]
+            self.batch = pyglet.graphics.Batch()
+
+            room = world.Room(self.rm_name, self.batch, self.rm_layers)
+            room.focus()
+            yield room
 
 
 @raises(world.WorldError)
@@ -39,22 +48,22 @@ def test_WorldError():
 class TestRoom(WorldTestCase):
 
     def test_init(self):
-        room, name, layers, wall, floor = self.get_room()
-        assert room == layers
-        assert isinstance(room.batch, pyglet.graphics.Batch)
+        room = self.roomgen.next()
+        assert room == self.rm_layers
+        assert room.batch == self.batch
         assert all(isinstance(group, pyglet.graphics.OrderedGroup)
                    for group in room.groups)
 
     def test__update_entity(self):
-        room, name, layers, wall, floor = self.get_room()
-        wall1 = wall()
+        room = self.roomgen.next()
+        wall1 = self.Wall()
         room._update_entity(wall1, 2, 1, 0)
         assert wall1.batch == room.batch
         assert wall1.x == world.ORIGIN_X + (2 * world.TILE_SIZE)
         assert wall1.y == world.ORIGIN_Y + world.TILE_SIZE
         assert wall1.group.order == 0
 
-        floor1 = floor()
+        floor1 = self.Floor()
         room._update_entity(floor1, 0, 0, 0)
         assert floor1.batch == room.batch
         assert floor1.x == world.ORIGIN_X
@@ -62,12 +71,12 @@ class TestRoom(WorldTestCase):
         assert floor1.group.order == 0
 
     def test_iswalkable(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         assert not room.iswalkable(0, 0)
         assert room.iswalkable(1, 1)
 
     def test_focus(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         room.focus()
         for layer in room:
             for y in range(len(layer)):
@@ -78,14 +87,14 @@ class TestRoom(WorldTestCase):
                     assert layer[y][x].y == y * world.TILE_SIZE + world.ORIGIN_Y
 
     def test_get_coords(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         entity_ = room[0][0][0]
         x, y, z = room.get_coords(entity_)
         assert (x, y, z) == (0, 0, 0)
 
     def test_add_layer(self):
-        room = self.get_room()[0]
-
+        room = self.roomgen.next()
+        
         roomlen = len(room)
         grouplen = len(room.groups)
         room.add_layer(0)
@@ -109,13 +118,13 @@ class TestRoom(WorldTestCase):
                              pyglet.graphics.Batch())
 
     def test_replace_entity(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         dummy = self.dummy_entity()
         room.replace_entity(dummy, 0, 0, 0)
         assert room[0][0][0] == dummy
 
     def test_add_entity(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         dummy = self.dummy_entity()
 
         room.add_entity(dummy, 1, 1, 1)
@@ -125,55 +134,62 @@ class TestRoom(WorldTestCase):
 
     @raises(world.WorldError)
     def test_add_entity_is_safe(self):
-        room = self.get_room()[0]
+        room = self.roomgen.next()
         room.add_entity(self.dummy_entity(), 0, 0, 0)
 
 
 class TestPortal(WorldTestCase):
 
     def test_init(self):
-        from_room = self.get_room()[0]
-        to_room = self.get_room()[0]
+        from_room = self.roomgen.next()
+        to_room = self.roomgen.next()
         portal = world.Portal(0, 0, from_room, to_room)
 
 
 class TestWorld(WorldTestCase):
 
     def setup(self):
-        WorldTestCase.setup(self)
-        self.room1, n1, l1, self.wall1, self.floor1 = self.get_room()
-        self.room2, n2, l2, self.wall2, self.floor2 = self.get_room()
-        self.room2.name = 'b room'
-        self.rooms = {'a room': self.room1, 'b room': self.room2}
-        self.portals = [world.Portal(1, 2, self.room1, self.room2),
-            world.Portal(1, 1, self.room2, self.room1)]
-        self.world = world.World(self.rooms, self.portals, 'b room') 
+        self.rooms = []
+        self.roomdict = {}
+        self.walls = []
+        self.floors = []
+        for i in range(2):
+            room = self.roomgen.next()
+            self.rooms.append(room)
+            self.roomdict[room.name] = room
+            self.walls.append(self.Wall)
+            self.floors.append(self.Floor)
+
+        self.portals = [world.Portal(1, 2, self.rooms[0], self.rooms[1]),
+                        world.Portal(1, 1, self.rooms[1], self.rooms[0])]
+
+        self.world = world.World(self.roomdict, self.portals, 'room1') 
 
     def test_init(self):
-        assert self.world == self.rooms
-        assert self.world.focus == self.room2
+        assert self.world == self.roomdict
+        assert self.world.focus == self.rooms[1]
 
     def test_get_portal(self):
         assert self.world.get_portal(1, 1) == self.portals[1]
         assert self.world.get_portal(1, 2) == None
-        assert self.world.get_portal(1, 2, room=self.room1) == self.portals[0]
+        assert self.world.get_portal(1, 2, room=self.rooms[0]) == self.portals[0]
 
     def test_add_entity1(self):
-        wall = self.wall1()
+        wall = self.walls[0]()
         nlayers = len(self.world.focus)
         self.world.add_entity(wall, 1, 1)
         assert self.world.focus[-1][1][1] == wall
         assert len(self.world.focus) == nlayers + 1
 
     def test_add_entity2(self):
-        floor = self.floor1()
+        floor = self.floors[0]()
         nlayers = len(self.world.focus)
         self.world.add_entity(floor, 1, 1, 0)
         assert self.world.focus[1][1][1] == floor
         assert len(self.world.focus) == nlayers + 1
 
     def test_add_entity3(self):
-        wall = self.wall2()
+        wall = self.walls[1]()
         nlayers = len(self.world.focus)
         self.world.add_entity(wall, 1, 1, 1)
         assert self.world.focus[1][1][1] == wall
@@ -181,40 +197,40 @@ class TestWorld(WorldTestCase):
 
     def test_pop_entity(self):
         entity_ = self.world.pop_entity(0, 0, 0)
-        assert entity_.name == self.wall2().name
+        assert entity_.name == self.walls[1]().name
         assert self.world.focus[0][0][0] == None
 
     def test_step_entity_changes_pos(self):
-        entity_ = self.room2[0][0][0]
+        entity_ = self.rooms[1][0][0][0]
         positions = ((1, 0), (0, 1), (-1, 0), (0, -1))
         for posx, posy in positions:
             self.world.step_entity(entity_, posx, posy)
             assert entity_.pos == (posx, posy)
 
     def test_step_entity_moves_entity_dest_walkable(self):
-        entity_ = self.room2[0][0][0]
+        entity_ = self.rooms[1][0][0][0]
         self.world.step_entity(entity_, 1, 2)
-        assert self.room2[0][0][0] != entity_
-        assert self.room2[1][2][1] == entity_
+        assert self.rooms[1][0][0][0] != entity_
+        assert self.rooms[1][1][2][1] == entity_
 
     def test_step_entity_doesnt_move_entity_dest_unwalkable(self):
-        entity_ = self.room2[0][0][0]
+        entity_ = self.rooms[1][0][0][0]
         self.world.step_entity(entity_, -1, 0)
-        assert self.room2[0][0][0] == entity_
+        assert self.rooms[1][0][0][0] == entity_
 
     def test_step_entity_returns_true_dest_walkable(self):
-        entity_ = self.room2[0][0][0]
+        entity_ = self.rooms[1][0][0][0]
         assert self.world.step_entity(entity_, 1, 2)
 
     def test_step_entity_returns_false_dest_unwalkable(self):
-        entity_ = self.room2[0][0][0]
+        entity_ = self.rooms[1][0][0][0]
         stepped = self.world.step_entity(entity_, -1, 0)
         assert not stepped
 
     def test_portal_entity(self):
         x, y, z = (1, 1, 0)
-        entity_ = self.room2[z][y][x]
+        entity_ = self.rooms[1][z][y][x]
         self.world.portal_entity(entity_, self.portals[1])
-        assert self.room2[z][y][x] != entity_
-        x, y, z = self.room1.get_coords(entity_)
-        assert self.room1[z][y][x] == entity_
+        assert self.rooms[1][z][y][x] != entity_
+        x, y, z = self.rooms[0].get_coords(entity_)
+        assert self.rooms[0][z][y][x] == entity_

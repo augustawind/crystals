@@ -29,11 +29,9 @@ class TestMainMenu(object):
 class TestWorldMode(WorldTestCase):
 
     def setup(self):
-        WorldTestCase.setup(self)
-
         self.window = pyglet.window.Window()
-        self.room1 = self.get_room()[0]
-        self.room2 = self.get_room()[0]
+        self.room1 = self.roomiter.next()
+        self.room2 = self.roomiter.next()
         self.rooms = {'a room': self.room1, 'b room': self.room2}
         self.portal1 = world.Portal(1, 1, self.room1, self.room2)
         self.portal2 = world.Portal(1, 2, self.room2, self.room1)
