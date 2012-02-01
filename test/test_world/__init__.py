@@ -15,9 +15,9 @@ class WorldTestCase(object):
         super(WorldTestCase, self).__init__()
 
     def setup(self):
-        self.roomgen = self.getroom()
+        self.roomgen = self.getrooms()
 
-    def getroom(self):
+    def getrooms(self):
         for i in count(0):
             self.imagedict = ImageDict('terrain', IMAGE_PATH)
             self.rm_name = 'room{}'.format(i)
@@ -42,7 +42,7 @@ class WorldTestCase(object):
 
 
 @raises(world.WorldError)
-def test_WorldError():
+def TestWorldError():
     raise world.WorldError()
 
 
