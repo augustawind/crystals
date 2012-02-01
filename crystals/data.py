@@ -40,7 +40,7 @@ class InsertPath(object):
 class ImageDict(dict):
     """Loads game images."""
 
-    def __init__(self, archetype, path=os.path.join(RES_PATH, 'image')):
+    def __init__(self, archetype, path=os.path.join(RES_PATH, 'images')):
         """Load all images in res_path/archetype.
 
         Images can then be accessed dict-style, where each key is an
@@ -55,10 +55,10 @@ class ImageDict(dict):
 
 def _validate_res_path(res_path):
     """Raise a ResourceError if res_path is invalid."""
-    image_path = os.path.join(res_path, 'image')
+    image_path = os.path.join(res_path, 'images')
     if not os.path.exists(image_path):
         raise ResourceError("Resource path must contain " +
-                             "subdirectory 'image'")
+                             "subdirectory 'images'")
     world_path = os.path.join(res_path, 'world')
     if not os.path.exists(world_path):
         raise ResourceError("Resource path must contain subdirectory " +
@@ -309,7 +309,7 @@ def load_setting(res_path=RES_PATH):
     _validate_res_path(res_path)
 
     # Load resources
-    image_path = os.path.join(res_path, 'image')
+    image_path = os.path.join(res_path, 'images')
     world_path = os.path.join(res_path, 'world')
     with InsertPath(world_path):
         configs, defaults = _load_configs()
