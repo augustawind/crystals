@@ -17,11 +17,11 @@ IGNORE_CHR = '.' # char to ignore when reading maps
 # Parameter names for all entities
 ENTITY_PARAMS = ('name', 'archetype', 'walkable', 'image')
 
-pyglet.resource.path = [
-    RES_PATH + '/world',
-    RES_PATH + '/img/terrain', RES_PATH + '/img/feature',
-    RES_PATH + '/img/item', RES_PATH + '/img/character']
-pyglet.resource.reindex()
+#pyglet.resource.path = [
+#    RES_PATH + '/world',
+#    RES_PATH + '/img/terrain', RES_PATH + '/img/feature',
+#    RES_PATH + '/img/item', RES_PATH + '/img/character']
+#pyglet.resource.reindex()
 
 
 class ResourceError(Exception):
