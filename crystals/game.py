@@ -4,8 +4,8 @@ import os.path
 import pyglet
 from pyglet.window import key
 
-from crystals import data
-from crystals.data import RES_PATH
+from crystals import resource
+from crystals.resource import RES_PATH
 from crystals import gui
 from crystals.entity import Entity
 from crystals.world import World
@@ -141,6 +141,6 @@ class Game(object):
         self.window.pop_handlers()
         self.window.clear()
 
-        world, player = data.load_setting(RES_PATH)
+        world, player = resource.load_setting(RES_PATH)
         self.world = WorldMode(self.window, world, player)
         self.world.activate()

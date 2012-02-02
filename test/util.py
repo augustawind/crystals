@@ -1,12 +1,21 @@
 """utility functions and classes for the test suite"""
 import os.path
+import os
 
 import pyglet
 
-RES_PATH = os.path.join('test', 'res')
-IMAGE_PATH = os.path.join(RES_PATH, 'images')
+RES_PATH = './test/res'
+IMG_PATH = RES_PATH + '/img'
 
-dummy_image = pyglet.image.load(os.path.join(IMAGE_PATH, 'item', 'sack.png'))
+pyglet.resource.path = [
+    RES_PATH + '/world',
+    IMG_PATH + '/terrain', IMG_PATH + '/feature', IMG_PATH + '/item',
+    IMG_PATH + '/character']
+pyglet.resource.reindex()
+
+
+def load_image(filename):
+    return pyglet.resource.image(filename)
 
 
 class PygletTestCase(object):

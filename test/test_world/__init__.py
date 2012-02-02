@@ -4,9 +4,8 @@ from nose.tools import *
 
 from crystals import world
 from crystals import entity
-from crystals.data import ImageDict
 from test.util import *
-from test.test_data import IMAGE_PATH
+from test.test_resource import IMG_PATH
 
 
 class WorldTestCase(object):
@@ -19,14 +18,13 @@ class WorldTestCase(object):
 
     def getrooms(self):
         for i in count(0):
-            self.imagedict = ImageDict('terrain', IMAGE_PATH)
             self.rm_name = 'room{}'.format(i)
             self.Wall = lambda: entity.Entity(
                 'terrain', 'wall{}'.format(i), False,
-                self.imagedict['wall-vert-blue'])
+                load_image('wall-vert-blue.png'))
             self.Floor = lambda: entity.Entity(
                 'terrain', 'floor{}'.format(i), True,
-                 self.imagedict['floor-b-red'])
+                 load_image('floor-b-red.png'))
             self.rm_layers = [
                 [[self.Wall(), self.Wall(), self.Wall()],
                  [self.Wall(), self.Floor(), self.Wall()],
@@ -148,9 +146,9 @@ class TestRoom(WorldTestCase):
         assert self._group_order_matches_index(room)
 
     def _DummyEntity(self):
-        images = ImageDict('terrain', IMAGE_PATH)
-        return entity.Entity('terrain', 'tree', False, images['tree-green'],
-                             pyglet.graphics.Batch())
+        return entity.Entity(
+            'terrain', 'tree', False, load_image('tree-green.png'),
+            pyglet.graphics.Batch())
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):
         room = self.roomgen.next()

@@ -7,11 +7,15 @@ entities = [
 
 def img(*parts):
     """Convenience function for providing the image names for entities."""
+    ext = '.png'
+    for part in parts:
+        part.replace(ext, '')
+
     if not parts:
         return ''
     if len(parts) == 1:
         return parts[0]
-    return '-'.join(parts)
+    return '-'.join(parts) + ext
 
 
 # define archetype classes ---------------------------------------------
@@ -26,6 +30,11 @@ class character(object):
     archetype = 'character'
     walkable = False
     image = img()
+
+# define player --------------------------------------------------------
+class player(character):
+    name = 'supercow'
+    image = img('cow')
 
 # define terrain template classes --------------------------------------
 class xterrain(terrain):

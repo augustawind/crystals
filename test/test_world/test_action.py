@@ -5,7 +5,7 @@ from test.util import *
 
 
 def _DummyEntity():
-    return entity.Entity('', '', False, dummy_image, None)
+    return entity.Entity('', '', False, load_image('sack.png'), None)
 
 
 class _OutputStream(object):
