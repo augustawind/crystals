@@ -40,8 +40,7 @@ class TestWorldMode(WorldTestCase):
         self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
                                   self.room2.name)
         self.player = entity.Entity(
-            'character', 'player', False, pyglet.image.load(
-            os.path.join(IMAGE_PATH, 'character', 'cow.png')))
+            'character', 'player', False, load_image('cow.png'))
         self.room2.add_entity(self.player, 1, 1, 1)
         self.worldmode = game.WorldMode(self.window, self.world_, self.player)
 

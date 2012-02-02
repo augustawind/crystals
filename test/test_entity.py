@@ -10,8 +10,7 @@ from test.util import *
 class TestEntity(object):
 
     def TestInit_AttrsHaveExpectedValues(self):
-        image = pyglet.image.load(
-            os.path.join(IMAGE_PATH, 'item', 'sack.png'))
+        image = load_image('sack.png')
         batch = pyglet.graphics.Batch()
         actions = [action.Alert(2, 'whoa!', sys.stdout)]
 

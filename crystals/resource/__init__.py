@@ -11,7 +11,7 @@ from crystals.world import Portal
 from crystals.world import Room
 from crystals.world import World
 
-RES_PATH = './res' # default path to game resources
+RES_PATH = 'res' # default path to game resources
 PLAYER_CHR = '@' # char that represents the player
 IGNORE_CHR = '.' # char to ignore when reading maps
 # Parameter names for all entities
