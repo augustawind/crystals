@@ -20,11 +20,9 @@ class WorldTestCase(object):
         for i in count(0):
             self.rm_name = 'room{}'.format(i)
             self.Wall = lambda: entity.Entity(
-                'terrain', 'wall{}'.format(i), False,
-                load_image('wall-vert-blue.png'))
+                'wall{}'.format(i), False, load_image('wall-vert-blue.png'))
             self.Floor = lambda: entity.Entity(
-                'terrain', 'floor{}'.format(i), True,
-                 load_image('floor-b-red.png'))
+                'floor{}'.format(i), True, load_image('floor-b-red.png'))
             self.rm_layers = [
                 [[self.Wall(), self.Wall(), self.Wall()],
                  [self.Wall(), self.Floor(), self.Wall()],
@@ -147,7 +145,7 @@ class TestRoom(WorldTestCase):
 
     def _DummyEntity(self):
         return entity.Entity(
-            'terrain', 'tree', False, load_image('tree-green.png'),
+            'tree', False, load_image('tree-green.png'),
             pyglet.graphics.Batch())
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):

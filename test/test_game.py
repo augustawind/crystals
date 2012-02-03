@@ -39,8 +39,7 @@ class TestWorldMode(WorldTestCase):
         self.portal2 = world.Portal(1, 2, self.room2, self.room1)
         self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
                                   self.room2.name)
-        self.player = entity.Entity(
-            'character', 'player', False, load_image('cow.png'))
+        self.player = entity.Entity('player', False, load_image('cow.png'))
         self.room2.add_entity(self.player, 1, 1, 1)
         self.worldmode = game.WorldMode(self.window, self.world_, self.player)
 
