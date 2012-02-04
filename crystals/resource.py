@@ -15,9 +15,20 @@ RES_PATH = 'res' # default path to game resources
 WORLD_PATH = RES_PATH + '/world' # default path to game world scripts
 IMG_PATH = RES_PATH + '/img' # default path to game images
 
+glEnable(GL_TEXTURE_2D)
+
 
 class AtlasError(Exception):
     """Raised when invalid code is found in the 'atlas.py' world script."""
+
+
+def _scale_image(img, width, height):
+    """Scale `img` to `width` by `height`, keeping pixel sharpness."""
+    texture = img.get_texture()
+    glBindTexture(GL_TEXTURE_2D, texture.id)
+    texture.width = width
+    texture.height = height
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
 
 def load_entity(obj, imgloader):
@@ -25,6 +36,7 @@ def load_entity(obj, imgloader):
     describe it.
     """
     image = imgloader.image(obj.image)
+    _scale_image(image, TILE_SIZE, TILE_SIZE)
     return Entity(obj.name, obj.walkable, image)
 
 
@@ -74,18 +86,24 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     from information found in modules 'atlas.py' and 'entities.py' at
     `world_path`, and using images at `img_path`.
     """
+    # Prepare resources
     atlas, entities = load_world_scripts(world_path)
     imgloader = make_img_loader(img_path)
 
+    # Load rooms
     rooms = {}
     for rname in atlas.ALL:
         ratlas = getattr(atlas, rname)
         rentities = getattr(entities, rname)
         rooms[rname] = load_room(rname, ratlas, rentities, imgloader)
 
+    # Load portals
     portals = []
+
+    # Load world
     world = World(rooms, portals, atlas.START[0])
 
+    # Load and add player to world
     player = load_entity(entities.PLAYER, imgloader)
     rname, rz, ry, rx = atlas.START
     world.add_entity(player, rx, ry, rz, room=world[rname])

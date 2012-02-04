@@ -25,6 +25,17 @@ def TestAtlasError():
     raise resource.AtlasError()
 
 
+def TestScaleImage_ValidParamsGiven_ScaleImage():
+    img = imgloader().image('cow.png')
+    texture = img.get_texture()
+    assert texture.width != 13
+    assert texture.height != 13
+
+    resource._scale_image(img, 13, 13)
+    assert texture.width == 13
+    assert texture.height == 13
+
+
 def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
     class AnEntity:
         name = 'guido'
