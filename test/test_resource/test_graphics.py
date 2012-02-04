@@ -2,10 +2,13 @@ import pyglet
 
 from crystals.resource import graphics
 from test.util import *
+from test.test_resource import imgloader
+
+images = imgloader()
 
 
 def TestScaleImage_ValidParamsGiven_ScaleImage():
-    img = load_image('cow.png')
+    img = images.image('cow.png')
     texture = img.get_texture()
     assert texture.width != 13
     assert texture.height != 13

@@ -4,18 +4,6 @@ import os
 
 import pyglet
 
-RES_PATH = 'test/res'
-IMG_PATH = RES_PATH + '/img'
-WORLD_PATH = RES_PATH + '/world'
-
-loader = pyglet.resource.Loader([
-    RES_PATH + '/world', IMG_PATH + '/terrain', IMG_PATH + '/feature',
-    IMG_PATH + '/item', IMG_PATH + '/character'], script_home='.')
-
-
-def load_image(filename):
-    return loader.image(filename)
-
 
 class PygletTestCase(object):
 

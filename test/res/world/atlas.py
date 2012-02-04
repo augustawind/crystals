@@ -7,8 +7,8 @@ class RedRoom:
     key = {
         '|': 'vwall',
         '-': 'hwall',
-        ',': 'floor_rough',
-        '+': 'floor_smooth'
+        ',': 'rfloor',
+        '+': 'sfloor'
     }
 
     map = [

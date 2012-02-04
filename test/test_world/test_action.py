@@ -2,10 +2,12 @@ from nose.tools import raises
 
 from crystals import *
 from test.util import *
+from test.test_resource import imgloader
 
+images = imgloader()
 
 def _DummyEntity():
-    return entity.Entity('', False, load_image('sack.png'), None)
+    return entity.Entity('', False, images.image('sack.png'), None)
 
 
 class _OutputStream(object):
@@ -21,39 +23,39 @@ class _OutputStream(object):
 class TestAction(object):
     
     def TestInit(self):
-        nactions = 3
-        action = world.action.Action(nactions)
+        count = 3
+        action = world.action.Action(count)
 
-    def TestExecute_NActionsPositive_DecrementNActions(self):
-        nactions = 3
-        action = world.action.Action(nactions)
+    def TestExecute_countPositive_Decrementcount(self):
+        count = 3
+        action = world.action.Action(count)
         entity_ = _DummyEntity()
-        for i in reversed(range(nactions)):
+        for i in reversed(range(count)):
 
             action.execute(entity_)
-            assert action.nactions == i
+            assert action.count == i
 
-    def TestExecute_NActionsZero_DoNothing(self):
+    def TestExecute_countZero_DoNothing(self):
         entity_ = _DummyEntity()
         action = world.action.Action(0)
 
         action.execute(entity_)
-        assert action.nactions == 0
+        assert action.count == 0
 
 
 class TestAlert(object):
 
     def TestInit(self):
-        nactions = 3
+        count = 3
         text = 'Hello, world!'
         output = _OutputStream()
-        alert = world.action.Alert(nactions, text, output)
+        alert = world.action.Alert(count, text, output)
 
     def TestExecute_ValidOutputStream_WriteToOutput(self):
-        nactions = 1
+        count = 1
         text = 'whoa!'
         output = _OutputStream()
-        alert = world.action.Alert(nactions, text, output)
+        alert = world.action.Alert(count, text, output)
         entity_ = _DummyEntity()
 
         alert.execute(entity_)

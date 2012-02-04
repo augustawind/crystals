@@ -6,11 +6,14 @@ import pyglet
 from crystals import entity
 from crystals.world import action
 from test.util import *
+from test.test_resource import imgloader
+
+images = imgloader()
 
 class TestEntity(object):
 
     def TestInit_AttrsHaveExpectedValues(self):
-        image = load_image('sack.png')
+        image = images.image('sack.png')
         batch = pyglet.graphics.Batch()
         actions = [action.Alert(2, 'whoa!', sys.stdout)]
 

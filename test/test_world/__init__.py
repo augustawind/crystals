@@ -5,7 +5,9 @@ from nose.tools import *
 from crystals import world
 from crystals import entity
 from test.util import *
-from test.test_resource import IMG_PATH
+from test.test_resource import imgloader
+
+images = imgloader()
 
 
 class WorldTestCase(object):
@@ -20,9 +22,9 @@ class WorldTestCase(object):
         for i in count(0):
             self.rm_name = 'room{}'.format(i)
             self.Wall = lambda: entity.Entity(
-                'wall{}'.format(i), False, load_image('wall-vert-blue.png'))
+                'wall{}'.format(i), False, images.image('wall-vert-blue.png'))
             self.Floor = lambda: entity.Entity(
-                'floor{}'.format(i), True, load_image('floor-b-red.png'))
+                'floor{}'.format(i), True, images.image('floor-b-red.png'))
             self.rm_layers = [
                 [[self.Wall(), self.Wall(), self.Wall()],
                  [self.Wall(), self.Floor(), self.Wall()],
@@ -145,7 +147,7 @@ class TestRoom(WorldTestCase):
 
     def _DummyEntity(self):
         return entity.Entity(
-            'tree', False, load_image('tree-green.png'),
+            'tree', False, images.image('tree-green.png'),
             pyglet.graphics.Batch())
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):

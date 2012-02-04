@@ -4,15 +4,14 @@ import os.path
 import pyglet
 from pyglet.window import key
 
-from crystals import resource
-from crystals.resource import RES_PATH
 from crystals import gui
+from crystals import resource
+from crystals.resource import WORLD_PATH, IMG_PATH
 from crystals.entity import Entity
 from crystals.world import World
 
 if __debug__:
-    # Use the resource path used in the test suite 
-    from test.util import RES_PATH
+    from test.test_resource import WORLD_PATH, IMG_PATH
 
 
 class GameMode(object):
@@ -141,6 +140,7 @@ class Game(object):
         self.window.pop_handlers()
         self.window.clear()
 
-        world, player = resource.load_setting(RES_PATH)
+        world = resource.load_world(WORLD_PATH, IMG_PATH)
+        player = resource.load_player()
         self.world = WorldMode(self.window, world, player)
         self.world.activate()

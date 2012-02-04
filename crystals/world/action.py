@@ -4,14 +4,14 @@
 class Action(object):
     """An action that can be committed by an entity in the world."""
 
-    def __init__(self, nactions):
-        self.nactions = nactions
+    def __init__(self, count):
+        self.count = count
     
     def execute(self, entity):
         """Execute the action, given the entity responsible for it."""
-        if self.nactions < 1:
+        if self.count < 1:
             return
-        self.nactions -= 1
+        self.count -= 1
 
 
 class Alert(Action):
@@ -19,8 +19,8 @@ class Alert(Action):
     presumably the game's infobox.
     """
 
-    def __init__(self, nactions, text, output):
-        Action.__init__(self, nactions)
+    def __init__(self, count, text, output):
+        Action.__init__(self, count)
         self.text = text
         self.output = output
 

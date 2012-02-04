@@ -5,8 +5,11 @@ from crystals import game
 from crystals import gui
 from crystals import entity
 from crystals import world
-from test.test_world import WorldTestCase
 from test.util import *
+from test.test_world import WorldTestCase
+from test.test_resource import imgloader
+
+images = imgloader()
 
 class TestGameMode(object):
 
@@ -39,7 +42,7 @@ class TestWorldMode(WorldTestCase):
         self.portal2 = world.Portal(1, 2, self.room2, self.room1)
         self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
                                   self.room2.name)
-        self.player = entity.Entity('player', False, load_image('cow.png'))
+        self.player = entity.Entity('player', False, images.image('cow.png'))
         self.room2.add_entity(self.player, 1, 1, 1)
         self.worldmode = game.WorldMode(self.window, self.world_, self.player)
 

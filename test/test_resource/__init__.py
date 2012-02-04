@@ -9,6 +9,16 @@ from crystals.world import Room
 from crystals.entity import Entity
 from test.util import *
 
+RES_PATH = 'test/res'
+WORLD_PATH = RES_PATH + '/world'
+IMG_PATH = RES_PATH + '/img'
+
+
+def imgloader():
+    return pyglet.resource.Loader([
+        IMG_PATH + '/terrain', IMG_PATH + '/feature', IMG_PATH + '/item',
+        IMG_PATH + '/character'], script_home='.')
+
 
 @raises(resource.AtlasError)
 def TestAtlasError():
@@ -20,7 +30,7 @@ def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
         name = 'guido'
         walkable = False
         image = 'human-peasant.png'
-    entity = resource.load_entity(AnEntity)
+    entity = resource.load_entity(AnEntity, imgloader())
 
     assert entity.name == AnEntity.name
     assert entity.walkable == AnEntity.walkable
@@ -72,7 +82,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
             walkable = True
             image = 'sack.png'
 
-    room = resource.load_room(name, atlas, entities)
+    room = resource.load_room(name, atlas, entities, imgloader())
     check_room(room, atlas, entities)
 
 
@@ -104,7 +114,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
             walkable = True
             image = 'sack.png'
 
-    room = resource.load_room(name, atlas, entities)
+    room = resource.load_room(name, atlas, entities, imgloader())
     assert room[1][1][1] is None
     check_room(room, atlas, entities)
 
@@ -138,11 +148,11 @@ def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
             walkable = True
             image = 'sack.png'
 
-    room = resource.load_room(name, atlas, entities)
+    room = resource.load_room(name, atlas, entities, imgloader())
 
 
 def TestLoadWorld():
-    world = resource.load_world()
+    world = resource.load_world(WORLD_PATH, IMG_PATH)
 
     assert len(world) is 1
     assert 'RedRoom' in world

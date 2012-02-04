@@ -12,28 +12,23 @@ PLAYER_CHAR = '@' # atlas char that represents the player
 IGNORE_CHAR = '.' # atlas char that represents empty space
 
 RES_PATH = 'res' # default path to game resources
-IMG_PATH = RES_PATH + '/img' # default path to game images
 WORLD_PATH = RES_PATH + '/world' # default path to game world scripts
-
-# loader for game resources
-loader = pyglet.resource.Loader([
-    IMG_PATH + '/terrain', IMG_PATH + '/feature', IMG_PATH + '/item',
-    IMG_PATH + '/character'], script_home='.')
+IMG_PATH = RES_PATH + '/img' # default path to game images
 
 
 class AtlasError(Exception):
     """Raised when invalid code is found in the 'atlas.py' world script."""
 
 
-def load_entity(obj):
+def load_entity(obj, imgloader):
     """Return an Entity instance, given an object whose attributes
     describe it.
     """
-    image = loader.image(obj.image)
+    image = imgloader.image(obj.image)
     return Entity(obj.name, obj.walkable, image)
 
 
-def load_room(name, atlas, entities):
+def load_room(name, atlas, entities, imgloader):
     """Return a Room instance, given its name, object `atlas` describing
     its layout and object `entities` describing its entities.
     """
@@ -50,27 +45,34 @@ def load_room(name, atlas, entities):
                     entity = None
                 else:
                     attrobj = getattr(entities, atlas.key[char])
-                    entity = load_entity(attrobj)
+                    entity = load_entity(attrobj, imgloader)
                 layers[-1][-1].append(entity)
 
     return Room(name, pyglet.graphics.Batch(), layers)
 
 
-def load_world():
+def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     """Return a World instance compiled from information found in modules
-    'atlas.py' and 'entities.py' at `WORLD_PATH`.
+    'atlas.py' and 'entities.py' at `world_path`, and using images at
+    `img_path`.
     """
-    world_path = os.path.normpath(WORLD_PATH)
+    # Load world scripts
+    world_path = os.path.normpath(world_path)
     sys.path.insert(0, world_path)
     atlas = __import__('atlas')
     entities = __import__('entities')
     sys.path.remove(world_path)
 
+    # Prepare a loader for images
+    imgloader = pyglet.resource.Loader([
+        img_path + '/terrain', img_path + '/feature', img_path + '/item',
+        img_path + '/character'], script_home='.')
+
     rooms = {}
     for rname in atlas.ALL:
         ratlas = getattr(atlas, rname)
         rentities = getattr(entities, rname)
-        rooms[rname] = load_room(rname, ratlas, rentities)
+        rooms[rname] = load_room(rname, ratlas, rentities, imgloader)
 
     portals = []
 

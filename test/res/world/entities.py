@@ -1,53 +1,25 @@
-# define archetype classes ---------------------------------------------
-class terrain(object):
-    name = 'feature of the environment'
-    walkable = True
+from collections import namedtuple
 
-class character(object):
-    name = 'intelligent life form'
-    walkable = False
+# Define some template entities
 
-# define player --------------------------------------------------------
-class player(character):
-    name = 'supercow'
-    image = 'cow.png'
+entity = namedtuple('entity', 'name walkable image')
 
-# define terrain template classes --------------------------------------
-class xterrain(terrain):
-    name = 'blockade of some sort'
-    walkable = False
+rfloor = entity('rough surface', True, 'floor-a-')
+sfloor = entity('smooth surface', True, 'floor-b-')
 
-class floor(terrain):
-    name = 'surface'
-    image = 'floor-'
-class floor_rough(floor):
-    name = 'rough surface'
-    image = floor.image + 'a-'
-class floor_smooth(floor):
-    name = 'smooth surface'
-    image = floor.image + 'b-'
+wall = entity('wall', False, None)
+vwall = wall._replace(image='wall-vert-')
+hwall = wall._replace(image='wall-horiz-')
 
-class wall(xterrain):
-    name = 'wall'
-    image = 'wall-'
-class vwall(wall):
-    image = wall.image + 'vert-'
-class hwall(wall):
-    image = wall.image + 'horiz-'
-
-# define rooms
+# Define entities for each room
 # ----------------------------------------------------------------------
 
-class RedRoom(object):
+class RedRoom:
 
-    ALL = ['floor_rough', 'floor_smooth']
+    ALL = ['rfloor', 'sfloor', 'vwall', 'hwall']
 
-    class floor_rough(floor_rough):
-        image = floor_rough.image + 'red.png'
-    class floor_smooth(floor_smooth):
-        image = floor_smooth.image + 'red.png'
+    rfloor = rfloor._replace(image=rfloor.image + 'red.png')
+    sfloor = sfloor._replace(image=sfloor.image + 'red.png')
 
-    class vwall(vwall):
-        image = vwall.image + 'red.png'
-    class hwall(hwall):
-        image = hwall.image + 'red.png'
+    vwall = vwall._replace(image=vwall.image + 'blue.png')
+    hwall = hwall._replace(image=hwall.image + 'blue.png')
