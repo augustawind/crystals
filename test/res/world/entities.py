@@ -1,9 +1,12 @@
 from collections import namedtuple
 
-# Define some template entities
-
+# Define an entity base class
 entity = namedtuple('entity', 'name walkable image')
 
+# Define the player entity
+PLAYER = entity('player', False, 'human-peasant.png')
+
+# Define some template entities
 rfloor = entity('rough surface', True, 'floor-a-')
 sfloor = entity('smooth surface', True, 'floor-b-')
 

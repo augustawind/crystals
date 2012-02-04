@@ -5,7 +5,7 @@ import pyglet
 from nose.tools import *
 
 from crystals import resource
-from crystals.world import Room
+from crystals.world import Room, World
 from crystals.entity import Entity
 from test.util import *
 
@@ -151,15 +151,27 @@ def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
     room = resource.load_room(name, atlas, entities, imgloader())
 
 
-def TestLoadWorld():
-    world = resource.load_world(WORLD_PATH, IMG_PATH)
+def TestLoadWorld_ReturnExpectedWorld():
+    world, player = resource.load_world(WORLD_PATH, IMG_PATH)
 
+    assert isinstance(world, World)
     assert len(world) is 1
     assert 'RedRoom' in world
 
     room = world['RedRoom']
     assert isinstance(room, Room)
     assert room.name == 'RedRoom'
-    assert len(room) == 2 # depth
-    assert len(room[0]) == 5 # height
-    assert len(room[0][0]) == 5 # width
+    assert len(room[0]) == 5 # Height
+    assert len(room[0][0]) == 5 # Width
+
+
+def TestLoadWorld_ReturnExpectedPlayer():
+    world, player = resource.load_world(WORLD_PATH, IMG_PATH)
+
+    assert isinstance(player, Entity)
+    assert player.name == 'player'
+    assert player.walkable == False
+
+    x, y, z = world.focus.get_coords(player)
+    assert x == 2
+    assert y == 2

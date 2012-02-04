@@ -51,22 +51,31 @@ def load_room(name, atlas, entities, imgloader):
     return Room(name, pyglet.graphics.Batch(), layers)
 
 
-def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
-    """Return a World instance compiled from information found in modules
-    'atlas.py' and 'entities.py' at `world_path`, and using images at
-    `img_path`.
+def load_world_scripts(world_path):
+    """Return 'atlas.py' and 'entities.py' module objects, given a
+    directory that contains those modules.
     """
-    # Load world scripts
     world_path = os.path.normpath(world_path)
     sys.path.insert(0, world_path)
     atlas = __import__('atlas')
     entities = __import__('entities')
     sys.path.remove(world_path)
+    return atlas, entities
 
-    # Prepare a loader for images
-    imgloader = pyglet.resource.Loader([
+
+def make_img_loader(img_path):
+    return pyglet.resource.Loader([
         img_path + '/terrain', img_path + '/feature', img_path + '/item',
         img_path + '/character'], script_home='.')
+
+
+def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
+    """Return a World instance and a player Entity instance, compiled
+    from information found in modules 'atlas.py' and 'entities.py' at
+    `world_path`, and using images at `img_path`.
+    """
+    atlas, entities = load_world_scripts(world_path)
+    imgloader = make_img_loader(img_path)
 
     rooms = {}
     for rname in atlas.ALL:
@@ -75,5 +84,10 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
         rooms[rname] = load_room(rname, ratlas, rentities, imgloader)
 
     portals = []
+    world = World(rooms, portals, atlas.START[0])
 
-    return World(rooms, portals, atlas.START)
+    player = load_entity(entities.PLAYER, imgloader)
+    rname, rz, ry, rx = atlas.START
+    world.add_entity(player, rx, ry, rz, room=world[rname])
+
+    return world, player

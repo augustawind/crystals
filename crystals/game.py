@@ -140,7 +140,6 @@ class Game(object):
         self.window.pop_handlers()
         self.window.clear()
 
-        world = resource.load_world(WORLD_PATH, IMG_PATH)
-        player = resource.load_player()
+        world, player = resource.load_world(WORLD_PATH, IMG_PATH)
         self.world = WorldMode(self.window, world, player)
         self.world.activate()

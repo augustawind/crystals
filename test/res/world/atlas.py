@@ -1,5 +1,5 @@
 ALL = ['RedRoom']
-START = 'RedRoom'
+START = ('RedRoom', 1, 2, 2)
 
 
 class RedRoom:
