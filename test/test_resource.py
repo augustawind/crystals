@@ -50,19 +50,21 @@ def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
 
 def check_room(room, atlas, entities):
     for z in range(len(atlas.map)):
-        for y in range(len(atlas.map[z])):
-            for x in range(len(atlas.map[z][y])):
-                char = atlas.map[z][y][x]
+        atlas_y_coords = range(len(atlas.map[z]))
+        room_y_coords = reversed(atlas_y_coords)
+        for ay, ry in zip(atlas_y_coords, room_y_coords):
+            for x in range(len(atlas.map[z][ay])):
+                char = atlas.map[z][ay][x]
 
                 if char == resource.IGNORE_CHAR:
-                    assert room[z][y][x] is None
+                    assert room[z][ry][x] is None
                     continue
 
                 clsname = atlas.key[char]
                 name = getattr(entities, clsname).name
-                assert room[z][y][x].name == name
+                assert room[z][ry][x].name == name
                 walkable = getattr(entities, clsname).walkable
-                assert room[z][y][x].walkable == walkable
+                assert room[z][ry][x].walkable == walkable
 
 
 def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():

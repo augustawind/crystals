@@ -47,7 +47,9 @@ def load_room(name, atlas, entities, imgloader):
     layers = []
     for layer in atlas.map:
         layers.append([])
-        for row in layer:
+        # Read rows in reverse so that maps displayed in symbol form
+        # in the atlas mirror the actual appearance of the room
+        for row in reversed(layer):
             layers[-1].append([])
             for char in row:
                 if char == IGNORE_CHAR:
