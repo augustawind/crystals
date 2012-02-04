@@ -162,7 +162,7 @@ class World(dict):
     
     def step_entity(self, entity, xstep, ystep):
         """Move entity from its current position by (xstep, ystep),
-        changing the position of the entity to reflect the direction of
+        changing the direction of the entity to reflect the direction of
         the attempted move. 
         
         Return True if the move was successful, else False.
@@ -185,10 +185,10 @@ class World(dict):
         destination.
         """
         x, y, z = self.focus.get_coords(entity)
-        self.pop_entity(x, y, z)
-
         for portal1 in self.portals:
             if portal1.from_room == portal.to_room:
+                self.pop_entity(x, y, z)
                 x = portal1.x
                 y = portal1.y
-        self.add_entity(entity, x, y, z, portal.to_room)
+                self.add_entity(entity, x, y, z, portal.to_room)
+                return

@@ -1,18 +1,15 @@
 """tools for loading variable game data and resources"""
-import os
+import os.path
 import sys
 
 import pyglet
 from pyglet.gl import *
 
 from crystals.entity import Entity
-from crystals.world import TILE_SIZE
-from crystals.world import Portal
-from crystals.world import Room
-from crystals.world import World
+from crystals.world import Room, World, Portal, TILE_SIZE
 
-CHR_PLAYER = '@' # char that represents the player
-CHR_IGNORE = '.' # char to ignore when reading maps
+PLAYER_CHAR = '@' # atlas char that represents the player
+IGNORE_CHAR = '.' # atlas char that represents empty space
 
 RES_PATH = 'res' # default path to game resources
 IMG_PATH = RES_PATH + '/img' # default path to game images
@@ -21,17 +18,60 @@ WORLD_PATH = RES_PATH + '/world' # default path to game world scripts
 # loader for game resources
 loader = pyglet.resource.Loader([
     IMG_PATH + '/terrain', IMG_PATH + '/feature', IMG_PATH + '/item',
-    IMG_PATH + '/character', WORLD_PATH], script_home='.')
+    IMG_PATH + '/character'], script_home='.')
 
 
-class ResourceError(Exception):
-    """Exception class for errors in loading game resources."""
+class AtlasError(Exception):
+    """Raised when invalid code is found in the 'atlas.py' world script."""
 
 
-def load_entity(name, walkable, img):
-    image = loader.image(img)
-    return Entity(name, walkable, image)
+def load_entity(obj):
+    """Return an Entity instance, given an object whose attributes
+    describe it.
+    """
+    image = loader.image(obj.image)
+    return Entity(obj.name, obj.walkable, image)
 
-#def load_world(self):
-    #entities = loader.file('entities.py')
-    #atlas = loader.file('atlas.py')
+
+def load_room(name, atlas, entities):
+    """Return a Room instance, given its name, object `atlas` describing
+    its layout and object `entities` describing its entities.
+    """
+    layers = []
+    for layer in atlas.map:
+        layers.append([])
+        for row in layer:
+            layers[-1].append([])
+            for char in row:
+                if char == IGNORE_CHAR:
+                    if len(layers) is 1:
+                        raise AtlasError("'.' character not allowed in " +
+                                         "first layer of atlas.map")
+                    entity = None
+                else:
+                    attrobj = getattr(entities, atlas.key[char])
+                    entity = load_entity(attrobj)
+                layers[-1][-1].append(entity)
+
+    return Room(name, pyglet.graphics.Batch(), layers)
+
+
+def load_world():
+    """Return a World instance compiled from information found in modules
+    'atlas.py' and 'entities.py' at `WORLD_PATH`.
+    """
+    world_path = os.path.normpath(WORLD_PATH)
+    sys.path.insert(0, world_path)
+    atlas = __import__('atlas')
+    entities = __import__('entities')
+    sys.path.remove(world_path)
+
+    rooms = {}
+    for rname in atlas.ALL:
+        ratlas = getattr(atlas, rname)
+        rentities = getattr(entities, rname)
+        rooms[rname] = load_room(rname, ratlas, rentities)
+
+    portals = []
+
+    return World(rooms, portals, atlas.START)

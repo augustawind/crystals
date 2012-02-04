@@ -1,70 +1,29 @@
-rooms = ['TestRoom1', 'TestRoom2']
-starting_room = 'TestRoom1'
-
-mapkey = {
-    '|': 'wall-vert',
-    '-': 'wall-horiz',
-    '+': 'floor-smooth',
-    ',': 'floor-rough'}
+ALL = ['RedRoom']
+START = 'RedRoom'
 
 
-class TestRoom1:
+class RedRoom:
 
-    mapkey = {}
-    
-    maps = [
-    """
-|-|
-|+|
-|++
-    """,
-    """
-.,.
-.@. 
-...
-    """
+    key = {
+        '|': 'vwall',
+        '-': 'hwall',
+        ',': 'floor_rough',
+        '+': 'floor_smooth'
+    }
+
+    map = [
+        [
+        ',,,,,',
+        ',,,,,',
+        ',,,,,',
+        ',,,,,',
+        ',,,,,',
+        ],
+        [
+        '|---|',
+        '|.+.|',
+        '|+++|',
+        '|.+.|',
+        '|---|',
+        ],
     ]
-
-    portalkey = {
-        '2': 'TestRoom2'}
-
-    portals = """
-...
-...
-..2
-    """
-
-
-class TestRoom2:
-
-    mapkey = {
-        '>': 'stairs-down',
-        'T': 'enemy-troll'}
-    
-    maps = [
-    """
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-    """,
-    """
-.....
-.....
-.T>..
-.....
-.....
-    """
-    ]
-
-    portalkey = {
-        '1': 'TestRoom1'}
-
-    portals = """
-.....
-.....
-..1..
-.....
-.....
-    """
