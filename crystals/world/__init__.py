@@ -1,4 +1,6 @@
 """creation and mutation of the game world"""
+from collections import namedtuple
+
 from pyglet.graphics import OrderedGroup
 
 __all__ = ['Room', 'Portal', 'World', 'action']
@@ -6,6 +8,8 @@ __all__ = ['Room', 'Portal', 'World', 'action']
 TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels
+
+Portal = namedtuple('Portal', ('x', 'y', 'from_room', 'to_room'))
 
 
 class WorldError(Exception):
@@ -89,16 +93,6 @@ class Room(list):
                 'Entity already exists in room {}[{}][{}][{}]'.format(
                 self.name, z, y, x))
         self.replace_entity(entity, x, y, z)
-
-
-class Portal(object):
-    """A two-way portal between two rooms."""
-
-    def __init__(self, x, y, from_room, to_room):
-        self.x = x
-        self.y = y
-        self.from_room = from_room
-        self.to_room = to_room
 
 
 class World(dict):
