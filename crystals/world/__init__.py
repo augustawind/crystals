@@ -119,7 +119,7 @@ class World(dict):
             return None
         return destname
 
-    def get_portal_xy_from_dest(self, to_room, from_room=''):
+    def get_dest_portal_xy(self, to_room, from_room=''):
         """If a portal from room named `from_room` to room named
         `to_room` exists, return its x and y coordinates.
         
@@ -127,13 +127,13 @@ class World(dict):
         """
         if not from_room:
             from_room = self.focus.name
-        portals = self.portals[from_room]
+        portals = self.portals[to_room]
         for y in range(len(portals)):
             for x in range(len(portals[y])):
                 p = portals[y][x]
                 if not p:
                     continue
-                if p == to_room:
+                if p == from_room:
                     return x, y
     
     def add_entity(self, entity, x, y, z=None, room=''):
@@ -192,10 +192,7 @@ class World(dict):
         current room to the destination room of the portal.
         """
         destname = self.portals[self.focus.name][y][x]
-        if not destname:
-            return
-
         z = self.focus.get_coords(entity)[2]
         self.pop_entity(x, y, z)
-        x, y = self.get_portal_xy_from_dest(self.focus.name, destname)
+        x, y = self.get_dest_portal_xy(destname)
         self.add_entity(entity, x, y, z, destname)

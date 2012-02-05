@@ -216,10 +216,11 @@ class TestWorld(WorldTestCase):
         destname = self.world.get_portal_dest_from_xy(x, y, self.rooms[0].name)
         assert destname == self.portals[self.rooms[0].name][y][x]
 
-    def TestGetPortalXYFromDest_PortalToDestExists_ReturnPortalXY(self):
-        room = self.rooms[0].name
-        x, y = self.world.get_portal_xy_from_dest(room)
-        assert self.portals[self.rooms[1].name][y][x] == room
+    def TestGetDestPortalXY_PortalToDestExists_ReturnPortalXY(self):
+        room0 = self.rooms[0].name
+        room1 = self.rooms[1].name
+        x, y = self.world.get_dest_portal_xy(room0)
+        assert self.portals[room0][y][x] == room1
 
     def TestAddEntity_ZIsNone_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[0]()

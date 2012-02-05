@@ -73,11 +73,12 @@ class TestWorldMode(WorldTestCase):
         self.worldmode.step_player(0, 1)
         self.worldmode.step_player(0, -1)
         assert self.room2[1][1][1] != self.player
-        assert self.room1[1][1][1] == self.player
+        assert self.room1[1][2][1] == self.player
 
     def TestPortalPlayer_ValidCoordsGiven_AddPlayerToPortalDest(self):
         x, y, z = self.room2.get_coords(self.worldmode.player)
         self.worldmode.portal_player(x, y)
+        x, y = self.world_.get_dest_portal_xy(self.room1.name, self.room2.name)
         assert self.room1[z][y][x] == self.worldmode.player
 
     def TestPortalPlayer_ValidCoordsGiven_DelPlayerFromPrevPos(self):
