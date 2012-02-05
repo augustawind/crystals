@@ -164,18 +164,43 @@ def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
     room = resource.load_room(name, atlas, entities, imgloader())
 
 
+def TestLoadPortals_LoadExpectedPortals():
+    class atlas:
+        portalkey = {'1': 'Room1', '2': 'Room2'}
+        portalmap = [
+            '..2',
+            '.1.',
+            '...']
+    portals = resource.load_portals(atlas)
+
+    assert len(portals) == 3 # height
+    assert len(portals[0]) == 3 # width
+    portal1 = portals[1][1]
+    assert portal1 == 'Room1'
+    portal2 = portals[2][2]
+    assert portal2 == 'Room2'
+
+
 def TestLoadWorld_ReturnExpectedWorld():
     world, player = resource.load_world(WORLD_PATH, IMG_PATH)
 
     assert isinstance(world, World)
-    assert len(world) is 1
+    assert len(world) is 2
     assert 'RedRoom' in world
+    assert world.focus == world['RedRoom']
 
     room = world['RedRoom']
     assert isinstance(room, Room)
     assert room.name == 'RedRoom'
     assert len(room[0]) == 5 # Height
     assert len(room[0][0]) == 5 # Width
+
+    room = world['BlueRoom']
+    assert isinstance(room, Room)
+    assert room.name == 'BlueRoom'
+    assert len(room) == 1
+    assert len(room[0]) == 5
+    assert len(room[0]) == 5
 
 
 def TestLoadWorld_ReturnExpectedPlayer():

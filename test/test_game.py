@@ -38,9 +38,18 @@ class TestWorldMode(WorldTestCase):
         self.room1 = self.roomgen.next()
         self.room2 = self.roomgen.next()
         self.rooms = {self.room1.name: self.room1, self.room2.name: self.room2}
-        self.portal1 = world.Portal(1, 1, self.room1, self.room2)
-        self.portal2 = world.Portal(1, 2, self.room2, self.room1)
-        self.world_ = world.World(self.rooms, [self.portal1, self.portal2],
+
+        self.portals = {
+            self.room1.name: [ 
+                ['', '', ''],
+                ['', '', ''],
+                ['', self.room2.name, '']],
+            self.room2.name: [ 
+                ['', '', ''],
+                ['', self.room1.name, ''],
+                ['', '', '']]}
+
+        self.world_ = world.World(self.rooms, self.portals,
                                   self.room2.name)
         self.player = entity.Entity('player', False, images.image('cow.png'))
         self.room2.add_entity(self.player, 1, 1, 1)
@@ -57,41 +66,43 @@ class TestWorldMode(WorldTestCase):
         self.worldmode.activate()
 
     def TestStepPlayer_NoPortalAtDest_MovePlayerGivenDistance(self):
-        self.world_.portals.remove(self.portal2) # Remove portal from world
         self.worldmode.step_player(0, 1)
         assert self.room2[1][2][1] == self.player
 
     def TestStepPlayer_PortalAtDest_MovePlayerToPortalDest(self):
         self.worldmode.step_player(0, 1)
-        assert self.room2[1][2][1] != self.player
+        self.worldmode.step_player(0, -1)
+        assert self.room2[1][1][1] != self.player
         assert self.room1[1][1][1] == self.player
 
     def TestPortalPlayer_ValidCoordsGiven_AddPlayerToPortalDest(self):
         x, y, z = self.room2.get_coords(self.worldmode.player)
-        self.worldmode.portal_player(self.portal2)
-        assert self.room2[z][y][x] != self.worldmode.player
+        self.worldmode.portal_player(x, y)
+        assert self.room1[z][y][x] == self.worldmode.player
 
     def TestPortalPlayer_ValidCoordsGiven_DelPlayerFromPrevPos(self):
         x, y, z = self.room2.get_coords(self.worldmode.player)
-        self.worldmode.portal_player(self.portal2)
-        assert self.room1[z][y][x] == self.worldmode.player
+        self.worldmode.portal_player(x, y)
+        assert self.room2[z][y][x] != self.worldmode.player
 
     def TestPortalPlayer_ValidCoordsGiven_SetFocusToNewRoom(self):
-       self.worldmode.portal_player(self.portal2)
-       assert self.world_.focus == self.room1
+        x, y, z = self.room2.get_coords(self.worldmode.player)
+        self.worldmode.portal_player(x, y)
+        assert self.world_.focus == self.room1
 
     def TestInteract(self):
         self.worldmode.interact()
 
     def TestOnKeyPress_MovementKeyPressedAndWalkable_MovePlayer(self):
-        self.world_.portals.remove(self.portal2) # Remove portal from focus
+        x, y, z = self.world_.focus.get_coords(self.worldmode.player)
         self.worldmode.on_key_press(key.MOTION_UP, 0)
-        assert self.room2[1][2][1] == self.player
+        assert self.room2[z][y + 1][x] == self.player
 
     def TestOnKeyPress_MovementKeyPressedButUnWalkable_DoNothing(self):
         for mvkey in (key.MOTION_LEFT, key.MOTION_DOWN, key.MOTION_RIGHT):
+            x, y, z = self.world_.focus.get_coords(self.worldmode.player)
             self.worldmode.on_key_press(mvkey, 0)
-            assert self.room2[1][1][1] == self.player
+            assert self.room2[z][y][x] == self.player
 
 
 class TestGame(object):

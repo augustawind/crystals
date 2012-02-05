@@ -94,16 +94,16 @@ class WorldMode(GameMode):
             return
 
         x, y, z = self.world.focus.get_coords(self.player)
-        portal = self.world.get_portal(x, y)
-        if portal:
-            self.portal_player(portal)
+        if self.world.get_portal_dest_from_xy(x, y):
+            self.portal_player(x, y)
 
-    def portal_player(self, portal):
-        """Transfer the player to the portal's destination, then set
-        that room as the focus.
+    def portal_player(self, x, y):
+        """Transfer the player to the destination of the portal at
+        (x, y), then set that room as the focus.
         """
-        self.world.portal_entity(self.player, portal)
-        self.set_focus(portal.to_room.name)
+        self.world.portal_entity(self.player, x, y)
+        dest = self.world.get_portal_dest_from_xy(x, y)
+        self.set_focus(dest)
 
     def interact(self):
         """If an interactable entity is in front of the player, make

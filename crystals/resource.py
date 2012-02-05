@@ -6,7 +6,7 @@ import pyglet
 from pyglet.gl import *
 
 from crystals.entity import Entity
-from crystals.world import Room, World, Portal, TILE_SIZE
+from crystals.world import Room, World, TILE_SIZE
 
 PLAYER_CHAR = '@' # atlas char that represents the player
 IGNORE_CHAR = '.' # atlas char that represents empty space
@@ -65,6 +65,25 @@ def load_room(name, atlas, entities, imgloader):
     return Room(name, pyglet.graphics.Batch(), layers)
 
 
+def load_portals(atlas):
+    """Return a list mapping room names to [y][x] indicies indicating
+    portal locations and their destination rooms, given object `atlas`
+    describing their positions and destination rooms.
+    """
+    portals = []
+    for y in reversed(range(len(atlas.portalmap))):
+        portals.append([])
+        for x in range(len(atlas.portalmap[y])):
+            char = atlas.portalmap[y][x]
+            if char == IGNORE_CHAR:
+                dest = ''
+            else:
+                dest = atlas.portalkey[char]
+            portals[-1].append(dest)
+
+    return portals
+
+
 def load_world_scripts(world_path):
     """Return 'atlas.py' and 'entities.py' module objects, given a
     directory that contains those modules.
@@ -92,15 +111,14 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     atlas, entities = load_world_scripts(world_path)
     imgloader = make_img_loader(img_path)
 
-    # Load rooms
+    # Load rooms and portals
     rooms = {}
+    portals = {}
     for rname in atlas.ALL:
         ratlas = getattr(atlas, rname)
         rentities = getattr(entities, rname)
         rooms[rname] = load_room(rname, ratlas, rentities, imgloader)
-
-    # Load portals
-    portals = []
+        portals[rname] = load_portals(ratlas)
 
     # Load world
     world = World(rooms, portals, atlas.START[0])
@@ -108,6 +126,6 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     # Load and add player to world
     player = load_entity(entities.PLAYER, imgloader)
     rname, rz, ry, rx = atlas.START
-    world.add_entity(player, rx, ry, rz, room=world[rname])
+    world.add_entity(player, rx, ry, rz, rname)
 
     return world, player

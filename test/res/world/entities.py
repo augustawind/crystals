@@ -26,3 +26,12 @@ class RedRoom:
 
     vwall = vwall._replace(image=vwall.image + 'blue.png')
     hwall = hwall._replace(image=hwall.image + 'blue.png')
+
+class BlueRoom:
+
+    ALL = ['sfloor', 'vwall', 'hwall']
+
+    sfloor = sfloor._replace(image='tree-dead.png')
+
+    vwall = vwall._replace(image=vwall.image + 'blue.png')
+    hwall = hwall._replace(image=hwall.image + 'blue.png')

@@ -169,19 +169,6 @@ class TestRoom(WorldTestCase):
         room.add_entity(dummy, 0, 0, 0)
 
 
-class TestPortal(WorldTestCase):
-
-    def TestInit_AttrsHaveExpectedValues(self):
-        from_room = self.roomgen.next()
-        to_room = self.roomgen.next()
-        portal = world.Portal(0, 0, from_room, to_room)
-
-        assert portal.x == 0
-        assert portal.y == 0
-        assert portal.from_room is from_room
-        assert portal.to_room is to_room
-
-
 class TestWorld(WorldTestCase):
 
     def setup(self):
@@ -198,8 +185,15 @@ class TestWorld(WorldTestCase):
             self.walls.append(self.Wall)
             self.floors.append(self.Floor)
 
-        self.portals = [world.Portal(1, 2, self.rooms[0], self.rooms[1]),
-                        world.Portal(1, 1, self.rooms[1], self.rooms[0])]
+        self.portals = {
+            self.rooms[0].name: [ 
+                ['', '', ''],
+                ['', '', ''],
+                ['', self.rooms[1].name, '']],
+            self.rooms[1].name: [ 
+                ['', '', ''],
+                ['', self.rooms[0].name, ''],
+                ['', '', '']]}
 
         self.world = world.World(self.roomdict, self.portals, 'room1') 
 
@@ -207,14 +201,25 @@ class TestWorld(WorldTestCase):
         assert self.world == self.roomdict
         assert self.world.focus == self.rooms[1]
 
-    def TestGetPortal_PortalAtCoords_ReturnPortal(self):
-        assert self.world.get_portal(1, 1) == self.portals[1]
+    def TestGetPortalDestFromXY_PortalAtCoords_ReturnPortal(self):
+        x = 1
+        y = 1
+        destname = self.world.get_portal_dest_from_xy(x, y)
+        assert destname == self.portals[self.rooms[1].name][y][x]
 
-    def TestGetPortal_NoPortalAtCoords_ReturnNone(self):
-        assert self.world.get_portal(1, 2) == None
+    def TestGetPortalDestFromXY_NoPortalAtCoords_ReturnNone(self):
+        assert self.world.get_portal_dest_from_xy(1, 2) == None
 
-    def TestGetPortal_OtherRoomGiven_ReturnPortal(self):
-        assert self.world.get_portal(1, 2, self.rooms[0]) == self.portals[0]
+    def TestGetPortalDestFromXY_OtherRoomGiven_ReturnPortal(self):
+        x = 1
+        y = 2
+        destname = self.world.get_portal_dest_from_xy(x, y, self.rooms[0].name)
+        assert destname == self.portals[self.rooms[0].name][y][x]
+
+    def TestGetPortalXYFromDest_PortalToDestExists_ReturnPortalXY(self):
+        room = self.rooms[0].name
+        x, y = self.world.get_portal_xy_from_dest(room)
+        assert self.portals[self.rooms[1].name][y][x] == room
 
     def TestAddEntity_ZIsNone_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[0]()
@@ -280,7 +285,7 @@ class TestWorld(WorldTestCase):
     def TestPortalEntity_GivenValidInputs_MoveEntityToPortalDest(self):
         x, y, z = (1, 1, 0)
         entity_ = self.rooms[1][z][y][x]
-        self.world.portal_entity(entity_, self.portals[1])
+        self.world.portal_entity(entity_, 1, 1)
         assert self.rooms[1][z][y][x] != entity_
 
         x, y, z = self.rooms[0].get_coords(entity_)

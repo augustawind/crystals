@@ -9,8 +9,6 @@ TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels
 
-Portal = namedtuple('Portal', ('x', 'y', 'from_room', 'to_room'))
-
 
 class WorldError(Exception):
     pass
@@ -98,40 +96,57 @@ class Room(list):
 class World(dict):
     """A collection of rooms linked by portals."""
 
-    def __init__(self, rooms, portals, current_room):
+    def __init__(self, rooms, portals, start):
         dict.__init__(self, rooms)
         self.portals = portals
         self.focus = None
-        self.set_focus(current_room)
+        self.set_focus(start)
 
     def set_focus(self, room_name):
         self.focus = self[room_name]
         self.focus.focus()
 
-    def get_portal(self, x, y, room=None):
+    def get_portal_dest_from_xy(self, x, y, room=''):
         """If a portal exists at (x, y) in the given room, return that
-        portal. Else, return None.
+        portal's destination room. Else, return None.
 
-        If room is None, use the focused room.
+        If room tests False, use the focused room.
         """
-        if room is None:
-            room = self.focus
-        for portal in self.portals:
-            if portal.from_room is room and portal.x is x and portal.y is y:
-                return portal
-        return None
+        if not room:
+            room = self.focus.name
+        destname = self.portals[room][y][x]
+        if not destname:
+            return None
+        return destname
+
+    def get_portal_xy_from_dest(self, to_room, from_room=''):
+        """If a portal from room named `from_room` to room named
+        `to_room` exists, return its x and y coordinates.
+        
+        If `from_room` tests False, use the focused room.
+        """
+        if not from_room:
+            from_room = self.focus.name
+        portals = self.portals[from_room]
+        for y in range(len(portals)):
+            for x in range(len(portals[y])):
+                p = portals[y][x]
+                if not p:
+                    continue
+                if p == to_room:
+                    return x, y
     
-    def add_entity(self, entity, x, y, z=None, room=None):
+    def add_entity(self, entity, x, y, z=None, room=''):
         """Add the given entity to the given room at (x, y, z).
         
         If z is None, or out of range, add a layer to the top and put the
-        entity there. Otherwise, if no entity exists at [z][y][x],
-        place it there, else insert a new layer at z + 1 and place it there.
+        entity there. Otherwise, if no entity exists at [z][y][x], place
+        it there, else insert a new layer at z + 1 and place it there.
 
-        If room is None, add the entity to the focused room.
+        If room tests False, add the entity to the focused room.
         """
-        if room is None:
-            room = self.focus
+        room = self[room] if room else self.focus
+
         if z is None or z >= len(room):
             z = -1
             room.add_layer()
@@ -144,10 +159,10 @@ class World(dict):
             room.add_layer(z)
             room.replace_entity(entity, x, y, z)
 
-    def pop_entity(self, x, y, z, room=None):
+    def pop_entity(self, x, y, z, room=''):
         """Remove and return the entity at (x, y, z)."""
-        if room is None:
-            room = self.focus
+        room = self[room] if room else self.focus
+        
         entity = room[z][y][x]
         room[z][y][x] = None
         return entity
@@ -172,15 +187,15 @@ class World(dict):
         self.add_entity(entity, newx, newy, z)
         return True
 
-    def portal_entity(self, entity, portal):
-        """Transfer entity from its current room to the portal's
-        destination.
+    def portal_entity(self, entity, x, y):
+        """If a portal exists at (x, y), transfer entity from its
+        current room to the destination room of the portal.
         """
-        x, y, z = self.focus.get_coords(entity)
-        for portal1 in self.portals:
-            if portal1.from_room == portal.to_room:
-                self.pop_entity(x, y, z)
-                x = portal1.x
-                y = portal1.y
-                self.add_entity(entity, x, y, z, portal.to_room)
-                return
+        destname = self.portals[self.focus.name][y][x]
+        if not destname:
+            return
+
+        z = self.focus.get_coords(entity)[2]
+        self.pop_entity(x, y, z)
+        x, y = self.get_portal_xy_from_dest(self.focus.name, destname)
+        self.add_entity(entity, x, y, z, destname)
