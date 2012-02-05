@@ -51,13 +51,11 @@ class TestRoom(WorldTestCase):
 
         assert room == self.rm_layers
         assert room.batch == self.batch
-        for group in room.groups:
-            assert isinstance(group, pyglet.graphics.OrderedGroup)
 
-    def TestUpdateEntity_ValidInputs_AddEntityToRoomBatch(self):
+    def TestFocusEntity_ValidInputs_AddEntityToRoomBatch(self):
         room = self.roomgen.next()
         wall = self.Wall()
-        room._update_entity(wall, 2, 1, 0)
+        room._focus_entity(wall, 2, 1, 0)
         assert wall.batch == room.batch
 
     def TestUpdateEntity_ValidInputs_UpdateSpriteCoords(self):
@@ -106,44 +104,42 @@ class TestRoom(WorldTestCase):
                     return False
         return True
     
-    def _group_order_matches_index(self, room):
-        for group in room.groups:
-            if group.order != room.groups.index(group):
-                return False
+    def _group_order_matches_z(self, room):
+        for z in range(len(room)):
+            for y in range(len(room[z])):
+                for x in range(len(room[z][y])):
+                    entity = room[z][y][x]
+                    if entity:
+                        if entity.group.order != z:
+                            return False
         return True
 
     def TestAddLayer_ZWithinCurrentNLayers_AddLayer(self):
         room = self.roomgen.next()
         roomlen = len(room)
-        grouplen = len(room.groups)
         room.add_layer(0)
 
         assert len(room) == roomlen + 1
-        assert len(room.groups) == grouplen + 1
         assert self._layer_is_empty(room[0])
-        assert self._group_order_matches_index(room)
+        assert self._group_order_matches_z(room)
 
     def TestAddLayer_ZIsNone_AppendLayerToTop(self):
         room = self.roomgen.next()
         roomlen = len(room)
-        grouplen = len(room.groups)
         room.add_layer(None)
 
         assert len(room) == roomlen + 1
-        assert len(room.groups) == grouplen + 1
         assert self._layer_is_empty(room[-1])
-        assert self._group_order_matches_index(room)
+        assert self._group_order_matches_z(room)
 
     def TestAddLayer_ZIsGTCurrentNLayer_AppendLayerToTop(self):
         room = self.roomgen.next()
         roomlen = len(room)
-        grouplen = len(room.groups)
         room.add_layer(len(room))
 
         assert len(room) == roomlen + 1
-        assert len(room.groups) == grouplen + 1
         assert self._layer_is_empty(room[-1])
-        assert self._group_order_matches_index(room)
+        assert self._group_order_matches_z(room)
 
     def _DummyEntity(self):
         return entity.Entity(

@@ -20,14 +20,42 @@ class Room(list):
         super(Room, self).__init__(layers)
         self.name = name
         self.batch = batch
-        self.groups = [OrderedGroup(z) for z in range(len(self))]
+
+    def _iter_entities(self, startz=0, endz=None):
+        """Iterate over each entity in the room from z-levels `startz`
+        to `endz`, yielding the next entity and its x, y, and z
+        coordinates in the room each iteration.
+        """
+        if not endz:
+            endz = len(self)
+        for z in range(startz, endz):
+            for y in range(len(self[z])):
+                for x in range(len(self[z][y])):
+                    entity = self[z][y][x]
+                    if entity is not None:
+                        yield entity, x, y, z
+
+    def _update_group_order(self, entity, z):
+        """Update the entity's OrderedGroup to match `z`."""
+        entity.group = OrderedGroup(z)
 
     def _update_entity(self, entity, x, y, z):
-        entity.batch = self.batch
-        entity.group = self.groups[z]
+        """Update the entity's position to reflect (x, y, z). Must only
+        be called after at least one call to _focus_entity.
+        """
         newx = x * TILE_SIZE + ORIGIN_X
         newy = y * TILE_SIZE + ORIGIN_Y
         entity.set_position(newx, newy)
+        self._update_group_order(entity, z)
+
+    def _focus_entity(self, entity, x, y, z):
+        entity.batch = self.batch
+        self._update_entity(entity, x, y, z)
+
+    def focus(self):
+        """Focus the room, preparing it for rendering."""
+        for entity, x, y, z in self._iter_entities(): 
+            self._focus_entity(entity, x, y, z)
 
     def iswalkable(self, x, y):
         """Return True if, for every layer, (x, y) is in bounds and is
@@ -40,15 +68,6 @@ class Room(list):
             if e != None and not e.walkable:
                 return False
         return True
-
-    def focus(self):
-        """Focus the room, preparing it for rendering."""
-        for z in range(len(self)):
-            for y in range(len(self[z])):
-                for x in range(len(self[z][y])):
-                    entity = self[z][y][x]
-                    if entity is not None:
-                        self._update_entity(entity, x, y, z)
 
     def get_coords(self, entity):
         """Return x, y, and z coordinates of the given entity in the room."""
@@ -68,19 +87,17 @@ class Room(list):
                  for y in range(len(self[0]))]
         if z is None or z >= len(self):
             self.append(layer)
-            self.groups.append(OrderedGroup(len(self.groups)))
         else:
             self.insert(z, layer)
-            self.groups.insert(z, OrderedGroup(z))
-            for group in self.groups[z + 1:]:
-                group.order += 1
+            for entity, x, y, z in self._iter_entities(z + 1):
+                self._update_group_order(entity, z)
 
     def replace_entity(self, entity, x, y, z):
         """Place 'entity' at (x, y, z), replacing an existing entity if
         neccesary.
         """
         self[z][y][x] = entity
-        self._update_entity(entity, x, y, z)
+        self._focus_entity(entity, x, y, z)
 
     def add_entity(self, entity, x, y, z):
         """Attempt to place 'entity' at (x, y, z), but raise a
