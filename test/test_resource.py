@@ -36,6 +36,10 @@ def TestScaleImage_ValidParamsGiven_ScaleImage():
     assert texture.height == 13
 
 
+def TestLoadActions():
+    actions = resource.load_actions()
+
+
 def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
     class AnEntity:
         name = 'guido'

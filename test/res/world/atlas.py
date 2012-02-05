@@ -8,7 +8,9 @@ class RedRoom:
         '|': 'vwall',
         '-': 'hwall',
         ',': 'rfloor',
-        '+': 'sfloor',}
+        '+': 'sfloor',
+
+        'T': 'troll',}
     map = [
         [
         ',,,,,',
@@ -21,7 +23,7 @@ class RedRoom:
         '|---|',
         '|.+.|',
         '|+++|',
-        '|.+.|',
+        '|T+.|',
         '-----',
         ],]
 

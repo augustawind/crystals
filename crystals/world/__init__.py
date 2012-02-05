@@ -1,9 +1,7 @@
 """creation and mutation of the game world"""
-from collections import namedtuple
-
 from pyglet.graphics import OrderedGroup
 
-__all__ = ['Room', 'Portal', 'World', 'action']
+__all__ = ['Room', 'World', 'action']
 
 TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner

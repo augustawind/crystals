@@ -18,7 +18,7 @@ class Alert(Action):
     """Action which writes given text to a given output stream,
     presumably the game's infobox.
     """
-
+    
     def __init__(self, count, text, output):
         Action.__init__(self, count)
         self.text = text
