@@ -51,7 +51,8 @@ class TestWorldMode(WorldTestCase):
 
         self.world_ = world.World(self.rooms, self.portals,
                                   self.room2.name)
-        self.player = entity.Entity('player', False, images.image('cow.png'))
+        self.player = entity.Entity('player', False, images.image('cow.png'),
+                                    pos=(0, -1))
         self.room2.add_entity(self.player, 1, 1, 1)
         self.worldmode = game.WorldMode(self.window, self.world_, self.player)
 
@@ -91,7 +92,7 @@ class TestWorldMode(WorldTestCase):
         self.worldmode.portal_player(x, y)
         assert self.world_.focus == self.room1
 
-    def TestInteract(self):
+    def TestInteract_AlertAction_ActionExecutes(self):
         self.worldmode.interact()
 
     def TestOnKeyPress_MovementKeyPressedAndWalkable_MovePlayer(self):

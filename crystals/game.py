@@ -72,6 +72,11 @@ class WorldMode(GameMode):
             key.SPACE: (self.interact,),
         }
 
+        # Define arguments for the execute method of each Action subclass.
+        self.action_args = {
+            'Alert': (self.infobox,)
+        }
+
     def activate(self):
         """Activate world mode."""
         self.infobox.activate()
@@ -109,6 +114,14 @@ class WorldMode(GameMode):
         """If an interactable entity is in front of the player, make
         her interact with it. Else, do nothing.
         """
+        x, y, z = self.world.focus.get_coords(self.player)
+        x += self.player.pos[0]
+        y += self.player.pos[1]
+        for layer in self.world.focus:
+            entity = layer[y][x]
+            if entity and entity.action:
+                args = self.action_args[type(entity.action).__name__]
+                entity.action.execute(entity, *args)
 
     def on_key_press(self, key, modifiers):
         """Process user input."""
