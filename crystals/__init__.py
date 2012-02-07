@@ -1,2 +1,1 @@
-__all__ = ['combat', 'data', 'entity', 'game', 'interaction', 'interface',
-    'world']
+__all__ = ['entity', 'game', 'gui', 'resource', 'world']

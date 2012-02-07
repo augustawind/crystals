@@ -1,15 +1,21 @@
-#!/usr/bin/python
-
-"""run.py"""
-
-import logging
+#!/usr/bin/python2
+"""runs the game"""
 import sys
+import os.path
+import subprocess
 
 from crystals.game import Game
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.WARNING, stream=sys.stdout,
-        format='%(levelname)s:%(message)s')
+TEST_DIRS = ['test']
 
-    game = Game()
-    game.run()
+if __name__ == '__main__':
+    if os.path.split(sys.argv[0])[-1] == 'run.py' and len(sys.argv) > 1:
+        if sys.argv[1] == 'test':
+            # Run the test suite with the given args
+            subprocess.call(['nosetests2'] + sys.argv[2:] + TEST_DIRS)
+        else:
+            # Call python2 with all args given to ./run.py
+            subprocess.call(['python2'] + sys.argv[1:] + ['run.py'])
+    else:
+        game = Game()
+        game.run()

@@ -1,159 +1,158 @@
-"""top-level application logic"""
-
-import random
+"""top-level game logic"""
+import os.path
 
 import pyglet
-from pyglet.window import key, mouse
+from pyglet.window import key
 
-import data
-import interface
-from world import \
-    VIEWPORT_ROWS, VIEWPORT_COLS, OFFSET_ROWS, OFFSET_COLS, TILE_SIZE
+from crystals import gui
+from crystals import resource
+from crystals.resource import WORLD_PATH, IMG_PATH
+from crystals.entity import Entity
+from crystals.world import World
 
-class Game(pyglet.window.Window):
-    """The main application class. Runs the game!"""
+if __debug__:
+    from test.test_resource import WORLD_PATH, IMG_PATH
+
+
+class GameMode(object):
+    """Abstract class for top-level game objects with event handlers."""
+
+    def __init__(self, window):
+        self.window = window
+        self.batch = pyglet.graphics.Batch()
+
+    def activate(self):
+        """Push all event handlers onto the window."""
+        self.window.push_handlers(self)
+
+    def on_draw(self):
+        """Clear the window and repaint the batch."""
+        self.window.clear()
+        self.batch.draw()
+
+
+class MainMenu(GameMode, gui.Menu):
+    """Game mode that displays a menu. Greets the player."""
+
+    def __init__(self, window, new_game):
+        GameMode.__init__(self, window)
+        gui.Menu.__init__(
+            self, 0, 0, window.width, window.height, self.batch,
+            ['new game', 'quit'],
+            [new_game, pyglet.app.exit],
+            show_box=True, bold=True)
+
+
+class WorldMode(GameMode):
+    """Game mode where the player explores the game world."""
+
+    def __init__(self, window, world, player):
+        GameMode.__init__(self, window)
+        self.world = world
+        self.player = player
+        self.batch = self.world.focus.batch
+        
+        tf_margin = 10
+        tf_x = tf_y = tf_margin
+        tf_width = window.width - (tf_margin * 2)
+        tf_height = 100
+        self.infobox = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
+                                     self.batch, show_box=True)
+        self.infobox.write('Welcome...')
+
+        # Define possible user inputs and their effects.
+        # Values are each a tuple of a callable followed optionally by 
+        # arguments.
+        self.inputdict = {
+            key.MOTION_LEFT: (self.step_player, -1, 0),
+            key.MOTION_RIGHT: (self.step_player, 1, 0),
+            key.MOTION_DOWN: (self.step_player, 0, -1),
+            key.MOTION_UP: (self.step_player, 0, 1),
+
+            key.SPACE: (self.interact,),
+        }
+
+        # Define arguments for the execute method of each Action subclass.
+        self.action_args = {
+            'Alert': (self.infobox,)
+        }
+
+    def activate(self):
+        """Activate world mode."""
+        self.infobox.activate()
+        GameMode.activate(self)
+
+    def set_focus(self, room_name):
+        """Set the room with name `room_name` as the focus."""
+        self.world.set_focus(room_name)
+        self.batch = self.world.focus.batch
+
+    def step_player(self, xstep, ystep):
+        """Step the player (`xstep`, `ystep`) tiles from her current
+        position.
+
+        If successful and the new position hosts a portal, portal
+        the player.
+        """
+        success = self.world.step_entity(self.player, xstep, ystep)
+        if not success:
+            return
+
+        x, y, z = self.world.focus.get_coords(self.player)
+        if self.world.get_portal_dest_from_xy(x, y):
+            self.portal_player(x, y)
+
+    def portal_player(self, x, y):
+        """Transfer the player to the destination of the portal at
+        (x, y), then set that room as the focus.
+        """
+        self.world.portal_entity(self.player, x, y)
+        dest = self.world.get_portal_dest_from_xy(x, y)
+        self.set_focus(dest)
+
+    def interact(self):
+        """If an interactable entity is in front of the player, make
+        her interact with it. Else, do nothing.
+        """
+        x, y, z = self.world.focus.get_coords(self.player)
+        x += self.player.pos[0]
+        y += self.player.pos[1]
+        for layer in self.world.focus:
+            entity = layer[y][x]
+            if entity and entity.action:
+                args = self.action_args[type(entity.action).__name__]
+                entity.action.execute(entity, *args)
+
+    def on_key_press(self, key, modifiers):
+        """Process user input."""
+        if key not in self.inputdict:
+            return
+        self.inputdict[key][0](*self.inputdict[key][1:])
+
+
+class Game(object):
+    """The main application object. Runs the game."""
 
     def __init__(self):
-        super(Game, self).__init__(
-            (VIEWPORT_COLS + OFFSET_COLS) * TILE_SIZE,
-            (VIEWPORT_ROWS + OFFSET_ROWS) * TILE_SIZE,
-            caption='CRYSTALS', resizable=False)
-        
-        self.main_menu = interface.MainMenu(self)
-        self.pause_menu = None
-        self.message_box = None
+        window_width = 400
+        window_height = 400
+        self.window = pyglet.window.Window(window_width, window_height)
+        self.window.clear()
 
+        self.main_menu = MainMenu(self.window, self.new_game)
         self.world = None
-        self.combat = None
-        self.hero = None
-
-        # application variables -----------------------------------------------
-        self.base_delay = 0.001
-        self.wander_frequency = 0.05
-        self.queued_input = None
-
-        # dict of argument tuples for calls to Interactable.interact,
-        # indexed by str(Interactable)
-        self.interact_args = {
-            'text': (self.message_box, ),
-            'talk': (self.message_box, )}
-
-        # keyboard controls
-        self.movement_keys = {
-            'up': key.MOTION_UP,
-            'down': key.MOTION_DOWN,
-            'left': key.MOTION_LEFT,
-            'right': key.MOTION_RIGHT}
-        self.interact_key = ' '
-        self.pause_key = key.ENTER
+        self.player = None
 
     def run(self):
-        """Run the game."""
+        """Run the game, activating the main menu."""
         self.main_menu.activate()
         pyglet.app.run()
 
-    # main menu methods
-    # -------------------------------------------------------------------------
-
     def new_game(self):
-        world_loader = data.WorldLoader()
-        self.world = world_loader.load_world()
-        self.hero = self.world.hero
-        self.pause_menu = interface.PauseMenu(self)
+        """Initialize and start a new game in world mode."""
+        self.window.pop_handlers()
+        self.window.clear()
 
-        self.activate_world_mode()
-
-    def load_game(self):
-        pass
-
-    def quit(self):
-        pyglet.app.exit()
-
-    # combat mode methods
-    # -------------------------------------------------------------------------
-
-    def activate_combat_mode(self):
-        pass
-
-    # world mode methods
-    # -------------------------------------------------------------------------
-
-    def activate_world_mode(self):
-        #self.message_box = interface.MessageBox(self)
-
-        def on_draw():
-            self.clear()
-            #self.message_box.draw()
-            self.world.draw()
-
-        def on_text_motion(motion):
-            """World mode controls. User can move Hero to interact with other
-            Entities in World, initiate Combat, and access the pause menu."""
-            self.queued_input = motion
-
-        def on_text(text):
-            self.queued_input = text
-
-        def on_key_press(symbol, modifiers):
-            if symbol == self.pause_key:
-                self.activate_pause_menu()
-
-        self.pop_handlers()
-        self.push_handlers(on_draw, on_text_motion, on_text, on_key_press)
-
-        pyglet.clock.schedule_interval(self.update_characters, self.base_delay)
-
-    def activate_pause_menu(self):
-        pyglet.clock.unschedule(self.update_characters)
-        self.pop_handlers()
-        self.pause_menu.activate()
-    
-    def update_characters(self, dt):
-        for character in self.world.get_characters():
-            if character is self.hero:
-                if self.queued_input in self.movement_keys.values():
-                    self.hero_move()
-                elif self.queued_input == self.interact_key:
-                    self.hero_interact()
-                self.queued_input = None
-            else:
-                self.npc_wander(character)
-
-    # hero methods ------------------------------------------------------------
-    def hero_move(self):
-        x = 0
-        y = 0
-        if self.queued_input == self.movement_keys['left']:
-            x = -1
-        if self.queued_input == self.movement_keys['down']:
-            y = -1
-        if self.queued_input == self.movement_keys['up']:
-            y = 1
-        if self.queued_input == self.movement_keys['right']:
-            x = 1
-
-        self.world.step_hero(x, y)
-
-    def hero_interact(self):
-        print 'game.hero_interact'
-        xdir, ydir = self.hero.direction
-        x, y = self.world.get_coords(self.hero)
-        interactions = self.world.get_interactions(x + xdir, y + ydir)
-        print 'interactions =', interactions
-        if interactions:
-            for interaction in interactions:
-                args = self.interact_args[str(interaction)]
-                interaction.interact(*args)
-        print
-
-    # npc methods -------------------------------------------------------------
-    def npc_wander(self, character):
-        if random.random() < self.wander_frequency:
-            axis = random.choice(('x', 'y'))
-            if axis == 'x':
-                x_dir = random.choice((-1, 1))
-                y_dir = 0
-            else:
-                y_dir = random.choice((-1, 1))
-                x_dir = 0
-            self.world.step_entity(character, x_dir, y_dir)
+        world, player = resource.load_world(WORLD_PATH, IMG_PATH)
+        self.world = WorldMode(self.window, world, player)
+        self.world.activate()
