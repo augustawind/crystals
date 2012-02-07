@@ -43,7 +43,6 @@ class BlueRoom:
         '-': 'hwall',
         ',': 'rfloor',
         '+': 'sfloor',}
-
     map = [
         [
         '|-+-|',
