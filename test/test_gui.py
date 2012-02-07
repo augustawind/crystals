@@ -232,7 +232,7 @@ class TestTextFeed(PygletTestCase):
             assert label.text == ''
 
             textfeed.write(text)
-            assert label.text == text
+            assert label.text == textfeed.prefix + text
 
     def TestWrite_BlankLabelsExist_NonBlankLabelsUntouched(self):
         textfeed = gui.TextFeed(
@@ -241,7 +241,7 @@ class TestTextFeed(PygletTestCase):
         for i in xrange(len(textfeed.labels)):
             textfeed.write(text[i])
             for j in xrange(i):
-                assert textfeed.labels[-1 - j].text == text[j]
+                assert textfeed.labels[-1 - j].text == textfeed.prefix + text[j]
 
             for label in textfeed.labels[:-i - 1]:
                 assert label.text == '', i
@@ -255,7 +255,7 @@ class TestTextFeed(PygletTestCase):
         text2 = 'Goodbye, cruel world...'
         for i in xrange(len(textfeed.labels)):
             textfeed.write(text2)
-            assert textfeed.labels[i].text == text2
+            assert textfeed.labels[i].text == textfeed.prefix + text2
 
             for label in textfeed.labels[i + 1:]:
-                assert label.text == text1
+                assert label.text == textfeed.prefix + text1

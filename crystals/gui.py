@@ -188,6 +188,8 @@ class TextFeed(object):
                 halign='center', multiline=False, batch=self.batch))
             self.labels[-1].content_valign = 'center'
 
+        self.prefix = ':: '
+
     def activate(self):
         """Prepare for rendering."""
         for label in self.labels:
@@ -198,12 +200,12 @@ class TextFeed(object):
         """Add some text, scrolling up if the the feed is full."""
         for label in reversed(self.labels):
             if not label.text:
-                label.text = text
+                label.text = self.prefix + text
                 return
 
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
         for i in reversed(xrange(1, len(self.labels))):
             self.labels[i].text = self.labels[i - 1].text
-        self.labels[0].text = text
+        self.labels[0].text = self.prefix + text
 
