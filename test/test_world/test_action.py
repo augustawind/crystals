@@ -30,7 +30,7 @@ class TestAction(object):
         count = 3
         action = world.action.Action(count)
         entity_ = _DummyEntity()
-        for i in reversed(range(count)):
+        for i in reversed(xrange(count)):
 
             action.execute(entity_)
             assert action.count == i
@@ -48,15 +48,14 @@ class TestAlert(object):
     def TestInit(self):
         count = 3
         text = 'Hello, world!'
-        output = _OutputStream()
-        alert = world.action.Alert(count, text, output)
+        alert = world.action.Alert(count, text)
 
     def TestExecute_ValidOutputStream_WriteToOutput(self):
         count = 1
         text = 'whoa!'
-        output = _OutputStream()
-        alert = world.action.Alert(count, text, output)
+        alert = world.action.Alert(count, text)
         entity_ = _DummyEntity()
+        output = _OutputStream()
+        alert.execute(entity_, output)
 
-        alert.execute(entity_)
         assert output.last == text

@@ -19,12 +19,11 @@ class Alert(Action):
     presumably the game's infobox.
     """
     
-    def __init__(self, count, text, output):
+    def __init__(self, count, text):
         Action.__init__(self, count)
         self.text = text
-        self.output = output
 
-    def execute(self, entity):
+    def execute(self, entity, output):
         """Write the text to the output stream."""
         Action.execute(self, entity)
-        self.output.write(self.text)
+        output.write(self.text)

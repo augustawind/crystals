@@ -82,7 +82,7 @@ class Menu(object):
         self.boxes = []
         self.labels = []
         for i, box_y, label_y in zip(
-                range(len(text)), box_ycoords, label_ycoords):
+                xrange(len(text)), box_ycoords, label_ycoords):
             self.boxes.append(
                 Box(box_x, box_y, box_width, box_height, batch, color,
                     show=False))
@@ -181,7 +181,7 @@ class TextFeed(object):
         y2 = y1 + height - (margin * 2)
 
         self.labels = []
-        for label_y in range(y1, y2, label_height):
+        for label_y in xrange(y1, y2, label_height):
             self.labels.append(pyglet.text.Label(
                 '', font_name, font_size, bold, italic, color,
                 label_x, label_y, label_width, label_height,
@@ -203,7 +203,7 @@ class TextFeed(object):
 
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
-        for i in reversed(range(1, len(self.labels))):
+        for i in reversed(xrange(1, len(self.labels))):
             self.labels[i].text = self.labels[i - 1].text
         self.labels[0].text = text
 

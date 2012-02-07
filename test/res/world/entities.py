@@ -2,20 +2,18 @@ from collections import namedtuple
 
 from crystals.world.action import *
 
-# Define entity base class
-entity = namedtuple('entity', 'name walkable image actions')
 
-# Define action base classes
-Alert = namedtuple('Alert', 'count text')
+# Define entity base class
+entity = namedtuple('entity', 'name walkable image action')
 
 # Define the player entity
-PLAYER = entity('player', False, 'human-peasant.png', [])
+PLAYER = entity('player', False, 'human-peasant.png', None)
 
 # Define some template entities
-rfloor = entity('rough surface', True, 'floor-a-', [])
-sfloor = entity('smooth surface', True, 'floor-b-', [])
+rfloor = entity('rough surface', True, 'floor-a-', None)
+sfloor = entity('smooth surface', True, 'floor-b-', None)
 
-wall = entity('wall', False, None, [])
+wall = entity('wall', False, None, None)
 vwall = wall._replace(image='wall-vert-')
 hwall = wall._replace(image='wall-horiz-')
 
@@ -31,8 +29,7 @@ class RedRoom:
     vwall = vwall._replace(image=vwall.image + 'blue.png')
     hwall = hwall._replace(image=hwall.image + 'blue.png')
 
-    troll = entity('troll', False, 'troll.png',
-                   [Alert(2, 'I like shorts')])
+    troll = entity('troll', False, 'troll.png', Alert(2, 'I like shorts'))
 
 
 class BlueRoom:

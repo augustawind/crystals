@@ -80,7 +80,7 @@ class TestMenu(PygletTestCase):
             assert isinstance(box, gui.Box)
 
     def TestInit_LabelAttrsHaveExpectedValues(self):
-        for i in range(len(self.menu.labels)):
+        for i in xrange(len(self.menu.labels)):
             label = self.menu.labels[i]
             assert isinstance(label, pyglet.text.Label)
             assert label.text == self.text[i]
@@ -178,7 +178,7 @@ class TestMenu(PygletTestCase):
             assert self.menu.selection == -1
 
     def TestOnMouseRelelase_ItemSelected_CallItemFunction(self):
-        for i in range(len(self.functions)):
+        for i in xrange(len(self.functions)):
             self.menu.select_item(i)
             self.menu.on_mouse_release(0, 0, mouse.LEFT, 0)
             assert self.test_number == i
@@ -201,7 +201,7 @@ class TestTextFeed(PygletTestCase):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
                                 self.batch)
         assert len(textfeed.labels) == len(
-            range(0, self.window.height, TILE_SIZE)) - 1
+            xrange(0, self.window.height, TILE_SIZE)) - 1
 
     def TestActivate_BatchChanged_AddAllLabelsToNewBatch(self):
         textfeed = gui.TextFeed(0, 0, self.window.width, self.window.height,
@@ -227,7 +227,7 @@ class TestTextFeed(PygletTestCase):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
         text = 'Hello, world!'
-        for i in range(len(textfeed.labels) - 1):
+        for i in xrange(len(textfeed.labels) - 1):
             label = textfeed.labels[-i - 1]
             assert label.text == ''
 
@@ -237,10 +237,10 @@ class TestTextFeed(PygletTestCase):
     def TestWrite_BlankLabelsExist_NonBlankLabelsUntouched(self):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
-        text = ['T' * i for i in range(1, len(textfeed.labels) + 1)]
-        for i in range(len(textfeed.labels)):
+        text = ['T' * i for i in xrange(1, len(textfeed.labels) + 1)]
+        for i in xrange(len(textfeed.labels)):
             textfeed.write(text[i])
-            for j in range(i):
+            for j in xrange(i):
                 assert textfeed.labels[-1 - j].text == text[j]
 
             for label in textfeed.labels[:-i - 1]:
@@ -250,10 +250,10 @@ class TestTextFeed(PygletTestCase):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
         text1 = 'Hello, world!'
-        for i in range(len(textfeed.labels)):
+        for i in xrange(len(textfeed.labels)):
             textfeed.write(text1)
         text2 = 'Goodbye, cruel world...'
-        for i in range(len(textfeed.labels)):
+        for i in xrange(len(textfeed.labels)):
             textfeed.write(text2)
             assert textfeed.labels[i].text == text2
 

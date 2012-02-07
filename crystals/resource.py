@@ -37,7 +37,7 @@ def load_entity(obj, imgloader):
     """
     image = imgloader.image(obj.image)
     _scale_image(image, TILE_SIZE, TILE_SIZE)
-    return Entity(obj.name, obj.walkable, image)
+    return Entity(obj.name, obj.walkable, image, action=obj.action)
 
 
 def load_room(name, atlas, entities, imgloader):
@@ -71,9 +71,9 @@ def load_portals(atlas):
     describing their positions and destination rooms.
     """
     portals = []
-    for y in reversed(range(len(atlas.portalmap))):
+    for y in reversed(xrange(len(atlas.portalmap))):
         portals.append([])
-        for x in range(len(atlas.portalmap[y])):
+        for x in xrange(len(atlas.portalmap[y])):
             char = atlas.portalmap[y][x]
             if char == IGNORE_CHAR:
                 dest = ''

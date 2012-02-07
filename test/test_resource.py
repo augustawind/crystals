@@ -36,28 +36,26 @@ def TestScaleImage_ValidParamsGiven_ScaleImage():
     assert texture.height == 13
 
 
-def TestLoadActions():
-    actions = resource.load_actions()
-
-
 def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
     class AnEntity:
         name = 'guido'
         walkable = False
         image = 'human-peasant.png'
+        action = None
     entity = resource.load_entity(AnEntity, imgloader())
 
     assert entity.name == AnEntity.name
     assert entity.walkable == AnEntity.walkable
+    assert entity.action is None
     assert isinstance(entity, pyglet.sprite.Sprite)
 
 
 def check_room(room, atlas, entities):
-    for z in range(len(atlas.map)):
-        atlas_y_coords = range(len(atlas.map[z]))
+    for z in xrange(len(atlas.map)):
+        atlas_y_coords = xrange(len(atlas.map[z]))
         room_y_coords = reversed(atlas_y_coords)
         for ay, ry in zip(atlas_y_coords, room_y_coords):
-            for x in range(len(atlas.map[z][ay])):
+            for x in xrange(len(atlas.map[z][ay])):
                 char = atlas.map[z][ay][x]
 
                 if char == resource.IGNORE_CHAR:
@@ -90,14 +88,17 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
+            action = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
+            action = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
+            action = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
     check_room(room, atlas, entities)
@@ -122,14 +123,17 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
+            action = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
+            action = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
+            action = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
     assert room[1][1][1] is None
@@ -156,14 +160,17 @@ def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
+            action = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
+            action = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
+            action = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
 

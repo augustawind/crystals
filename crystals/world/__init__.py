@@ -26,9 +26,9 @@ class Room(list):
         """
         if not endz:
             endz = len(self)
-        for z in range(startz, endz):
-            for y in range(len(self[z])):
-                for x in range(len(self[z][y])):
+        for z in xrange(startz, endz):
+            for y in xrange(len(self[z])):
+                for x in xrange(len(self[z][y])):
                     entity = self[z][y][x]
                     if entity is not None:
                         yield entity, x, y, z
@@ -81,8 +81,8 @@ class Room(list):
         """If z is None or too large, append a blank layer at the top.
         If z is an integer, insert a blank layer at z. 
         """
-        layer = [[None for x in range(len(self[0][0]))]
-                 for y in range(len(self[0]))]
+        layer = [[None for x in xrange(len(self[0][0]))]
+                 for y in xrange(len(self[0]))]
         if z is None or z >= len(self):
             self.append(layer)
         else:
@@ -143,8 +143,8 @@ class World(dict):
         if not from_room:
             from_room = self.focus.name
         portals = self.portals[to_room]
-        for y in range(len(portals)):
-            for x in range(len(portals[y])):
+        for y in xrange(len(portals)):
+            for x in xrange(len(portals[y])):
                 p = portals[y][x]
                 if not p:
                     continue

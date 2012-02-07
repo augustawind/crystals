@@ -83,8 +83,8 @@ class TestRoom(WorldTestCase):
         room = self.roomgen.next()
         room.focus()
         for layer in room:
-            for y in range(len(layer)):
-                for x in range(len(layer[y])):
+            for y in xrange(len(layer)):
+                for x in xrange(len(layer[y])):
                     if layer[y][x] is None:
                         continue
                     assert layer[y][x].x == x * world.TILE_SIZE + world.ORIGIN_X
@@ -98,16 +98,16 @@ class TestRoom(WorldTestCase):
         assert (x, y, z) == (0, 0, 0)
 
     def _layer_is_empty(self, layer):
-        for y in range(len(layer)):
-            for x in range(len(layer[y])):
+        for y in xrange(len(layer)):
+            for x in xrange(len(layer[y])):
                 if layer[y][x] is not None:
                     return False
         return True
     
     def _group_order_matches_z(self, room):
-        for z in range(len(room)):
-            for y in range(len(room[z])):
-                for x in range(len(room[z][y])):
+        for z in xrange(len(room)):
+            for y in xrange(len(room[z])):
+                for x in xrange(len(room[z][y])):
                     entity = room[z][y][x]
                     if entity:
                         if entity.group.order != z:
@@ -174,7 +174,7 @@ class TestWorld(WorldTestCase):
         self.roomdict = {}
         self.walls = []
         self.floors = []
-        for i in range(2):
+        for i in xrange(2):
             room = self.roomgen.next()
             self.rooms.append(room)
             self.roomdict[room.name] = room
