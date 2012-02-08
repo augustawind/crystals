@@ -1,5 +1,7 @@
 from itertools import count
+from functools import partial
 
+import pyglet
 from nose.tools import *
 
 from crystals import world
@@ -7,7 +9,16 @@ from crystals.world import entity
 from test.util import *
 from test.test_resource import imgloader
 
-images = imgloader()
+
+class MockEntity(pyglet.sprite.Sprite):
+
+    def __init__(self, name='entity', walkable=True, action=None):
+        pyglet.sprite.Sprite.__init__(
+            self, imgloader().image('cow.png'),
+            batch=pyglet.graphics.Batch())
+        self.name = name
+        self.walkable = walkable
+        self.action = action
 
 
 class WorldTestCase(object):
@@ -21,10 +32,8 @@ class WorldTestCase(object):
     def getrooms(self):
         for i in count(0):
             self.rm_name = 'room{}'.format(i)
-            self.Wall = lambda: entity.Entity(
-                'wall{}'.format(i), False, images.image('wall-vert-blue.png'))
-            self.Floor = lambda: entity.Entity(
-                'floor{}'.format(i), True, images.image('floor-b-red.png'))
+            self.Wall = partial(MockEntity, 'wall{}'.format(i), False)
+            self.Floor = partial(MockEntity, 'floor{}'.format(i), True)
             self.rm_layers = [
                 [[self.Wall(), self.Wall(), self.Wall()],
                  [self.Wall(), self.Floor(), self.Wall()],
@@ -46,11 +55,8 @@ def TestWorldError():
 
 class TestRoom(WorldTestCase):
 
-    def TestInit_AttrsHaveExpectedValues(self):
+    def TestInit(self):
         room = self.roomgen.next()
-
-        assert room == self.rm_layers
-        assert room.batch == self.batch
 
     def TestFocusEntity_ValidInputs_AddEntityToRoomBatch(self):
         room = self.roomgen.next()
@@ -148,20 +154,20 @@ class TestRoom(WorldTestCase):
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):
         room = self.roomgen.next()
-        dummy = self._DummyEntity()
+        dummy = MockEntity()
         room.replace_entity(dummy, 0, 0, 0)
         assert room[0][0][0] == dummy
 
     def TestAddEntity_NoEntityAtDest_PlaceEntityAtGivenDest(self):
         room = self.roomgen.next()
-        dummy = self._DummyEntity()
+        dummy = MockEntity()
         room.add_entity(dummy, 1, 1, 1)
         assert room[1][1][1] == dummy 
 
     @raises(world.WorldError)
     def TestAddEntity_EntityAtDest_RaiseWorldError(self):
         room = self.roomgen.next()
-        dummy = self._DummyEntity()
+        dummy = MockEntity()
         room.add_entity(dummy, 0, 0, 0)
 
 
