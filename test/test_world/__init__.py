@@ -5,7 +5,6 @@ import pyglet
 from nose.tools import *
 
 from crystals import world
-from crystals.world import entity
 from test.util import *
 from test.test_resource import imgloader
 
@@ -146,11 +145,6 @@ class TestRoom(WorldTestCase):
         assert len(room) == roomlen + 1
         assert self._layer_is_empty(room[-1])
         assert self._group_order_matches_z(room)
-
-    def _DummyEntity(self):
-        return entity.Entity(
-            'tree', False, images.image('tree-green.png'),
-            pyglet.graphics.Batch())
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):
         room = self.roomgen.next()
