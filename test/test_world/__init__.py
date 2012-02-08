@@ -3,7 +3,7 @@ from itertools import count
 from nose.tools import *
 
 from crystals import world
-from crystals import entity
+from crystals.world import entity
 from test.util import *
 from test.test_resource import imgloader
 
@@ -250,15 +250,15 @@ class TestWorld(WorldTestCase):
     def TestStepEntity_WalkableCoordsGiven_ChangeEntityPos(self):
         entity_ = self.rooms[1][0][0][0]
         positions = ((1, 0), (-1, 0), (0, -1))
-        for posx, posy in positions:
-            self.world.step_entity(entity_, posx, posy)
-            assert entity_.pos == (posx, posy)
+        for fx, fy in positions:
+            self.world.step_entity(entity_, fx, fy)
+            assert entity_.facing == (fx, fy)
 
     def TestStepEntity_UnwalkableCoordsGiven_ChangeEntityPos(self):
         entity_ = self.rooms[1][0][0][0]
-        posx, posy = 0, 1
-        self.world.step_entity(entity_, posx, posy)
-        assert entity_.pos == (posx, posy)
+        fx, fy = 0, 1
+        self.world.step_entity(entity_, fx, fy)
+        assert entity_.facing == (fx, fy)
 
     def TestStepEntity_DestWalkable_MoveEntity(self):
         entity_ = self.rooms[1][0][0][0]

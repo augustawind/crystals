@@ -5,8 +5,7 @@ import sys
 import pyglet
 from pyglet.gl import *
 
-from crystals.entity import Entity
-from crystals.world import Room, World, TILE_SIZE
+from crystals.world import Room, World, Entity, TILE_SIZE
 
 PLAYER_CHAR = '@' # atlas char that represents the player
 IGNORE_CHAR = '.' # atlas char that represents empty space

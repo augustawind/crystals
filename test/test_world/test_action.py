@@ -7,7 +7,7 @@ from test.test_resource import imgloader
 images = imgloader()
 
 def _DummyEntity():
-    return entity.Entity('', False, images.image('sack.png'), None)
+    return world.Entity('', False, images.image('sack.png'), None)
 
 
 class _OutputStream(object):

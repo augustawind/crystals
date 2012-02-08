@@ -1,7 +1,10 @@
 """creation and mutation of the game world"""
 from pyglet.graphics import OrderedGroup
 
-__all__ = ['Room', 'World', 'action']
+import entity
+from entity import Entity
+
+__all__ = ['Room', 'World', 'entity', 'Entity', 'action']
 
 TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
@@ -189,7 +192,7 @@ class World(dict):
         
         Return True if the move was successful, else False.
         """
-        entity.pos = (xstep / abs(xstep) if xstep else 0,
+        entity.facing = (xstep / abs(xstep) if xstep else 0,
                       ystep / abs(ystep) if ystep else 0)
 
         x, y, z = self.focus.get_coords(entity)

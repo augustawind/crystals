@@ -7,8 +7,7 @@ from pyglet.window import key
 from crystals import gui
 from crystals import resource
 from crystals.resource import WORLD_PATH, IMG_PATH
-from crystals.entity import Entity
-from crystals.world import World
+from crystals.world import World, Entity
 
 if __debug__:
     from test.test_resource import WORLD_PATH, IMG_PATH
@@ -115,8 +114,8 @@ class WorldMode(GameMode):
         her interact with it. Else, do nothing.
         """
         x, y, z = self.world.focus.get_coords(self.player)
-        x += self.player.pos[0]
-        y += self.player.pos[1]
+        x += self.player.facing[0]
+        y += self.player.facing[1]
         for layer in self.world.focus:
             entity = layer[y][x]
             if entity and entity.action:

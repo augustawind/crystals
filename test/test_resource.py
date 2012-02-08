@@ -5,8 +5,7 @@ import pyglet
 from nose.tools import *
 
 from crystals import resource
-from crystals.world import Room, World
-from crystals.entity import Entity
+from crystals.world import Room, World, Entity
 from test.util import *
 
 RES_PATH = 'test/res'
@@ -28,9 +27,9 @@ def TestAtlasError():
 def TestScaleImage_ValidParamsGiven_ScaleImage():
     img = imgloader().image('cow.png')
     texture = img.get_texture()
+
     assert texture.width != 13
     assert texture.height != 13
-
     resource._scale_image(img, 13, 13)
     assert texture.width == 13
     assert texture.height == 13
@@ -47,7 +46,6 @@ def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
     assert entity.name == AnEntity.name
     assert entity.walkable == AnEntity.walkable
     assert entity.action is None
-    assert isinstance(entity, pyglet.sprite.Sprite)
 
 
 def check_room(room, atlas, entities):
@@ -214,7 +212,7 @@ def TestLoadWorld_ReturnExpectedWorld():
     assert len(room[0]) == 5
 
 
-def TestLoadWorld_ReturnExpectedPlayer():
+def TestLoadWorld_ReturnExpectedPlayerAtExpectedCoords():
     world, player = resource.load_world(WORLD_PATH, IMG_PATH)
 
     assert isinstance(player, Entity)
