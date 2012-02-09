@@ -21,13 +21,17 @@ class TestPlot(object):
             'TalkedToDad': False,
             '#TimesCheckedBookcase': 1,
             'ACondition': 'foo'}
-        triggers = (
-            ((lambda x: x), {'TalkedToDad': True}))
+        triggers = ((lambda x: x), {'TalkedToDad': True})
         plt = plot.Plot(state, triggers)
+        assert len(plt.triggers) == 1
+        assert plt.triggers[0] == triggers
 
-        plt.add_triggers(
+        new_triggers = [
             ((lambda x: x), {'TalkedToDad': True, '#TimesCheckedBookcase': 3}),
-            ((lambda x: x), {'TalkedToDad': False, 'ACondition': 'bar'}))
+            ((lambda x: x), {'TalkedToDad': False, 'ACondition': 'bar'})]
+        plt.add_triggers(*new_triggers)
+        assert len(plt.triggers) is 3
+        assert plt.triggers[1:] == new_triggers
 
     def TestUpdate(self):
         state = {

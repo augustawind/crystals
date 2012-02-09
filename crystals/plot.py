@@ -2,8 +2,8 @@
 
 
 class Plot(dict):
-    """An object that stewards a state dictionary, triggering functions 
-    when the state is modified in given ways.
+    """A dict that executes given functions when its items have
+    given values.
     """
 
     def __init__(self, state, *triggers):
