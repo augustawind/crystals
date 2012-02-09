@@ -20,7 +20,6 @@ class Plot(object):
             self._funcs.append(func)
             self._conds.append(conds)
             
-
     def update(self, state):
         """Update the state dictionary and trigger any relevant events."""
         self._state.update(state)
