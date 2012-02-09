@@ -10,9 +10,10 @@ from crystals.world import Room, World, Entity, TILE_SIZE
 PLAYER_CHAR = '@' # atlas char that represents the player
 IGNORE_CHAR = '.' # atlas char that represents empty space
 
-RES_PATH = 'res' # default path to game resources
-WORLD_PATH = RES_PATH + '/world' # default path to game world scripts
-IMG_PATH = RES_PATH + '/img' # default path to game images
+RES_PATH = 'res' # default path to variable game resources
+WORLD_PATH = RES_PATH + '/world' # default path to variable world scripts
+PLOT_PATH = RES_PATH + '/plot' # default path to variable plot scripts
+IMG_PATH = RES_PATH + '/img' # default path to variable game images
 
 glEnable(GL_TEXTURE_2D)
 
@@ -128,3 +129,10 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     world.add_entity(player, rx, ry, rz, rname)
 
     return world, player
+
+
+def load_plot(worldmode, plot_path=PLOT_PATH):
+    sys.path.insert(0, plot_path)
+    state = __import__('state')
+    triggers = __import__('triggers')
+    sys.path.remove(plot_path)

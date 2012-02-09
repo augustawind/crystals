@@ -45,13 +45,13 @@ class TestPlot(object):
                 {'TalkedToDad': False, 'ACondition': 'bar'}))
         plt = plot.Plot(state, *triggers)
 
-        plt.update({'TalkedToDad': True})
+        plt['TalkedToDad'] = True
         assert self.dummyvar is 0
-        plt.update({'#TimesCheckedBookcase': 3})
+        plt['#TimesCheckedBookcase'] = 3
         assert self.dummyvar is 1
-        plt.update({'ACondition': 'bar'})
+        plt['ACondition'] = 'bar'
         assert self.dummyvar is 1
-        plt.update({'TalkedToDad': False})
+        plt['TalkedToDad'] = False
         assert self.dummyvar is 2
 
         del self.dummyvar
