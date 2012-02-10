@@ -6,6 +6,7 @@ from test.test_resource import imgloader
 
 images = imgloader()
 
+
 def _DummyEntity():
     return world.Entity('', False, images.image('sack.png'), None)
 
@@ -20,10 +21,9 @@ class _OutputStream(object):
         self.last = text
 
 
-class TestAction(object):
-    
-    def TestInit(self):
-        action = world.action.Action()
+@raises(TypeError)
+def TestActionIsAbstract(object):
+    action = world.action.Action()
 
 
 class TestAlert(object):
@@ -32,12 +32,12 @@ class TestAlert(object):
         text = 'Hello, world!'
         alert = world.action.Alert(text)
 
-    def TestExecute_ValidOutputStream_WriteToOutput(self):
+    def TestCall_ValidOutputStream_WriteToOutput(self):
         text = 'whoa!'
         alert = world.action.Alert(text)
         entity_ = _DummyEntity()
         output = _OutputStream()
-        alert.execute(entity_, output)
+        alert(entity_, output)
 
         assert output.last == text
 
@@ -48,11 +48,11 @@ class TestUpdatePlot(object):
         updates = {'foo': 'bar'}
         updateplot = world.action.UpdatePlot(updates)
 
-    def TestExecute(self):
+    def TestCall_ValidPlotGiven_UpdatePlot(self):
         updates = {'foo': 'bar'}
         updateplot = world.action.UpdatePlot(updates)
         plt = {'foo': 'baz', 'bip': 'bop'}
-        updateplot.execute(_DummyEntity(), plt)
+        updateplot(_DummyEntity(), plt)
         plt['foo'] == 'bar'
         assert plt['bip'] == 'bop'
 
