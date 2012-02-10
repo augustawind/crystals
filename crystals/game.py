@@ -76,7 +76,8 @@ class WorldMode(GameMode):
         # Define arguments for the execute method of each Action subclass.
         self.action_args = {
             'Alert': (self.infobox,),
-            'UpdatePlot': (self.plot,)
+            'Talk': (self.infobox,),
+            'UpdatePlot': (self.plot,),
         }
 
     def activate(self):
@@ -124,7 +125,7 @@ class WorldMode(GameMode):
             if entity:
                 for action in entity.actions:
                     args = self.action_args[type(action).__name__]
-                    action.execute(entity, *args)
+                    action(entity, *args)
 
     def on_key_press(self, key, modifiers):
         """Process user input."""

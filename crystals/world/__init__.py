@@ -132,10 +132,7 @@ class World(dict):
         """
         if not room:
             room = self.focus.name
-        destname = self.portals[room][y][x]
-        if not destname:
-            return None
-        return destname
+        return self.portals[room][y][x] if self.portals[room] else None
 
     def get_dest_portal_xy(self, to_room, from_room=''):
         """If a portal from room named `from_room` to room named
