@@ -11,13 +11,13 @@ from test.test_resource import imgloader
 
 class MockEntity(pyglet.sprite.Sprite):
 
-    def __init__(self, name='entity', walkable=True, action=None):
+    def __init__(self, name='entity', walkable=True, actions=[]):
         pyglet.sprite.Sprite.__init__(
             self, imgloader().image('cow.png'),
             batch=pyglet.graphics.Batch())
         self.name = name
         self.walkable = walkable
-        self.action = action
+        self.actions = actions
 
 
 class WorldTestCase(object):

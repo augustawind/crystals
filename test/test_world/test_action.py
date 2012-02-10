@@ -23,37 +23,18 @@ class _OutputStream(object):
 class TestAction(object):
     
     def TestInit(self):
-        count = 3
-        action = world.action.Action(count)
-
-    def TestExecute_countPositive_Decrementcount(self):
-        count = 3
-        action = world.action.Action(count)
-        entity_ = _DummyEntity()
-        for i in reversed(xrange(count)):
-
-            action.execute(entity_)
-            assert action.count == i
-
-    def TestExecute_countZero_DoNothing(self):
-        entity_ = _DummyEntity()
-        action = world.action.Action(0)
-
-        action.execute(entity_)
-        assert action.count == 0
+        action = world.action.Action()
 
 
 class TestAlert(object):
 
     def TestInit(self):
-        count = 3
         text = 'Hello, world!'
-        alert = world.action.Alert(count, text)
+        alert = world.action.Alert(text)
 
     def TestExecute_ValidOutputStream_WriteToOutput(self):
-        count = 1
         text = 'whoa!'
-        alert = world.action.Alert(count, text)
+        alert = world.action.Alert(text)
         entity_ = _DummyEntity()
         output = _OutputStream()
         alert.execute(entity_, output)
@@ -64,14 +45,12 @@ class TestAlert(object):
 class TestUpdatePlot(object):
 
     def TestInit(self):
-        count = 2
         updates = {'foo': 'bar'}
-        updateplot = world.action.UpdatePlot(count, updates)
+        updateplot = world.action.UpdatePlot(updates)
 
     def TestExecute(self):
-        count = 1
         updates = {'foo': 'bar'}
-        updateplot = world.action.UpdatePlot(count, updates)
+        updateplot = world.action.UpdatePlot(updates)
         plt = {'foo': 'baz', 'bip': 'bop'}
         updateplot.execute(_DummyEntity(), plt)
         plt['foo'] == 'bar'

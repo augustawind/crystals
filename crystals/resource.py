@@ -5,6 +5,7 @@ import sys
 import pyglet
 from pyglet.gl import *
 
+from crystals.plot import Plot
 from crystals.world import Room, World, Entity, TILE_SIZE
 
 PLAYER_CHAR = '@' # atlas char that represents the player
@@ -37,7 +38,7 @@ def load_entity(obj, imgloader):
     """
     image = imgloader.image(obj.image)
     _scale_image(image, TILE_SIZE, TILE_SIZE)
-    return Entity(obj.name, obj.walkable, image, action=obj.action)
+    return Entity(obj.name, obj.walkable, image, actions=obj.actions)
 
 
 def load_room(name, atlas, entities, imgloader):
@@ -131,8 +132,10 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     return world, player
 
 
-def load_plot(worldmode, plot_path=PLOT_PATH):
+def load_plot(plot_path=PLOT_PATH):
     sys.path.insert(0, plot_path)
-    state = __import__('state')
-    triggers = __import__('triggers')
+    state = __import__('state').STATE
+    triggers = __import__('triggers').TRIGGERS
     sys.path.remove(plot_path)
+
+    return Plot(state, *triggers)

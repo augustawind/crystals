@@ -2,16 +2,13 @@
 
 
 class Action(object):
-    """An action that can be committed by an entity in the world."""
+    """Abstract action that can be committed by an entity in the world."""
 
-    def __init__(self, count):
-        self.count = count
-    
+    def __init__(self, *args, **kwargs):
+        """Initialize the action, given its arguments."""
+
     def execute(self, entity):
         """Execute the action, given the entity responsible for it."""
-        if self.count < 1:
-            return
-        self.count -= 1
 
 
 class Alert(Action):
@@ -19,8 +16,8 @@ class Alert(Action):
     presumably the game's infobox.
     """
     
-    def __init__(self, count, text):
-        Action.__init__(self, count)
+    def __init__(self, text):
+        Action.__init__(self)
         self.text = text
 
     def execute(self, entity, output):
@@ -32,8 +29,8 @@ class Alert(Action):
 class UpdatePlot(Action):
     """Action which updates a dictionary."""
 
-    def __init__(self, count, updates):
-        Action.__init__(self, count)
+    def __init__(self, updates):
+        Action.__init__(self)
         self.updates = updates
 
     def execute(self, entity, plot):

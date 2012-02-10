@@ -6,11 +6,11 @@ from pyglet.window import key
 
 from crystals import gui
 from crystals import resource
-from crystals.resource import WORLD_PATH, IMG_PATH
+from crystals.resource import WORLD_PATH, PLOT_PATH, IMG_PATH
 from crystals.world import World, Entity
 
 if __debug__:
-    from test.test_resource import WORLD_PATH, IMG_PATH
+    from test.test_resource import WORLD_PATH, PLOT_PATH, IMG_PATH
 
 
 class GameMode(object):
@@ -45,10 +45,12 @@ class MainMenu(GameMode, gui.Menu):
 class WorldMode(GameMode):
     """Game mode where the player explores the game world."""
 
-    def __init__(self, window, world, player):
+    def __init__(self, window, world, player, plot):
         GameMode.__init__(self, window)
         self.world = world
         self.player = player
+        self.plot = plot
+        plot.wmode = self
         self.batch = self.world.focus.batch
         
         tf_margin = 10
@@ -73,7 +75,8 @@ class WorldMode(GameMode):
 
         # Define arguments for the execute method of each Action subclass.
         self.action_args = {
-            'Alert': (self.infobox,)
+            'Alert': (self.infobox,),
+            'UpdatePlot': (self.plot,)
         }
 
     def activate(self):
@@ -118,9 +121,10 @@ class WorldMode(GameMode):
         y += self.player.facing[1]
         for layer in self.world.focus:
             entity = layer[y][x]
-            if entity and entity.action:
-                args = self.action_args[type(entity.action).__name__]
-                entity.action.execute(entity, *args)
+            if entity:
+                for action in entity.actions:
+                    args = self.action_args[type(action).__name__]
+                    action.execute(entity, *args)
 
     def on_key_press(self, key, modifiers):
         """Process user input."""
@@ -153,5 +157,6 @@ class Game(object):
         self.window.clear()
 
         world, player = resource.load_world(WORLD_PATH, IMG_PATH)
-        self.world = WorldMode(self.window, world, player)
+        plot = resource.load_plot(PLOT_PATH)
+        self.world = WorldMode(self.window, world, player, plot)
         self.world.activate()

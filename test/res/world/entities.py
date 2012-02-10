@@ -4,16 +4,16 @@ from crystals.world.action import *
 
 
 # Define entity base class
-entity = namedtuple('entity', 'name walkable image action')
+entity = namedtuple('entity', 'name walkable image actions')
 
 # Define the player entity
-PLAYER = entity('player', False, 'human-peasant.png', None)
+PLAYER = entity('player', False, 'human-peasant.png', [])
 
 # Define some template entities
-rfloor = entity('rough surface', True, 'floor-a-', None)
-sfloor = entity('smooth surface', True, 'floor-b-', None)
+rfloor = entity('rough surface', True, 'floor-a-', [])
+sfloor = entity('smooth surface', True, 'floor-b-', [])
 
-wall = entity('wall', False, None, None)
+wall = entity('wall', False, [], [])
 vwall = wall._replace(image='wall-vert-')
 hwall = wall._replace(image='wall-horiz-')
 
@@ -29,7 +29,10 @@ class RedRoom:
     vwall = vwall._replace(image=vwall.image + 'blue.png')
     hwall = hwall._replace(image=hwall.image + 'blue.png')
 
-    troll = entity('troll', False, 'troll.png', Alert(2, 'I like shorts'))
+    troll = entity(
+        'troll', False, 'troll.png', (
+            Alert('I like shorts'),
+            UpdatePlot({'CheckTroll': True})))
 
 
 class BlueRoom:

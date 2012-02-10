@@ -39,13 +39,13 @@ class TestPlot(object):
             '#TimesCheckedBookcase': 1,
             'ACondition': 'foo'}
         self.dummyvar = -1
-        def setdummy(x):
+        def setdummy(w, x):
             self.dummyvar = x
         triggers = (
-            (partial(setdummy, 0), {'TalkedToDad': True}),
-            (partial(setdummy, 1),
+            (partial(setdummy, x=0), {'TalkedToDad': True}),
+            (partial(setdummy, x=1),
                 {'TalkedToDad': True, '#TimesCheckedBookcase': 3}),
-            (partial(setdummy, 2),
+            (partial(setdummy, x=2),
                 {'TalkedToDad': False, 'ACondition': 'bar'}))
         plt = plot.Plot(state, *triggers)
 
@@ -64,8 +64,9 @@ class TestPlot(object):
 
     def TestUpdate(self):
         state = {'foo': 0, 'bar': 1, 'baz': 2}
-        trigger = (partial(state.__setitem__, 'baz', 'foobar'),
-                   {'foo': 1, 'bar': 2})
+        def func(w):
+            state['baz'] = 'foobar'
+        trigger = (func, {'foo': 1, 'bar': 2})
         plt = plot.Plot(state, trigger)
 
         plt.update({'foo': 1, 'bar': 2})

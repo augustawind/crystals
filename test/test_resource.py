@@ -10,6 +10,7 @@ from test.util import *
 
 RES_PATH = 'test/res'
 WORLD_PATH = RES_PATH + '/world'
+PLOT_PATH = RES_PATH + '/plot'
 IMG_PATH = RES_PATH + '/img'
 
 
@@ -40,12 +41,12 @@ def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
         name = 'guido'
         walkable = False
         image = 'human-peasant.png'
-        action = None
+        actions = None
     entity = resource.load_entity(AnEntity, imgloader())
 
     assert entity.name == AnEntity.name
     assert entity.walkable == AnEntity.walkable
-    assert entity.action is None
+    assert entity.actions is None
 
 
 def check_room(room, atlas, entities):
@@ -86,17 +87,17 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
-            action = None
+            actions = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
-            action = None
+            actions = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
-            action = None
+            actions = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
     check_room(room, atlas, entities)
@@ -121,17 +122,17 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
-            action = None
+            actions = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
-            action = None
+            actions = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
-            action = None
+            actions = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
     assert room[1][1][1] is None
@@ -158,17 +159,17 @@ def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
             name = 'floor'
             walkable = True
             image = 'floor-a-red.png'
-            action = None
+            actions = None
         class cow:
             name = 'cow'
             walkable = False
             image = 'cow.png'
-            action = None
+            actions = None
         class sack:
             name = 'sack'
             walkable = True
             image = 'sack.png'
-            action = None
+            actions = None
 
     room = resource.load_room(name, atlas, entities, imgloader())
 
@@ -222,3 +223,7 @@ def TestLoadWorld_ReturnExpectedPlayerAtExpectedCoords():
     x, y, z = world.focus.get_coords(player)
     assert x == 2
     assert y == 2
+
+
+def TestLoadPlot():
+    resource.load_plot(PLOT_PATH)

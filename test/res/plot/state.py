@@ -1,0 +1,2 @@
+STATE = {
+    'CheckTroll': False}

@@ -12,11 +12,13 @@ class Plot(dict):
         self._conds = []
         self.add_triggers(*triggers)
 
+        self.wmode = None
+
     def _trigger_key(self, key):
         for (i, conds) in enumerate(self._conds):
             if key in conds and all(self[c] == conds[c] for c in conds):
                 self._conds.pop(i)
-                self._funcs.pop(i)()
+                self._funcs.pop(i)(self.wmode)
             
     def __setitem__(self, key, val):
         """Call dict.__setitem__ on self, then trigger any relevant events."""
@@ -25,16 +27,16 @@ class Plot(dict):
             return
         self._trigger_key(key)
 
+    @property
+    def triggers(self):
+        return zip(self._funcs, self._conds)
+
     def update(self, other):
         """Call dict.update on self, then trigger any relevant events."""
         dict.update(self, other)
 
         for key in dict(other):
             self._trigger_key(key)
-
-    @property
-    def triggers(self):
-        return zip(self._funcs, self._conds)
 
     def add_triggers(self, *triggers):
         """Add function triggers to be called when their given state
