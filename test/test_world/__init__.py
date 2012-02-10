@@ -183,13 +183,13 @@ class TestWorld(WorldTestCase):
 
         self.portals = {
             self.rooms[0].name: [ 
-                ['', '', ''],
-                ['', '', ''],
-                ['', self.rooms[1].name, '']],
+                [None, None, None],
+                [None, None, None],
+                [None, self.rooms[1].name, None]],
             self.rooms[1].name: [ 
-                ['', '', ''],
-                ['', self.rooms[0].name, ''],
-                ['', '', '']]}
+                [None, None, None],
+                [None, self.rooms[0].name, None],
+                [None, None, None]]}
 
         self.world = world.World(self.roomdict, self.portals, 'room1') 
 

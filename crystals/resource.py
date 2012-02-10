@@ -77,7 +77,7 @@ def load_portals(atlas):
         for x in xrange(len(atlas.portalmap[y])):
             char = atlas.portalmap[y][x]
             if char == IGNORE_CHAR:
-                dest = ''
+                dest = None
             else:
                 dest = atlas.portalkey[char]
             portals[-1].append(dest)
