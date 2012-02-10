@@ -12,6 +12,10 @@ CRY§TAL§ TODO
           is not found True.
         * Write class Interaction in world.entity to coordinate actions.
     3. Prepare and send the game to Julian Wass, asking for his approval.
+        * Write a demonstration world.
+        * Get everything working on Windows.
+        * Create a Windows executable for the game.
+        * Email everything to Julian with a verbose explanation.
     4. Implement the pause menu.
         * Can be opened anytime in world mode.
         * Lets the user check her party's information, save the game,
@@ -33,3 +37,7 @@ CRY§TAL§ TODO
           movement.
             * Most will only have right and left rotations.
             * The player and party members will have all four directions.
+    8. Beautify interface.
+        * Add background image to main menu.
+        * Replace boring line border panels with graphical panels in all
+          gui elements.
