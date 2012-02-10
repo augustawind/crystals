@@ -47,11 +47,23 @@ class Alert(Action):
         output.write(self.text)
 
 
-class Talk(Action):
+class Talk(Alert):
     """Action which writes given text to a given output stream,
     prepended by the name of the acting entity.
     """
 
+    sep = ': '
+
+    def __init__(self, text):
+        Alert.__init__(self, text)
+
+    def __call__(self, entity, output):
+        """Write the text to the given output stream, prepended by the
+        entity's name plus class attribute `sep`.
+        """
+        Action.__call__(self, entity)
+        output.write(entity.name + self.sep + self.text)
+    
 
 class Move(Action):
     pass

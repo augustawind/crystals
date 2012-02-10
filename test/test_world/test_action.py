@@ -22,8 +22,23 @@ class _OutputStream(object):
 
 
 @raises(TypeError)
-def TestActionIsAbstract(object):
+def TestAction_IsAbstract(object):
     action = world.action.Action()
+
+
+class TestUpdatePlot(object):
+
+    def TestInit(self):
+        updates = {'foo': 'bar'}
+        updateplot = world.action.UpdatePlot(updates)
+
+    def TestCall_ValidPlotGiven_UpdatePlot(self):
+        updates = {'foo': 'bar'}
+        updateplot = world.action.UpdatePlot(updates)
+        plt = {'foo': 'baz', 'bip': 'bop'}
+        updateplot(_DummyEntity(), plt)
+        plt['foo'] == 'bar'
+        assert plt['bip'] == 'bop'
 
 
 class TestAlert(object):
@@ -42,17 +57,17 @@ class TestAlert(object):
         assert output.last == text
 
 
-class TestUpdatePlot(object):
+class TestTalk(object):
 
     def TestInit(self):
-        updates = {'foo': 'bar'}
-        updateplot = world.action.UpdatePlot(updates)
+        text = 'Yo, man'
+        talk = world.action.Talk(text)
 
-    def TestCall_ValidPlotGiven_UpdatePlot(self):
-        updates = {'foo': 'bar'}
-        updateplot = world.action.UpdatePlot(updates)
-        plt = {'foo': 'baz', 'bip': 'bop'}
-        updateplot(_DummyEntity(), plt)
-        plt['foo'] == 'bar'
-        assert plt['bip'] == 'bop'
+    def TestCall_ValidOutputStream_WriteToOutput(self):
+        text = 'Yo, man'
+        talk = world.action.Talk(text)
 
+        entity_ = _DummyEntity()
+        output = _OutputStream()
+        talk(entity_, output)
+        assert output.last == entity_.name + talk.sep + text
