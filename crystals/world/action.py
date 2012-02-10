@@ -24,6 +24,19 @@ class Alert(Action):
         self.text = text
 
     def execute(self, entity, output):
-        """Write the text to the output stream."""
+        """Write the text to the given output stream."""
         Action.execute(self, entity)
         output.write(self.text)
+
+
+class UpdatePlot(Action):
+    """Action which updates a dictionary."""
+
+    def __init__(self, count, updates):
+        Action.__init__(self, count)
+        self.updates = updates
+
+    def execute(self, entity, plot):
+        """Update dict `plot` with self.updates."""
+        Action.execute(self, entity)
+        plot.update(self.updates)

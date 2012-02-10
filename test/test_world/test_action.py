@@ -59,3 +59,21 @@ class TestAlert(object):
         alert.execute(entity_, output)
 
         assert output.last == text
+
+
+class TestUpdatePlot(object):
+
+    def TestInit(self):
+        count = 2
+        updates = {'foo': 'bar'}
+        updateplot = world.action.UpdatePlot(count, updates)
+
+    def TestExecute(self):
+        count = 1
+        updates = {'foo': 'bar'}
+        updateplot = world.action.UpdatePlot(count, updates)
+        plt = {'foo': 'baz', 'bip': 'bop'}
+        updateplot.execute(_DummyEntity(), plt)
+        plt['foo'] == 'bar'
+        assert plt['bip'] == 'bop'
+
