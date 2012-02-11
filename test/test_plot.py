@@ -4,7 +4,7 @@ from collections import namedtuple
 from crystals import plot
 
 
-class TestNewPlot():
+class TestPlot():
 
     def __init__(self):
         self.dummy = -1

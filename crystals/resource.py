@@ -19,10 +19,6 @@ IMG_PATH = RES_PATH + '/img' # default path to variable game images
 glEnable(GL_TEXTURE_2D)
 
 
-class AtlasError(Exception):
-    """Raised when invalid code is found in the 'atlas.py' world script."""
-
-
 def _scale_image(img, width, height):
     """Scale `img` to `width` by `height`, keeping pixel sharpness."""
     texture = img.get_texture()
@@ -45,25 +41,22 @@ def load_room(name, atlas, entities, imgloader):
     """Return a Room instance, given its name, object `atlas` describing
     its layout and object `entities` describing its entities.
     """
-    layers = []
-    for layer in atlas.map:
-        layers.append([])
-        # Read rows in reverse so that maps displayed in symbol form
-        # in the atlas mirror the actual appearance of the room
-        for row in reversed(layer):
-            layers[-1].append([])
-            for char in row:
+    grid = []
+    # Read rows in reverse so that maps displayed in symbol form
+    # in the atlas mirror the actual appearance of the room
+    for rows in reversed(zip(*atlas.map)):
+        grid.append([])
+        for cell in zip(*rows):
+            grid[-1].append([])
+            for z, char in enumerate(cell):
                 if char == IGNORE_CHAR:
-                    if len(layers) is 1:
-                        raise AtlasError("'.' character not allowed in " +
-                                         "first layer of atlas.map")
                     entity = None
                 else:
                     attrobj = getattr(entities, atlas.key[char])
                     entity = load_entity(attrobj, imgloader)
-                layers[-1][-1].append(entity)
+                grid[-1][-1].append(entity)
 
-    return Room(name, pyglet.graphics.Batch(), layers)
+    return Room(name, pyglet.graphics.Batch(), grid)
 
 
 def load_portals(atlas):
@@ -71,16 +64,13 @@ def load_portals(atlas):
     portal locations and their destination rooms, given object `atlas`
     describing their positions and destination rooms.
     """
-    portals = []
+    portals = {}
     for y in reversed(xrange(len(atlas.portalmap))):
-        portals.append([])
-        for x in xrange(len(atlas.portalmap[y])):
-            char = atlas.portalmap[y][x]
+        for x, char in enumerate(atlas.portalmap[y]):
             if char == IGNORE_CHAR:
-                dest = None
-            else:
-                dest = atlas.portalkey[char]
-            portals[-1].append(dest)
+                continue
+            dest = atlas.portalkey[char]
+            portals[dest] = (x, y)
 
     return portals
 
@@ -97,12 +87,6 @@ def load_world_scripts(world_path):
     return atlas, entities
 
 
-def make_img_loader(img_path):
-    return pyglet.resource.Loader([
-        img_path + '/terrain', img_path + '/feature', img_path + '/item',
-        img_path + '/character'], script_home='.')
-
-
 def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     """Return a World instance and a player Entity instance, compiled
     from information found in modules 'atlas.py' and 'entities.py' at
@@ -110,7 +94,9 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
     """
     # Prepare resources
     atlas, entities = load_world_scripts(world_path)
-    imgloader = make_img_loader(img_path)
+    imgloader = pyglet.resource.Loader([
+        img_path + '/terrain', img_path + '/feature', img_path + '/item',
+        img_path + '/character'], script_home='.')
 
     # Load rooms and portals
     rooms = {}

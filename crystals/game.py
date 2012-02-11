@@ -99,8 +99,9 @@ class WorldMode(GameMode):
         if not success:
             return
 
+        from_room = self.world.focus.name
         x, y, z = self.world.focus.get_coords(self.player)
-        if self.world.get_portal_dest_from_xy(x, y):
+        if self.world.portals_xy2dest[from_room].get((x, y)):
             self.portal_player(x, y)
 
     def portal_player(self, x, y):
@@ -108,7 +109,8 @@ class WorldMode(GameMode):
         (x, y), then set that room as the focus.
         """
         self.world.portal_entity(self.player, x, y)
-        dest = self.world.get_portal_dest_from_xy(x, y)
+        from_room = self.world.focus.name
+        dest = self.world.portals_xy2dest[from_room][(x, y)]
         self.set_focus(dest)
 
     def interact(self):
@@ -118,8 +120,7 @@ class WorldMode(GameMode):
         x, y, z = self.world.focus.get_coords(self.player)
         x += self.player.facing[0]
         y += self.player.facing[1]
-        for layer in self.world.focus:
-            entity = layer[y][x]
+        for entity in self.world.focus[y][x]:
             if entity:
                 for action in entity.actions:
                     args = self.action_args[type(action).__name__]
@@ -157,5 +158,5 @@ class Game(object):
 
         world, player = resource.load_world(WORLD_PATH, IMG_PATH)
         plot = resource.load_plot(PLOT_PATH)
-        self.world = WorldMode(self.window, world, player, plot)
-        self.world.activate()
+        self.wmode = WorldMode(self.window, world, player, plot)
+        self.wmode.activate()

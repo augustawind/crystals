@@ -20,11 +20,6 @@ def imgloader():
         IMG_PATH + '/character'], script_home='.')
 
 
-@raises(resource.AtlasError)
-def TestAtlasError():
-    raise resource.AtlasError()
-
-
 def TestScaleImage_ValidParamsGiven_ScaleImage():
     img = imgloader().image('cow.png')
     texture = img.get_texture()
@@ -58,14 +53,14 @@ def check_room(room, atlas, entities):
                 char = atlas.map[z][ay][x]
 
                 if char == resource.IGNORE_CHAR:
-                    assert room[z][ry][x] is None
+                    assert room[ry][x][z] is None
                     continue
 
                 clsname = atlas.key[char]
                 name = getattr(entities, clsname).name
-                assert room[z][ry][x].name == name
+                assert room[ry][x][z].name == name
                 walkable = getattr(entities, clsname).walkable
-                assert room[z][ry][x].walkable == walkable
+                assert room[ry][x][z].walkable == walkable
 
 
 def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
@@ -139,41 +134,6 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
     check_room(room, atlas, entities)
 
 
-@raises(resource.AtlasError)
-def TestLoadRoom_IgnoreCharInLayer0_RaiseAtlasError():
-    name = 'TestRoom'
-    class atlas:
-        key = {'+': 'floor', '@': 'cow', 'o': 'sack'}
-        map = [
-            [
-                '+++',
-                '+.+',
-                '+++',
-                ],
-            [
-                'o@o',
-                'oo@',
-                '@oo']]
-    class entities:
-        class floor:
-            name = 'floor'
-            walkable = True
-            image = 'floor-a-red.png'
-            actions = None
-        class cow:
-            name = 'cow'
-            walkable = False
-            image = 'cow.png'
-            actions = None
-        class sack:
-            name = 'sack'
-            walkable = True
-            image = 'sack.png'
-            actions = None
-
-    room = resource.load_room(name, atlas, entities, imgloader())
-
-
 def TestLoadPortals_LoadExpectedPortals():
     class atlas:
         portalkey = {'1': 'Room1', '2': 'Room2'}
@@ -183,12 +143,7 @@ def TestLoadPortals_LoadExpectedPortals():
             '...']
     portals = resource.load_portals(atlas)
 
-    assert len(portals) == 3 # height
-    assert len(portals[0]) == 3 # width
-    portal1 = portals[1][1]
-    assert portal1 == 'Room1'
-    portal2 = portals[2][2]
-    assert portal2 == 'Room2'
+    assert portals == {'Room1': (1, 1), 'Room2': (2, 0)}
 
 
 def TestLoadWorld_ReturnExpectedWorld():
@@ -202,15 +157,15 @@ def TestLoadWorld_ReturnExpectedWorld():
     room = world['RedRoom']
     assert isinstance(room, Room)
     assert room.name == 'RedRoom'
-    assert len(room[0]) == 5 # Height
-    assert len(room[0][0]) == 5 # Width
+    assert len(room) == 5 # Height
+    assert len(room[0]) == 5 # Width
 
     room = world['BlueRoom']
     assert isinstance(room, Room)
     assert room.name == 'BlueRoom'
-    assert len(room) == 1
+    assert len(room) == 5
     assert len(room[0]) == 5
-    assert len(room[0]) == 5
+    assert len(room[0][0]) == 1
 
 
 def TestLoadWorld_ReturnExpectedPlayerAtExpectedCoords():

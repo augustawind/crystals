@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from crystals.world.action import *
+from crystals.world.entity import *
 
 
 # Define entity base class

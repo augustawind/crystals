@@ -33,72 +33,68 @@ class TestWorldMode(WorldTestCase):
         self.rooms = {self.room1.name: self.room1, self.room2.name: self.room2}
 
         self.portals = {
-            self.room1.name: [ 
-                ['', '', ''],
-                ['', '', ''],
-                ['', self.room2.name, '']],
-            self.room2.name: [ 
-                ['', '', ''],
-                ['', self.room1.name, ''],
-                ['', '', '']]}
+            self.room1.name: {
+                self.room2.name: (1, 2)},
+            self.room2.name: {
+                self.room1.name: (1, 1)}}
 
         self.world_ = world.World(self.rooms, self.portals,
                                   self.room2.name)
         self.player = entity.Entity('player', False, images.image('cow.png'),
                                     facing=(0, -1))
-        self.room2.add_entity(self.player, 1, 1, 1)
+        self.world_.add_entity(self.player, 1, 1, 1)
 
         class MockPlot(object):
-            wmode = None
+            app = None
 
-        self.worldmode = game.WorldMode(self.window, self.world_, self.player,
+        self.wmode = game.WorldMode(self.window, self.world_, self.player,
                                         MockPlot())
 
     def TestInit(self):
         pass
 
     def TestActivate(self):
-        self.worldmode.activate()
+        self.wmode.activate()
 
     def TestStepPlayer_NoPortalAtDest_MovePlayerGivenDistance(self):
-        self.worldmode.step_player(0, 1)
-        assert self.room2[1][2][1] == self.player
+        self.wmode.step_player(0, 1)
+        assert self.room2[2][1][1] == self.player
 
     def TestStepPlayer_PortalAtDest_MovePlayerToPortalDest(self):
-        self.worldmode.step_player(0, 1)
-        self.worldmode.step_player(0, -1)
+        self.wmode.step_player(0, 1)
+        self.wmode.step_player(0, -1)
         assert self.room2[1][1][1] != self.player
-        assert self.room1[1][2][1] == self.player
+        assert self.room1[2][1][1] == self.player
 
     def TestPortalPlayer_ValidCoordsGiven_AddPlayerToPortalDest(self):
-        x, y, z = self.room2.get_coords(self.worldmode.player)
-        self.worldmode.portal_player(x, y)
-        x, y = self.world_.get_dest_portal_xy(self.room1.name, self.room2.name)
-        assert self.room1[z][y][x] == self.worldmode.player
+        x, y, z = self.room2.get_coords(self.wmode.player)
+        self.wmode.portal_player(x, y)
+        x, y = self.world_.portals_dest2xy[self.room1.name][self.room2.name]
+        assert self.room1[y][x][z] == self.wmode.player
 
     def TestPortalPlayer_ValidCoordsGiven_DelPlayerFromPrevPos(self):
-        x, y, z = self.room2.get_coords(self.worldmode.player)
-        self.worldmode.portal_player(x, y)
-        assert self.room2[z][y][x] != self.worldmode.player
+        x, y, z = self.room2.get_coords(self.wmode.player)
+        self.wmode.portal_player(x, y)
+        assert self.room2[y][x][z] != self.wmode.player
 
     def TestPortalPlayer_ValidCoordsGiven_SetFocusToNewRoom(self):
-        x, y, z = self.room2.get_coords(self.worldmode.player)
-        self.worldmode.portal_player(x, y)
+        x, y, z = self.room2.get_coords(self.wmode.player)
+        self.wmode.portal_player(x, y)
         assert self.world_.focus == self.room1
 
     def TestInteract_AlertAction_ActionExecutes(self):
-        self.worldmode.interact()
+        self.wmode.interact()
 
     def TestOnKeyPress_MovementKeyPressedAndWalkable_MovePlayer(self):
-        x, y, z = self.world_.focus.get_coords(self.worldmode.player)
-        self.worldmode.on_key_press(key.MOTION_UP, 0)
-        assert self.room2[z][y + 1][x] == self.player
+        x, y, z = self.world_.focus.get_coords(self.wmode.player)
+        self.wmode.on_key_press(key.MOTION_UP, 0)
+        assert self.room2[y + 1][x][z] == self.player
 
     def TestOnKeyPress_MovementKeyPressedButUnWalkable_DoNothing(self):
         for mvkey in (key.MOTION_LEFT, key.MOTION_DOWN, key.MOTION_RIGHT):
-            x, y, z = self.world_.focus.get_coords(self.worldmode.player)
-            self.worldmode.on_key_press(mvkey, 0)
-            assert self.room2[z][y][x] == self.player
+            x, y, z = self.world_.focus.get_coords(self.wmode.player)
+            self.wmode.on_key_press(mvkey, 0)
+            assert self.room2[y][x][z] == self.player
 
 
 class TestGame(object):
@@ -112,4 +108,4 @@ class TestGame(object):
             pass
         game_.window.push_handlers(on_draw)
         game_.new_game()
-        assert isinstance(game_.world, game.WorldMode)
+        assert isinstance(game_.wmode, game.WorldMode)

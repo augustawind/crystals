@@ -39,10 +39,16 @@ class WorldTestCase(object):
                  [self.Wall(), self.Floor(), self.Floor()]],
                 [[None, None, None],
                  [None, None, None],
-                 [None, None, self.Wall()]]]
+                 [None, None, self.Wall()]],
+                [[self.Floor(), self.Floor(), self.Floor()],
+                 [self.Floor(), self.Floor(), self.Floor()],
+                 [self.Floor(), self.Floor(), self.Wall()]]]
+            self.grid = [
+                [list(row) for row in zip(*rows)]
+                 for rows in zip(*self.rm_layers)]
             self.batch = pyglet.graphics.Batch()
 
-            room = world.Room(self.rm_name, self.batch, self.rm_layers)
+            room = world.Room(self.rm_name, self.batch, self.grid)
             room.focus()
             yield room
 
@@ -56,12 +62,6 @@ class TestRoom(WorldTestCase):
 
     def TestInit(self):
         room = self.roomgen.next()
-
-    def TestFocusEntity_ValidInputs_AddEntityToRoomBatch(self):
-        room = self.roomgen.next()
-        wall = self.Wall()
-        room._focus_entity(wall, 2, 1, 0)
-        assert wall.batch == room.batch
 
     def TestUpdateEntity_ValidInputs_UpdateSpriteCoords(self):
         room = self.roomgen.next()
@@ -84,16 +84,18 @@ class TestRoom(WorldTestCase):
         room = self.roomgen.next()
         assert not room.iswalkable(0, 0)
 
-    def TestFocus_UpdateEntitySpritePositions(self):
+    def TestFocus_UpdateEntitySpritePositionsAndBatches(self):
         room = self.roomgen.next()
         room.focus()
-        for layer in room:
-            for y in xrange(len(layer)):
-                for x in xrange(len(layer[y])):
-                    if layer[y][x] is None:
+        for y in xrange(len(room)):
+            for x in xrange(len(room[y])):
+                for z in xrange(len(room[y][x])):
+                    ent = room[y][x][z]
+                    if ent is None:
                         continue
-                    assert layer[y][x].x == x * world.TILE_SIZE + world.ORIGIN_X
-                    assert layer[y][x].y == y * world.TILE_SIZE + world.ORIGIN_Y
+                    assert ent.x == x * world.TILE_SIZE + world.ORIGIN_X
+                    assert ent.y == y * world.TILE_SIZE + world.ORIGIN_Y
+                    assert ent.batch is room.batch
 
     def TestGetCoords_GivenValidEntity_ReturnEntityCoords(self):
         room = self.roomgen.next()
@@ -102,67 +104,17 @@ class TestRoom(WorldTestCase):
 
         assert (x, y, z) == (0, 0, 0)
 
-    def _layer_is_empty(self, layer):
-        for y in xrange(len(layer)):
-            for x in xrange(len(layer[y])):
-                if layer[y][x] is not None:
-                    return False
+    def _group_order_matches_z(self, room, x, y):
+        for z, entity in enumerate(room[y][x]):
+            if entity and entity.group.order != z:
+                return False
         return True
-    
-    def _group_order_matches_z(self, room):
-        for z in xrange(len(room)):
-            for y in xrange(len(room[z])):
-                for x in xrange(len(room[z][y])):
-                    entity = room[z][y][x]
-                    if entity:
-                        if entity.group.order != z:
-                            return False
-        return True
-
-    def TestAddLayer_ZWithinCurrentNLayers_AddLayer(self):
-        room = self.roomgen.next()
-        roomlen = len(room)
-        room.add_layer(0)
-
-        assert len(room) == roomlen + 1
-        assert self._layer_is_empty(room[0])
-        assert self._group_order_matches_z(room)
-
-    def TestAddLayer_ZIsNone_AppendLayerToTop(self):
-        room = self.roomgen.next()
-        roomlen = len(room)
-        room.add_layer(None)
-
-        assert len(room) == roomlen + 1
-        assert self._layer_is_empty(room[-1])
-        assert self._group_order_matches_z(room)
-
-    def TestAddLayer_ZIsGTCurrentNLayer_AppendLayerToTop(self):
-        room = self.roomgen.next()
-        roomlen = len(room)
-        room.add_layer(len(room))
-
-        assert len(room) == roomlen + 1
-        assert self._layer_is_empty(room[-1])
-        assert self._group_order_matches_z(room)
 
     def TestReplaceEntity_EntityAtDest_ReplaceWithNewEntity(self):
         room = self.roomgen.next()
         dummy = MockEntity()
         room.replace_entity(dummy, 0, 0, 0)
         assert room[0][0][0] == dummy
-
-    def TestAddEntity_NoEntityAtDest_PlaceEntityAtGivenDest(self):
-        room = self.roomgen.next()
-        dummy = MockEntity()
-        room.add_entity(dummy, 1, 1, 1)
-        assert room[1][1][1] == dummy 
-
-    @raises(world.WorldError)
-    def TestAddEntity_EntityAtDest_RaiseWorldError(self):
-        room = self.roomgen.next()
-        dummy = MockEntity()
-        room.add_entity(dummy, 0, 0, 0)
 
 
 class TestWorld(WorldTestCase):
@@ -182,14 +134,10 @@ class TestWorld(WorldTestCase):
             self.floors.append(self.Floor)
 
         self.portals = {
-            self.rooms[0].name: [ 
-                [None, None, None],
-                [None, None, None],
-                [None, self.rooms[1].name, None]],
-            self.rooms[1].name: [ 
-                [None, None, None],
-                [None, self.rooms[0].name, None],
-                [None, None, None]]}
+            self.rooms[0].name: {
+                self.rooms[1].name: (1, 2)},
+            self.rooms[1].name: {
+                self.rooms[0].name: (1, 1)}}
 
         self.world = world.World(self.roomdict, self.portals, 'room1') 
 
@@ -197,47 +145,44 @@ class TestWorld(WorldTestCase):
         assert self.world == self.roomdict
         assert self.world.focus == self.rooms[1]
 
-    def TestGetPortalDestFromXY_PortalAtCoords_ReturnPortal(self):
-        x = 1
-        y = 1
-        destname = self.world.get_portal_dest_from_xy(x, y)
-        assert destname == self.portals[self.rooms[1].name][y][x]
-
-    def TestGetPortalDestFromXY_NoPortalAtCoords_ReturnNone(self):
-        assert self.world.get_portal_dest_from_xy(1, 2) == None
-
-    def TestGetPortalDestFromXY_OtherRoomGiven_ReturnPortal(self):
-        x = 1
-        y = 2
-        destname = self.world.get_portal_dest_from_xy(x, y, self.rooms[0].name)
-        assert destname == self.portals[self.rooms[0].name][y][x]
-
-    def TestGetDestPortalXY_PortalToDestExists_ReturnPortalXY(self):
-        room0 = self.rooms[0].name
-        room1 = self.rooms[1].name
-        x, y = self.world.get_dest_portal_xy(room0)
-        assert self.portals[room0][y][x] == room1
-
     def TestAddEntity_ZIsNone_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[0]()
-        nlayers = len(self.world.focus)
-        self.world.add_entity(wall, 1, 1, None)
-        assert len(self.world.focus) == nlayers + 1
-        assert self.world.focus[-1][1][1] == wall
+        x = y = 1
+        cell = self.world.focus[y][x]
+        depth = len(cell)
+        self.world.add_entity(wall, x, y, None)
+        assert len(cell) == depth + 1
+        assert cell[-1] == wall
 
     def TestAddEntity_ZOutOfRange_AddLayerToTopAndPlaceThere(self):
         wall = self.walls[1]()
-        nlayers = len(self.world.focus)
-        self.world.add_entity(wall, 1, 1, 1)
-        assert len(self.world.focus) == nlayers
-        assert self.world.focus[1][1][1] == wall
+        x = y = z = 1
+        cell = self.world.focus[y][x]
+        depth = len(cell)
+        self.world.add_entity(wall, x, y, z)
+        assert len(cell) == depth
+        assert cell[z] == wall
 
     def TestAddEntity_ZInRangeAndEntityAtXYZ_AddLayerAboveZAndPlaceThere(self):
         floor = self.floors[0]()
-        nlayers = len(self.world.focus)
-        self.world.add_entity(floor, 1, 1, 0)
-        assert len(self.world.focus) == nlayers + 1
-        assert self.world.focus[1][1][1] == floor
+        x = y = 1
+        z = 0
+        cell = self.world.focus[y][x]
+        depth = len(cell)
+        self.world.add_entity(floor, x, y, z)
+        assert len(cell) == depth + 1
+        assert cell[1] == floor
+
+    def TestAddEntity_ZInRangeAndEntityAtXYZ_UpdateAboveEntityGroups(self):
+        floor = self.floors[0]()
+        x = y = 1
+        z = 0
+        cell = self.world.focus[y][x]
+        self.world.add_entity(floor, x, y, z)
+
+        for ent in cell:
+            if ent:
+                assert ent.group.order == cell.index(ent)
 
     def TestPopEntity_EntityCoordsGiven_RemoveEntity(self):
         self.world.pop_entity(0, 0, 0)
@@ -264,7 +209,7 @@ class TestWorld(WorldTestCase):
         entity_ = self.rooms[1][0][0][0]
         self.world.step_entity(entity_, 1, 2)
         assert self.rooms[1][0][0][0] != entity_
-        assert self.rooms[1][1][2][1] == entity_
+        assert self.rooms[1][2][1][1] == entity_
 
     def TestStepEntity_DestWalkable_ReturnTrue(self):
         entity_ = self.rooms[1][0][0][0]
@@ -281,9 +226,9 @@ class TestWorld(WorldTestCase):
 
     def TestPortalEntity_GivenValidInputs_MoveEntityToPortalDest(self):
         x, y, z = (1, 1, 0)
-        entity_ = self.rooms[1][z][y][x]
+        entity_ = self.rooms[1][y][x][z]
         self.world.portal_entity(entity_, 1, 1)
-        assert self.rooms[1][z][y][x] != entity_
+        assert self.rooms[1][y][x][z] != entity_
 
         x, y, z = self.rooms[0].get_coords(entity_)
-        assert self.rooms[0][z][y][x] == entity_
+        assert self.rooms[0][y][x][z] == entity_

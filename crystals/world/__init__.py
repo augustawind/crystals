@@ -17,28 +17,10 @@ class WorldError(Exception):
 
 class Room(list):
 
-    def __init__(self, name, batch, layers):
-        super(Room, self).__init__(layers)
+    def __init__(self, name, batch, grid):
+        super(Room, self).__init__(grid)
         self.name = name
         self.batch = batch
-
-    def _iter_entities(self, startz=0, endz=None):
-        """Iterate over each entity in the room from z-levels `startz`
-        to `endz`, yielding the next entity and its x, y, and z
-        coordinates in the room each iteration.
-        """
-        if not endz:
-            endz = len(self)
-        for z in xrange(startz, endz):
-            for y in xrange(len(self[z])):
-                for x in xrange(len(self[z][y])):
-                    entity = self[z][y][x]
-                    if entity is not None:
-                        yield entity, x, y, z
-
-    def _update_group_order(self, entity, z):
-        """Update the entity's OrderedGroup to match `z`."""
-        entity.group = OrderedGroup(z)
 
     def _update_entity(self, entity, x, y, z):
         """Update the entity's position to reflect (x, y, z). Must only
@@ -47,7 +29,7 @@ class Room(list):
         newx = x * TILE_SIZE + ORIGIN_X
         newy = y * TILE_SIZE + ORIGIN_Y
         entity.set_position(newx, newy)
-        self._update_group_order(entity, z)
+        entity.group = OrderedGroup(z)
 
     def _focus_entity(self, entity, x, y, z):
         entity.batch = self.batch
@@ -55,8 +37,11 @@ class Room(list):
 
     def focus(self):
         """Focus the room, preparing it for rendering."""
-        for entity, x, y, z in self._iter_entities(): 
-            self._focus_entity(entity, x, y, z)
+        for y in xrange(len(self)):
+            for x in xrange(len(self[y])):
+                for z, entity in enumerate(self[y][x]):
+                    if entity:
+                        self._focus_entity(entity, x, y, z)
 
     def iswalkable(self, x, y):
         """Return True if, for every layer, (x, y) is in bounds and is
@@ -64,8 +49,7 @@ class Room(list):
         """
         if (x < 0 or x >= len(self[0][0])) or (y < 0 or y >= len(self[0])):
             return False
-        for layer in self:
-            e = layer[y][x]
+        for e in self[y][x]:
             if e != None and not e.walkable:
                 return False
         return True
@@ -80,35 +64,12 @@ class Room(list):
             z = entity.group.order
         return x, y, z
 
-    def add_layer(self, z=None):
-        """If z is None or too large, append a blank layer at the top.
-        If z is an integer, insert a blank layer at z. 
-        """
-        layer = [[None for x in xrange(len(self[0][0]))]
-                 for y in xrange(len(self[0]))]
-        if z is None or z >= len(self):
-            self.append(layer)
-        else:
-            self.insert(z, layer)
-            for entity, x, y, z in self._iter_entities(z + 1):
-                self._update_group_order(entity, z)
-
     def replace_entity(self, entity, x, y, z):
         """Place 'entity' at (x, y, z), replacing an existing entity if
-        neccesary.
+        neccessary.
         """
-        self[z][y][x] = entity
+        self[y][x][z] = entity
         self._focus_entity(entity, x, y, z)
-
-    def add_entity(self, entity, x, y, z):
-        """Attempt to place 'entity' at (x, y, z), but raise a
-        WorldError if an entity already exists there.
-        """
-        if self[z][y][x] is not None:
-            raise WorldError(
-                'Entity already exists in room {}[{}][{}][{}]'.format(
-                self.name, z, y, x))
-        self.replace_entity(entity, x, y, z)
 
 
 class World(dict):
@@ -116,43 +77,32 @@ class World(dict):
 
     def __init__(self, rooms, portals, start):
         dict.__init__(self, rooms)
-        self.portals = portals
-        self.focus = None
+
+        self._portals_dest2xy = dict.fromkeys(portals, {})
+        self._portals_xy2dest = dict.fromkeys(portals, {})
+        for from_room, portal in portals.iteritems():
+            for dest, xy in portal.iteritems():
+                self._portals_dest2xy[from_room][dest] = xy
+                self._portals_xy2dest[from_room][xy] = dest
+
+        self._focus = None
         self.set_focus(start)
 
+    @property
+    def focus(self):
+        return self._focus
+
+    @property
+    def portals_dest2xy(self):
+        return self._portals_dest2xy
+
+    @property
+    def portals_xy2dest(self):
+        return self._portals_xy2dest
+
     def set_focus(self, room_name):
-        self.focus = self[room_name]
-        self.focus.focus()
-
-    def get_portal_dest_from_xy(self, x, y, room=''):
-        """If a portal exists at (x, y) in the given room, return that
-        portal's destination room. Else, return None.
-
-        If room tests False, use the focused room.
-        """
-        if not room:
-            room = self.focus.name
-        try:
-            return self.portals[room][y][x] 
-        except IndexError:
-            return None
-
-    def get_dest_portal_xy(self, to_room, from_room=''):
-        """If a portal from room named `from_room` to room named
-        `to_room` exists, return its x and y coordinates.
-        
-        If `from_room` tests False, use the focused room.
-        """
-        if not from_room:
-            from_room = self.focus.name
-        portals = self.portals[to_room]
-        for y in xrange(len(portals)):
-            for x in xrange(len(portals[y])):
-                p = portals[y][x]
-                if not p:
-                    continue
-                if p == from_room:
-                    return x, y
+        self._focus = self[room_name]
+        self._focus.focus()
     
     def add_entity(self, entity, x, y, z=None, room=''):
         """Add the given entity to the given room at (x, y, z).
@@ -163,26 +113,26 @@ class World(dict):
 
         If room tests False, add the entity to the focused room.
         """
-        room = self[room] if room else self.focus
+        room = self[room] if room else self._focus
 
-        if z is None or z >= len(room):
+        if z is None or z >= len(room[y][x]):
+            room[y][x].append(None)
             z = -1
-            room.add_layer()
-            room.replace_entity(entity, x, y, -1)
-            return
-        try:
-            room.add_entity(entity, x, y, z)
-        except WorldError:
+        elif room[y][x][z]:
             z += 1
-            room.add_layer(z)
-            room.replace_entity(entity, x, y, z)
+            room[y][x].insert(z, None)
+            for i, ent in enumerate(room[y][x][z + 1:]):
+                if ent:
+                    room.replace_entity(ent, x, y, z + 1 + i)
+
+        room.replace_entity(entity, x, y, z)
 
     def pop_entity(self, x, y, z, room=''):
         """Remove and return the entity at (x, y, z)."""
-        room = self[room] if room else self.focus
+        room = self[room] if room else self._focus
         
-        entity = room[z][y][x]
-        room[z][y][x] = None
+        entity = room[y][x][z]
+        room[y][x][z] = None
         return entity
     
     def step_entity(self, entity, xstep, ystep):
@@ -195,10 +145,10 @@ class World(dict):
         entity.facing = (xstep / abs(xstep) if xstep else 0,
                       ystep / abs(ystep) if ystep else 0)
 
-        x, y, z = self.focus.get_coords(entity)
+        x, y, z = self._focus.get_coords(entity)
         newx = x + xstep
         newy = y + ystep
-        if not self.focus.iswalkable(newx, newy):
+        if not self._focus.iswalkable(newx, newy):
             return False
 
         self.pop_entity(x, y, z)
@@ -209,8 +159,8 @@ class World(dict):
         """If a portal exists at (x, y), transfer entity from its
         current room to the destination room of the portal.
         """
-        destname = self.portals[self.focus.name][y][x]
-        z = self.focus.get_coords(entity)[2]
+        destname = self.portals_xy2dest[self._focus.name][(x, y)]
+        z = self._focus.get_coords(entity)[2]
         self.pop_entity(x, y, z)
-        x, y = self.get_dest_portal_xy(destname)
+        x, y = self.portals_dest2xy[destname][self._focus.name]
         self.add_entity(entity, x, y, z, destname)
