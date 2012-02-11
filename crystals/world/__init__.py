@@ -23,17 +23,14 @@ class Room(list):
         self.batch = batch
 
     def _update_entity(self, entity, x, y, z):
-        """Update the entity's position to reflect (x, y, z). Must only
-        be called after at least one call to _focus_entity.
+        """Update the entity's rendered position to reflect (x, y, z),
+        and set the entity's batch to self.batch.
         """
         newx = x * TILE_SIZE + ORIGIN_X
         newy = y * TILE_SIZE + ORIGIN_Y
         entity.set_position(newx, newy)
         entity.group = OrderedGroup(z)
-
-    def _focus_entity(self, entity, x, y, z):
         entity.batch = self.batch
-        self._update_entity(entity, x, y, z)
 
     def focus(self):
         """Focus the room, preparing it for rendering."""
@@ -41,13 +38,13 @@ class Room(list):
             for x in xrange(len(self[y])):
                 for z, entity in enumerate(self[y][x]):
                     if entity:
-                        self._focus_entity(entity, x, y, z)
+                        self._update_entity(entity, x, y, z)
 
     def iswalkable(self, x, y):
         """Return True if, for every layer, (x, y) is in bounds and is
         either None or a walkable entity, else return False.
         """
-        if (x < 0 or x >= len(self[0][0])) or (y < 0 or y >= len(self[0])):
+        if (x < 0 or x >= len(self[0])) or (y < 0 or y >= len(self)):
             return False
         for e in self[y][x]:
             if e != None and not e.walkable:
@@ -69,7 +66,7 @@ class Room(list):
         neccessary.
         """
         self[y][x][z] = entity
-        self._focus_entity(entity, x, y, z)
+        self._update_entity(entity, x, y, z)
 
 
 class World(dict):
@@ -114,16 +111,22 @@ class World(dict):
         If room tests False, add the entity to the focused room.
         """
         room = self[room] if room else self._focus
+        depth = len(room[y][x])
 
-        if z is None or z >= len(room[y][x]):
+        if z is None:
             room[y][x].append(None)
-            z = -1
-        elif room[y][x][z]:
-            z += 1
-            room[y][x].insert(z, None)
-            for i, ent in enumerate(room[y][x][z + 1:]):
-                if ent:
-                    room.replace_entity(ent, x, y, z + 1 + i)
+            z = depth
+        else:
+            z = min(depth - 1, z)
+            if room[y][x][z]:
+                z += 1
+                if z == depth:
+                    room[y][x].append(None)
+                else:
+                    room[y][x].insert(z, None)
+                    for i, ent in enumerate(room[y][x][z + 1:]):
+                        if ent:
+                            room.replace_entity(ent, x, y, z + 1 + i)
 
         room.replace_entity(entity, x, y, z)
 

@@ -84,6 +84,10 @@ class TestRoom(WorldTestCase):
         room = self.roomgen.next()
         assert not room.iswalkable(0, 0)
 
+    def TestIsWalkable_GivenOutOfBoundsCoords_ReturnFalse(self):
+        room = self.roomgen.next()
+        assert not room.iswalkable(len(room[0]), len(room))
+
     def TestFocus_UpdateEntitySpritePositionsAndBatches(self):
         room = self.roomgen.next()
         room.focus()
