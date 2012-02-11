@@ -34,4 +34,4 @@ class Home:
     dad = ent('Dad', False, 'human-warden.png', [
               Talk("My child! It's good to see you in health. Go run " +
                    "along and play now!"),
-              UpdatePlot({'CheckDad': True})])
+              UpdatePlot('CheckDad')])

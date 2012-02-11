@@ -134,8 +134,7 @@ def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
 
 def load_plot(plot_path=PLOT_PATH):
     sys.path.insert(0, plot_path)
-    state = __import__('state').STATE
-    triggers = __import__('triggers').TRIGGERS
+    triggers = __import__('plot').TRIGGERS
     sys.path.remove(plot_path)
 
-    return Plot(state, *triggers)
+    return Plot(triggers)

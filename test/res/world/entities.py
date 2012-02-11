@@ -32,7 +32,7 @@ class RedRoom:
     troll = entity(
         'troll', False, 'troll.png', (
             Alert('I like shorts'),
-            UpdatePlot({'CheckTroll': True})))
+            UpdatePlot('CheckTroll')))
 
 
 class BlueRoom:

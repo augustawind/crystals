@@ -47,7 +47,7 @@ class Action(object):
         """
 
 class UpdatePlot(Action):
-    """Action which updates a dictionary."""
+    """Action which updates a Plot instance."""
 
     def __init__(self, updates):
         Action.__init__(self)

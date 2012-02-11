@@ -1,73 +1,39 @@
 from functools import partial
+from collections import namedtuple
 
 from crystals import plot
 
 
-class TestPlot(object):
+class TestNewPlot():
 
-    def TestInit(self):
-        state = {
-            'TalkedToDad': False,
-            '#TimesCheckedBookcase': 1,
-            'ACondition': 'foo'}
-        triggers = (
-            ((lambda: 1), {'TalkedToDad': True}),
-            ((lambda: 1), {'TalkedToDad': True, '#TimesCheckedBookcase': 3}),
-            ((lambda: 1), {'TalkedToDad': False, 'ACondition': 'bar'}))
-        plt = plot.Plot(state, *triggers)
+    def __init__(self):
+        self.dummy = -1
+        def setdummy(self, app, x):
+            self.dummy = x
 
-    def TestAddTriggers(self):
-        state = {
-            'TalkedToDad': False,
-            '#TimesCheckedBookcase': 1,
-            'ACondition': 'foo'}
-        triggers = ((lambda: 1), {'TalkedToDad': True})
-        plt = plot.Plot(state, triggers)
-        assert len(plt.triggers) == 1
-        assert plt.triggers[0] == triggers
+        func1, func2, func3 = (partial(setdummy, x=x) for x in range(3))
+        plt = plot.Plot({
+            ('State1', 'State2'): (func1, {
+                ('State3',): (func2, {}),
+                ('State4',): (func3, {})
+            })
+        })
+        assert plt.triggers == {
+            frozenset(('State1', 'State2')): (func1, {
+                frozenset(('State3',)): (func2, {}),
+                frozenset(('State4',)): (func3, {})
+            })
+        }
 
-        new_triggers = [
-            ((lambda: 1), {'TalkedToDad': True, '#TimesCheckedBookcase': 3}),
-            ((lambda: 1), {'TalkedToDad': False, 'ACondition': 'bar'})]
-        plt.add_triggers(*new_triggers)
-        assert len(plt.triggers) is 3
-        assert plt.triggers[1:] == new_triggers
+        newset = set((1, 2, 3))
+        plt.update(*newset)
+        assert not (plt.state ^ newset)
+        assert self.dummy is -1
 
-    def TestSetItem(self):
-        state = {
-            'TalkedToDad': False,
-            '#TimesCheckedBookcase': 1,
-            'ACondition': 'foo'}
-        self.dummyvar = -1
-        def setdummy(w, x):
-            self.dummyvar = x
-        triggers = (
-            (partial(setdummy, x=0), {'TalkedToDad': True}),
-            (partial(setdummy, x=1),
-                {'TalkedToDad': True, '#TimesCheckedBookcase': 3}),
-            (partial(setdummy, x=2),
-                {'TalkedToDad': False, 'ACondition': 'bar'}))
-        plt = plot.Plot(state, *triggers)
-
-        plt['NewDictItem'] = 333
-        assert self.dummyvar is -1
-        plt['TalkedToDad'] = True
-        assert self.dummyvar is 0
-        plt['#TimesCheckedBookcase'] = 3
-        assert self.dummyvar is 1
-        plt['ACondition'] = 'bar'
-        assert self.dummyvar is 1
-        plt['TalkedToDad'] = False
-        assert self.dummyvar is 2
-
-        del self.dummyvar
-
-    def TestUpdate(self):
-        state = {'foo': 0, 'bar': 1, 'baz': 2}
-        def func(w):
-            state['baz'] = 'foobar'
-        trigger = (func, {'foo': 1, 'bar': 2})
-        plt = plot.Plot(state, trigger)
-
-        plt.update({'foo': 1, 'bar': 2})
-        assert state['baz'] == 'foobar'
+        plt.update('State1', 'State2')
+        assert self.dummy is 0
+        plt.update('State3')
+        assert self.dummy is 0
+        plt.update('State5')
+        assert self.dummy is 0
+        assert self.dummy is 0

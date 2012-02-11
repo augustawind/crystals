@@ -1,48 +1,74 @@
-"""tracking and responding to the game state"""
+"""keeping track of and responding to the game state"""
 
 
-class Plot(dict):
-    """A dict that executes given functions when its items have
-    given values.
-    """
+class Plot(object):
+    def __init__(self, triggers, app=None):
+        """Return a plot instance, given dict `triggers` containing
+        structured plot information.
 
-    def __init__(self, state, *triggers):
-        dict.__init__(self, state)
-        self._funcs = []
-        self._conds = []
-        self.add_triggers(*triggers)
+        `triggers` must be a dictionary where each key is an arbitrary-
+        length tuple of unique plot state identifiers, and each value is
+        a 2-tuple where the first item is a callable to be called when
+        the plot states given in the key exist, and the second item is
+        either an empty dict or a nested `triggers` dict::
 
-        self.wmode = None
+            plt = Plot({
+                ('state1', 'state2'): (func1, {
+                    ('state3', ): (func2, {}),
+                    ('state4', ): (func3, {
+                        ...}),
+                    ...}),
+                ('state5',): (func4, {}),
+                ...})
 
-    def _trigger_key(self, key):
-        for (i, conds) in enumerate(self._conds):
-            if key in conds and all(self[c] == conds[c] for c in conds):
-                self._conds.pop(i)
-                self._funcs.pop(i)(self.wmode)
-            
-    def __setitem__(self, key, val):
-        """Call dict.__setitem__ on self, then trigger any relevant events."""
-        dict.__setitem__(self, key, val)
-        if key not in self:
-            return
-        self._trigger_key(key)
+        `app` is the controlling application of the plot, and is passed
+        as the sole argument to each triggered function as they are
+        respectively called. It may be omitted, but usually you'll want
+        to assign something to it before calling `self.update`.
+        """
+        self._triggers = self._format_triggers(triggers)
+        self._state = set()
+        self._app = None
+
+    def _format_triggers(self, triggers):
+        """Convenience function that returns a properly formatted
+        trigger dict given a lazily formatted trigger dict.
+
+        Apply builtin function `frozenset` recursively to the keys of
+        `triggers` as well as the keys of all nested dicts.
+        Accepted formats for `triggers` are described in the
+        documentation for the constructor.
+        """
+        return dict((frozenset(k), (v[0], self._format_triggers(v[1])))
+                    for k, v in triggers.iteritems())
+
+    def _get_app(self): return self._app
+    def _set_app(self, app): self._app = app
+    app = property(_get_app, _set_app,
+        """The application controlling the plot.
+        
+        Triggered functions are passed this property as the sole
+        argument.
+        """)
+
+    @property
+    def state(self):
+        """A set describing the current state of the plot."""
+        return self._state
 
     @property
     def triggers(self):
-        return zip(self._funcs, self._conds)
+        """A dict describing the plot's current state triggers."""
+        return self._triggers
 
-    def update(self, other):
-        """Call dict.update on self, then trigger any relevant events."""
-        dict.update(self, other)
-
-        for key in dict(other):
-            self._trigger_key(key)
-
-    def add_triggers(self, *triggers):
-        """Add function triggers to be called when their given state
-        conditions are met.
+    def update(self, *elems):
+        """Add elements to the plot state, causing any trigger functions
+        to be called if their element requirements are now met.
         """
-        for func, conds in triggers:
-            self._funcs.append(func)
-            self._conds.append(conds)
-                    
+        self._state.update(elems)
+
+        for req_state, (func, nextbranch) in self._triggers.items():
+            if req_state <= self._state:
+                func(self.app)
+                del self._triggers[req_state]
+                self._triggers.update(nextbranch)

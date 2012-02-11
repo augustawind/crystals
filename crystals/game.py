@@ -50,7 +50,7 @@ class WorldMode(GameMode):
         self.world = world
         self.player = player
         self.plot = plot
-        plot.wmode = self
+        plot.app = self
         self.batch = self.world.focus.batch
         
         tf_padding = 10
