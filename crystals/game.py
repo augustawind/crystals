@@ -53,13 +53,16 @@ class WorldMode(GameMode):
         plot.wmode = self
         self.batch = self.world.focus.batch
         
-        tf_margin = 10
-        tf_x = tf_y = tf_margin
-        tf_width = window.width - (tf_margin * 2)
+        tf_padding = 10
+        tf_x = tf_y = tf_padding
+        tf_width = window.width - (tf_padding * 2)
         tf_height = 100
+        tf_style = dict(
+            wrap=True, font_size=10, line_spacing=20, color=gui.COLOR_WHITE,
+            font_name='monospace')
         self.infobox = gui.TextFeed(
             tf_x, tf_y, tf_width, tf_height, self.batch, show_box=True,
-            font_size=10, line_height=16)
+            style=tf_style)
 
         # Define possible user inputs and their effects.
         # Values are each a tuple of a callable followed optionally by 
@@ -79,11 +82,6 @@ class WorldMode(GameMode):
             'Talk': (self.infobox,),
             'UpdatePlot': (self.plot,),
         }
-
-    def activate(self):
-        """Activate world mode."""
-        self.infobox.activate()
-        GameMode.activate(self)
 
     def set_focus(self, room_name):
         """Set the room with name `room_name` as the focus."""

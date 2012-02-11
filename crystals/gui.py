@@ -168,55 +168,28 @@ class TextFeed(object):
     """A box that can output text."""
 
     def __init__(self, x, y, width, height, batch, show_box=False,
-                 margin=10, line_height=24, font_name='monospace',
-                 font_size=16, bold=False, italic=False, color=COLOR_WHITE):
+                 padding=10, style=dict(
+                    line_spacing=24, font_name='monospace', font_size=16,
+                    bold=False, italic=False, color=COLOR_WHITE)):
         self.batch = batch
 
-        self.box = Box(x, y, width, height, batch, color, show_box)
+        layout_x = x + padding
+        layout_y = y + padding
+        layout_width = width - (padding * 2)
+        layout_height = height - (padding * 2)
 
-        # Create a label for each line in the textfeed -----------------
-        label_x = x + margin
-        label_width = width - (margin * 2)
-        label_height = max(font_size, line_height)
-        margin += ((height - margin) % label_height) / 2
-        y1 = y + margin
-        y2 = y1 + height - (margin * 2)
+        self.document = pyglet.text.document.FormattedDocument(' ')
+        self.document.set_style(0, 1, style)
+        self.layout = pyglet.text.layout.IncrementalTextLayout(
+            self.document, layout_width, layout_height, multiline=True,
+            batch=batch)
+        self.layout.x = layout_x
+        self.layout.y = layout_y
+        self.box = Box(x, y, width, height, batch, show=show_box)
 
-        self.labels = []
-        for label_y in xrange(y1, y2, label_height):
-            self.labels.append(pyglet.text.Label(
-                '', font_name, font_size, bold, italic, color,
-                label_x, label_y, label_width, label_height,
-                halign='center', multiline=False, batch=self.batch))
-            self.labels[-1].content_valign = 'center'
-
-        prefix = ' _  '
-        self.wrapper = textwrap.TextWrapper(
-            width=width / font_size, initial_indent=prefix,
-            subsequent_indent='  | ')
-
-    def activate(self):
-        """Prepare for rendering."""
-        for label in self.labels:
-            label.batch = self.batch
-        self.box.batch = self.batch
-    
-    def _write_line(self, text):
-        """Add a line of text, scrolling up if the the feed is full.
-        
-        `text` should fit horizontally into the infobox when displayed.
-        """
-        for label in reversed(self.labels):
-            if not label.text:
-                label.text = text
-                return
-
-        # Move all text up a label, discarding the top text and assigning 
-        # `text` to the bottom label
-        for i in reversed(xrange(1, len(self.labels))):
-            self.labels[i].text = self.labels[i - 1].text
-        self.labels[0].text = text
+        self.prefix = '> '
 
     def write(self, text):
-        for line in self.wrapper.wrap(text):
-            self._write_line(line)
+        self.document.insert_text(len(self.document.text),
+                                  self.prefix + text + '\n')
+        self.layout.ensure_line_visible(-1)
