@@ -57,9 +57,9 @@ class WorldMode(GameMode):
         tf_x = tf_y = tf_margin
         tf_width = window.width - (tf_margin * 2)
         tf_height = 100
-        self.infobox = gui.TextFeed(tf_x, tf_y, tf_width, tf_height,
-                                     self.batch, show_box=True)
-        self.infobox.write('Welcome...')
+        self.infobox = gui.TextFeed(
+            tf_x, tf_y, tf_width, tf_height, self.batch, show_box=True,
+            font_size=10, line_height=16)
 
         # Define possible user inputs and their effects.
         # Values are each a tuple of a callable followed optionally by 

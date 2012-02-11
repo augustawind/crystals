@@ -1,4 +1,6 @@
 """simple gui components"""
+import textwrap
+
 import pyglet
 from pyglet.window import mouse
 
@@ -188,24 +190,33 @@ class TextFeed(object):
                 halign='center', multiline=False, batch=self.batch))
             self.labels[-1].content_valign = 'center'
 
-        self.prefix = ':: '
+        prefix = ' _  '
+        self.wrapper = textwrap.TextWrapper(
+            width=width / font_size, initial_indent=prefix,
+            subsequent_indent='  | ')
 
     def activate(self):
         """Prepare for rendering."""
         for label in self.labels:
             label.batch = self.batch
         self.box.batch = self.batch
-
-    def write(self, text):
-        """Add some text, scrolling up if the the feed is full."""
+    
+    def _write_line(self, text):
+        """Add a line of text, scrolling up if the the feed is full.
+        
+        `text` should fit horizontally into the infobox when displayed.
+        """
         for label in reversed(self.labels):
             if not label.text:
-                label.text = self.prefix + text
+                label.text = text
                 return
 
         # Move all text up a label, discarding the top text and assigning 
         # `text` to the bottom label
         for i in reversed(xrange(1, len(self.labels))):
             self.labels[i].text = self.labels[i - 1].text
-        self.labels[0].text = self.prefix + text
+        self.labels[0].text = text
 
+    def write(self, text):
+        for line in self.wrapper.wrap(text):
+            self._write_line(line)

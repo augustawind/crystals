@@ -223,7 +223,7 @@ class TestTextFeed(PygletTestCase):
         textfeed.activate()
         assert textfeed.box.batch is self.batch
 
-    def TestWrite_BlankLabelsExist_AddTextToClosestBlankLabelToTop(self):
+    def TestWriteLine_BlankLabelsExist_AddTextToClosestBlankLabelToTop(self):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
         text = 'Hello, world!'
@@ -231,31 +231,31 @@ class TestTextFeed(PygletTestCase):
             label = textfeed.labels[-i - 1]
             assert label.text == ''
 
-            textfeed.write(text)
-            assert label.text == textfeed.prefix + text
+            textfeed._write_line(text)
+            assert label.text == text
 
-    def TestWrite_BlankLabelsExist_NonBlankLabelsUntouched(self):
+    def TestWriteLine_BlankLabelsExist_NonBlankLabelsUntouched(self):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
         text = ['T' * i for i in xrange(1, len(textfeed.labels) + 1)]
         for i in xrange(len(textfeed.labels)):
-            textfeed.write(text[i])
+            textfeed._write_line(text[i])
             for j in xrange(i):
-                assert textfeed.labels[-1 - j].text == textfeed.prefix + text[j]
+                assert textfeed.labels[-1 - j].text == text[j]
 
             for label in textfeed.labels[:-i - 1]:
                 assert label.text == '', i
 
-    def TestWrite_NoBlankLabelsExist_InsertTextInBottom(self):
+    def TestWriteLine_NoBlankLabelsExist_InsertTextInBottom(self):
         textfeed = gui.TextFeed(
             0, 0, self.window.width, self.window.height, self.batch)
         text1 = 'Hello, world!'
         for i in xrange(len(textfeed.labels)):
-            textfeed.write(text1)
-        text2 = 'Goodbye, cruel world...'
+            textfeed._write_line(text1)
+        text2 = 'Goodbye, world!'
         for i in xrange(len(textfeed.labels)):
-            textfeed.write(text2)
-            assert textfeed.labels[i].text == textfeed.prefix + text2
+            textfeed._write_line(text2)
+            assert textfeed.labels[i].text == text2
 
             for label in textfeed.labels[i + 1:]:
-                assert label.text == textfeed.prefix + text1
+                assert label.text == text1

@@ -2,7 +2,6 @@ CRY§TAL§ TODO
 =============
 
     1. Extend the game's infobox.
-        * Text that doesn't fit horizontally wraps.
         * Text that, after wrapping, doesn't fit vertically prompts the
           user to scroll by pressing space.
     2. Implement complex interactions between PC and NPCs.
