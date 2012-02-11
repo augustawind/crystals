@@ -193,13 +193,3 @@ class TestMenu(PygletTestCase):
             self.menu.select_item(0)
             self.menu.on_mouse_release(0, 0, btn, 0)
             assert self.test_number is None
-
-
-class TestTextFeed(PygletTestCase):
-
-    def TestWrite_StringGiven_WriteStringToDocument(self):
-        textfeed = gui.TextFeed(
-            0, 0, self.window.width, self.window.height, self.batch)
-        text = 'Hello, world!'
-        textfeed.write(text)
-        assert text in textfeed.document.text

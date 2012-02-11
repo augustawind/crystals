@@ -178,8 +178,8 @@ class TextFeed(object):
         layout_width = width - (padding * 2)
         layout_height = height - (padding * 2)
 
-        self.document = pyglet.text.document.FormattedDocument(' ')
-        self.document.set_style(0, 1, style)
+        self.document = pyglet.text.document.FormattedDocument('\n')
+        self.document.set_paragraph_style(0, 1, style)
         self.layout = pyglet.text.layout.IncrementalTextLayout(
             self.document, layout_width, layout_height, multiline=True,
             batch=batch)
@@ -190,6 +190,5 @@ class TextFeed(object):
         self.prefix = '> '
 
     def write(self, text):
-        self.document.insert_text(len(self.document.text),
-                                  self.prefix + text + '\n')
-        self.layout.ensure_line_visible(-1)
+        self.document.insert_text(0, self.prefix + text + '\n')
+        self.layout.ensure_line_visible(0)
