@@ -38,7 +38,7 @@ def load_room(name, atlas, entities):
                 if char == IGNORE_CHAR:
                     entity = None
                 else:
-                    entity = getattr(entities, atlas.key[char])
+                    entity = getattr(entities, atlas.key[char])()
                     prepare_sprite(entity)
                 grid[-1][-1].append(entity)
 
@@ -102,11 +102,12 @@ def load_world(world_path, img_path):
     world = World(rooms, portals, atlas.START[0])
 
     # Add player character to world
-    prepare_sprite(entities.PLAYER)
+    player = entities.PLAYER()
+    prepare_sprite(player)
     rname, rz, ry, rx = atlas.START
-    world.add_entity(entities.PLAYER, rx, ry, rz, rname)
+    world.add_entity(player, rx, ry, rz, rname)
 
-    return world, entities.PLAYER
+    return world, player
 
 
 def load_plot(plot_path):

@@ -1,9 +1,9 @@
-from collections import namedtuple
+from functools import partial
 
 from crystals.world.entity import *
 
 # Define the player entity
-PLAYER = Entity('player', False, 'human-peasant.png')
+PLAYER = partial(Entity, 'player', False, 'human-peasant.png')
 
 
 # Define some template entities
@@ -39,12 +39,12 @@ class RedRoom:
 
     ALL = ['rfloor', 'sfloor', 'vwall', 'hwall']
 
-    rfloor = Rfloor('red.png')
-    sfloor = Sfloor('red.png')
-    vwall = Vwall('blue.png')
-    hwall = Hwall('blue.png')
+    rfloor = partial(Rfloor, 'red.png')
+    sfloor = partial(Sfloor, 'red.png')
+    vwall = partial(Vwall, 'blue.png')
+    hwall = partial(Hwall, 'blue.png')
 
-    troll = Entity(
+    troll = partial(Entity,
         id='troll',
         name='troll',
         walkable=False,
@@ -57,6 +57,6 @@ class BlueRoom:
 
     ALL = ['sfloor', 'vwall', 'hwall']
 
-    sfloor = Entity('smooth surface', True, 'tree-dead.png')
-    vwall = Vwall('blue.png')
-    hwall = Hwall('blue.png')
+    sfloor = partial(Entity, 'smooth surface', True, 'tree-dead.png')
+    vwall = partial(Vwall, 'blue.png')
+    hwall = partial(Hwall, 'blue.png')

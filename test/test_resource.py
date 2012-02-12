@@ -1,5 +1,6 @@
 import os
 import sys
+from functools import partial
 
 import pyglet
 from nose.tools import *
@@ -33,10 +34,9 @@ def check_room(room, atlas, entities):
                     continue
 
                 clsname = atlas.key[char]
-                name = getattr(entities, clsname).name
-                assert room[ry][x][z].name == name
-                walkable = getattr(entities, clsname).walkable
-                assert room[ry][x][z].walkable == walkable
+                entity = getattr(entities, clsname)()
+                assert room[ry][x][z].name == entity.name
+                assert room[ry][x][z].walkable == entity.walkable
 
 
 def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
@@ -54,15 +54,15 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
                 'oo@',
                 '@oo']]
     class entities:
-        floor = Entity(
+        floor = partial(Entity, 
             name = 'floor',
             walkable = True,
             image = 'floor-a-red.png')
-        cow = Entity(
+        cow = partial(Entity, 
             name = 'cow',
             walkable = False,
             image = 'cow.png')
-        sack = Entity(
+        sack = partial(Entity, 
             name = 'sack',
             walkable = True,
             image = 'sack.png')
@@ -86,15 +86,15 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
                 'o' + resource.IGNORE_CHAR + '@',
                 '@oo']]
     class entities:
-        floor = Entity(
+        floor = partial(Entity, 
             name = 'floor',
             walkable = True,
             image = 'floor-a-red.png')
-        cow = Entity(
+        cow = partial(Entity, 
             name = 'cow',
             walkable = False,
             image = 'cow.png')
-        sack = Entity(
+        sack = partial(Entity, 
             name = 'sack',
             walkable = True,
             image = 'sack.png')

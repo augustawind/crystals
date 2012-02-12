@@ -7,14 +7,13 @@ import pyglet
 class Entity(pyglet.sprite.Sprite):
     """A tangible thing in the game world."""
 
-    def __init__(self, name, walkable, image, batch=None,
-                 facing=(0, -1), actions=[], id=None):
+    def __init__(self, name, walkable, image, facing=(0, -1), actions=[], 
+                 id=None):
         image = pyglet.resource.image(image)
-        super(Entity, self).__init__(image, batch=batch)
+        super(Entity, self).__init__(image)
 
         self.name = name
         self.walkable = walkable
-        self.batch = batch
         self._facing = facing
         self.actions = actions
         self.id = id

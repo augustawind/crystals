@@ -10,9 +10,8 @@ from test.util import *
 
 
 def TestEntity():
-    batch = pyglet.graphics.Batch()
-    entity_ = entity.Entity('an entity', True, 'sack.png', batch,
-                            facing=(0, 1), actions=[])
+    entity_ = entity.Entity('an entity', True, 'sack.png', facing=(0, 1),
+                            actions=[])
 
 
 @raises(TypeError)
