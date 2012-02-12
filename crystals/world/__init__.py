@@ -107,13 +107,11 @@ class World(dict):
     def portals_xy2dest(self):
         return self._portals_xy2dest
 
-    def set_focus(self, room='', batch=None):
+    def set_focus(self, room=''):
         if self.focus:
             self.focus.batch = None
             self.focus.update()
 
-        if batch:
-            self.batch = batch
         room = self[room] if room else self.focus
         room.batch = self.batch
         room.update()

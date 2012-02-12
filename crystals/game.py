@@ -53,7 +53,8 @@ class WorldMode(GameMode):
         self.batch = pyglet.graphics.Batch()
         plot.app = self
 
-        self.world.set_focus(batch=self.batch)
+        self.world.batch = self.batch
+        self.world.set_focus()
         
         tf_padding = 10
         tf_x = tf_y = tf_padding

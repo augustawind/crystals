@@ -51,7 +51,7 @@ class WorldTestCase(object):
 
             room = world.Room(self.rm_name, self.grid)
             room.batch = self.batch
-            room.focus()
+            room.update()
             yield room
 
 
@@ -94,7 +94,7 @@ class TestRoom(WorldTestCase):
 
     def TestFocus_UpdateEntitySpritePositionsAndBatches(self):
         room = self.roomgen.next()
-        room.focus()
+        room.update()
         for y in xrange(len(room)):
             for x in xrange(len(room[y])):
                 for z in xrange(len(room[y][x])):
