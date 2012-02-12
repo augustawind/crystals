@@ -8,25 +8,14 @@ from crystals import resource
 from crystals.world import Room, World, Entity
 from test.util import *
 
-RES_PATH = 'test/res'
-WORLD_PATH = RES_PATH + '/world'
-PLOT_PATH = RES_PATH + '/plot'
-IMG_PATH = RES_PATH + '/img'
-
-
-def imgloader():
-    return pyglet.resource.Loader([
-        IMG_PATH + '/terrain', IMG_PATH + '/feature', IMG_PATH + '/item',
-        IMG_PATH + '/character'], script_home='.')
-
 
 def TestScaleImage_ValidParamsGiven_ScaleImage():
-    img = imgloader().image('cow.png')
+    img = pyglet.resource.image('cow.png')
     texture = img.get_texture()
 
     assert texture.width != 13
     assert texture.height != 13
-    resource._scale_image(img, 13, 13)
+    resource._scale_texture(img, 13, 13)
     assert texture.width == 13
     assert texture.height == 13
 
@@ -37,7 +26,7 @@ def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
         walkable = False
         image = 'human-peasant.png'
         actions = None
-    entity = resource.load_entity(AnEntity, imgloader())
+    entity = resource.load_entity(AnEntity)
 
     assert entity.name == AnEntity.name
     assert entity.walkable == AnEntity.walkable
@@ -94,7 +83,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
             image = 'sack.png'
             actions = None
 
-    room = resource.load_room(name, atlas, entities, imgloader())
+    room = resource.load_room(name, atlas, entities)
     check_room(room, atlas, entities)
 
 
@@ -129,7 +118,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
             image = 'sack.png'
             actions = None
 
-    room = resource.load_room(name, atlas, entities, imgloader())
+    room = resource.load_room(name, atlas, entities)
     assert room[1][1][1] is None
     check_room(room, atlas, entities)
 

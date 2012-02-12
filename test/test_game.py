@@ -7,7 +7,6 @@ from crystals import world
 from crystals.world import entity
 from test.util import *
 from test.test_world import WorldTestCase
-from test.test_resource import imgloader
 
 
 def TestGameMode():
@@ -25,7 +24,6 @@ class TestWorldMode(WorldTestCase):
 
     def setup(self):
         WorldTestCase.setup(self)
-        images = imgloader()
 
         self.window = pyglet.window.Window()
         self.room1 = self.roomgen.next()
@@ -40,8 +38,8 @@ class TestWorldMode(WorldTestCase):
 
         self.world_ = world.World(self.rooms, self.portals,
                                   self.room2.name)
-        self.player = entity.Entity('player', False, images.image('cow.png'),
-                                    facing=(0, -1))
+        self.player = entity.Entity(
+            'player', False, 'cow.png', facing=(0, -1))
         self.world_.add_entity(self.player, 1, 1, 1)
 
         class MockPlot(object):

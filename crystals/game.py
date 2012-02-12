@@ -6,11 +6,15 @@ from pyglet.window import key
 
 from crystals import gui
 from crystals import resource
-from crystals.resource import WORLD_PATH, PLOT_PATH, IMG_PATH
 from crystals.world import World, Entity
 
+RES_PATH = 'res' # default path to variable game resources
+WORLD_PATH = RES_PATH + '/world' # default path to variable world scripts
+PLOT_PATH = RES_PATH + '/plot' # default path to variable plot scripts
+IMG_PATH = RES_PATH + '/img' # default path to variable game images
+
 if __debug__:
-    from test.test_resource import WORLD_PATH, PLOT_PATH, IMG_PATH
+    from test.util import WORLD_PATH, PLOT_PATH, IMG_PATH
 
 
 class GameMode(object):

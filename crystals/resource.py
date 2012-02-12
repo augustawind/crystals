@@ -11,36 +11,29 @@ from crystals.world import Room, World, Entity, TILE_SIZE
 PLAYER_CHAR = '@' # atlas char that represents the player
 IGNORE_CHAR = '.' # atlas char that represents empty space
 
-RES_PATH = 'res' # default path to variable game resources
-WORLD_PATH = RES_PATH + '/world' # default path to variable world scripts
-PLOT_PATH = RES_PATH + '/plot' # default path to variable plot scripts
-IMG_PATH = RES_PATH + '/img' # default path to variable game images
-
 glEnable(GL_TEXTURE_2D)
 
 
-def _scale_image(img, width, height):
-    """Scale `img` to `width` by `height`, keeping pixel sharpness."""
-    texture = img.get_texture()
+def _scale_texture(texture, width, height):
+    """Scale `texture` to `width` by `height`, keeping pixel sharpness."""
     glBindTexture(GL_TEXTURE_2D, texture.id)
     texture.width = width
     texture.height = height
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
 
 
-def load_entity(obj, imgloader):
+def load_entity(obj):
     """Return an Entity instance, given an object whose attributes
     describe it.
     """
-    image = imgloader.image(obj.image)
-    _scale_image(image, TILE_SIZE, TILE_SIZE)
     id = obj.id if hasattr(obj, 'id') else None
-    entity = Entity(obj.name, obj.walkable, image, actions=obj.actions,
+    entity = Entity(obj.name, obj.walkable, obj.image, actions=obj.actions,
                     id=id)
+    _scale_texture(entity.image, TILE_SIZE, TILE_SIZE)
     return entity
 
 
-def load_room(name, atlas, entities, imgloader):
+def load_room(name, atlas, entities):
     """Return a Room instance, given its name, object `atlas` describing
     its layout and object `entities` describing its entities.
     """
@@ -56,7 +49,7 @@ def load_room(name, atlas, entities, imgloader):
                     entity = None
                 else:
                     attrobj = getattr(entities, atlas.key[char])
-                    entity = load_entity(attrobj, imgloader)
+                    entity = load_entity(attrobj)
                 grid[-1][-1].append(entity)
 
     return Room(name, grid)
@@ -90,38 +83,43 @@ def load_world_scripts(world_path):
     return atlas, entities
 
 
-def load_world(world_path=WORLD_PATH, img_path=IMG_PATH):
+def load_world(world_path, img_path):
     """Return a World instance and a player Entity instance, compiled
     from information found in modules 'atlas.py' and 'entities.py' at
     `world_path`, and using images at `img_path`.
     """
-    # Prepare resources
-    atlas, entities = load_world_scripts(world_path)
-    imgloader = pyglet.resource.Loader([
+    # Prepare images
+    pyglet.resource.path = [
         img_path + '/terrain', img_path + '/feature', img_path + '/item',
-        img_path + '/character'], script_home='.')
+        img_path + '/character']
+    pyglet.resource._default_loader._script_home = '.'
+    pyglet.resource.reindex()
+    assert pyglet.resource._default_loader._script_home == '.'
 
-    # Load rooms and portals
+    # Load world scripts
+    atlas, entities = load_world_scripts(world_path)
+
+    # Make rooms and portals
     rooms = {}
     portals = {}
     for rname in atlas.ALL:
         ratlas = getattr(atlas, rname)
         rentities = getattr(entities, rname)
-        rooms[rname] = load_room(rname, ratlas, rentities, imgloader)
+        rooms[rname] = load_room(rname, ratlas, rentities)
         portals[rname] = load_portals(ratlas)
 
-    # Load world
+    # Make world
     world = World(rooms, portals, atlas.START[0])
 
-    # Load and add player to world
-    player = load_entity(entities.PLAYER, imgloader)
+    # Make player character and add to world
+    player = load_entity(entities.PLAYER)
     rname, rz, ry, rx = atlas.START
     world.add_entity(player, rx, ry, rz, rname)
 
     return world, player
 
 
-def load_plot(plot_path=PLOT_PATH):
+def load_plot(plot_path):
     sys.path.insert(0, plot_path)
     triggers = __import__('plot').TRIGGERS
     sys.path.remove(plot_path)

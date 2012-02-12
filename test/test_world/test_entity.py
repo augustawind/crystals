@@ -7,13 +7,11 @@ from nose.tools import raises
 from crystals import *
 from crystals.world import entity
 from test.util import *
-from test.test_resource import imgloader
 
 
 def TestEntity():
-    image = imgloader().image('sack.png')
     batch = pyglet.graphics.Batch()
-    entity_ = entity.Entity('an entity', True, image, batch,
+    entity_ = entity.Entity('an entity', True, 'sack.png', batch,
                             facing=(0, 1), actions=[])
 
 
@@ -64,7 +62,7 @@ class TestAlert(object):
 
 
 def _DummyEntity():
-    return world.Entity('', False, imgloader().image('sack.png'), None)
+    return world.Entity('', False, 'sack.png', None)
 
 
 class TestTalk(object):

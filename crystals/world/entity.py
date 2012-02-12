@@ -9,7 +9,9 @@ class Entity(pyglet.sprite.Sprite):
 
     def __init__(self, name, walkable, image, batch=None,
                  facing=(0, -1), actions=[], id=None):
+        image = pyglet.resource.image(image)
         super(Entity, self).__init__(image, batch=batch)
+
         self.name = name
         self.walkable = walkable
         self.batch = batch

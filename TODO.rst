@@ -7,11 +7,6 @@ CRY§TAL§ TODO
 
     * Change entities file to employ direct instantiation of world.Entity
       for entity definitions.
-        * Change Entity to class to take an image name instead of an image,
-          and have the initializer load the image.
-            * This can be possibly be achieved by using pyglet's default
-              loader, and manually changing its _script_home attribute to
-              '.'.
 
     * Implement complex interactions between PC and NPCs.
         * Actions can be executed in a given order, a given number of
