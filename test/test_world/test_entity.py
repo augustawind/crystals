@@ -9,6 +9,11 @@ from crystals.world import entity
 from test.util import *
 
 
+def mockplot(triggers):
+    while True:
+        yield
+
+
 def TestEntity():
     entity_ = entity.Entity('an entity', True, 'sack.png', facing=(0, 1),
                             actions=[])
@@ -26,12 +31,11 @@ class TestUpdatePlot(object):
         updateplot = entity.UpdatePlot(updates)
 
     def TestCall_ValidPlotGiven_UpdatePlot(self):
-        updates = {'foo': 'bar'}
+        updates = ('foo', 'bar')
         updateplot = entity.UpdatePlot(updates)
-        plt = {'foo': 'baz', 'bip': 'bop'}
+        plt = mockplot({})
+        plt.next()
         updateplot(_DummyEntity(), plt)
-        plt['foo'] == 'bar'
-        assert plt['bip'] == 'bop'
 
 
 class _OutputStream(object):

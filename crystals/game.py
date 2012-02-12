@@ -6,6 +6,7 @@ from pyglet.window import key
 
 from crystals import gui
 from crystals import resource
+from crystals.plot import GameOver
 from crystals.world import World, Entity
 
 RES_PATH = 'res' # default path to variable game resources
@@ -54,9 +55,9 @@ class WorldMode(GameMode):
         self.world = world
         self.player = player
         self.plot = plot
-        self.batch = pyglet.graphics.Batch()
-        plot.app = self
+        self.plot.send(self)
 
+        self.batch = pyglet.graphics.Batch()
         self.world.batch = self.batch
         self.world.set_focus()
         
@@ -151,7 +152,12 @@ class Game(object):
     def run(self):
         """Run the game, activating the main menu."""
         self.main_menu.activate()
-        pyglet.app.run()
+
+        try:
+            pyglet.app.run()
+        except GameOver:
+            print 'Game over: all plot conditions were met'
+            pyglet.app.exit()
 
     def new_game(self):
         """Initialize and start a new game in world mode."""

@@ -42,11 +42,14 @@ class TestWorldMode(WorldTestCase):
             'player', False, 'cow.png', facing=(0, -1))
         self.world_.add_entity(self.player, 1, 1, 1)
 
-        class MockPlot(object):
-            app = None
-
+        def mockplot():
+            while True:
+                yield
+        plot = mockplot()
+        plot.next()
         self.wmode = game.WorldMode(self.window, self.world_, self.player,
-                                        MockPlot())
+                                    plot)
+
 
     def TestInit(self):
         pass

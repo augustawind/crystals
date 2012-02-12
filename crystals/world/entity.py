@@ -53,10 +53,10 @@ class UpdatePlot(Action):
         Action.__init__(self)
         self.updates = updates
 
-    def __call__(self, entity, plot):
-        """Update dict `plot` with self.updates."""
+    def __call__(self, entity, plt):
+        """Send plot generator `plt` self.updates."""
         Action.__call__(self, entity)
-        plot.update(self.updates)
+        plt.send(self.updates)
 
 
 class Alert(Action):

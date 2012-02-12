@@ -9,4 +9,7 @@ def troll_push_player(wmode):
     wmode.world.step_entity('troll', xstep, ystep)
 
 TRIGGERS = {
-    ('CheckTroll',): (troll_push_player, {})}
+    ('CheckTroll',): (troll_push_player, {
+        ('TranscendSpaceAndTime',): (lambda: 1 / 0, {})
+        })
+    }
