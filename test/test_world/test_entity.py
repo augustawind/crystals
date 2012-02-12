@@ -14,7 +14,7 @@ def TestEntity():
     image = imgloader().image('sack.png')
     batch = pyglet.graphics.Batch()
     entity_ = entity.Entity('an entity', True, image, batch,
-                            facing=(0, 1), actions=[], x=2, y=2)
+                            facing=(0, 1), actions=[])
 
 
 @raises(TypeError)

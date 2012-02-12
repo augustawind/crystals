@@ -18,6 +18,7 @@ class MockEntity(pyglet.sprite.Sprite):
         self.name = name
         self.walkable = walkable
         self.actions = actions
+        self.id = id(self)
 
 
 class WorldTestCase(object):
@@ -48,7 +49,8 @@ class WorldTestCase(object):
                  for rows in zip(*self.rm_layers)]
             self.batch = pyglet.graphics.Batch()
 
-            room = world.Room(self.rm_name, self.batch, self.grid)
+            room = world.Room(self.rm_name, self.grid)
+            room.batch = self.batch
             room.focus()
             yield room
 
@@ -60,8 +62,10 @@ def TestWorldError():
 
 class TestRoom(WorldTestCase):
 
-    def TestInit(self):
+    def TestInit_UniquesIndexed(self):
         room = self.roomgen.next()
+        assert len(room.uniques) == len([
+            0 for row in self.grid for col in row for cell in col if cell])
 
     def TestUpdateEntity_ValidInputs_UpdateSpriteCoords(self):
         room = self.roomgen.next()

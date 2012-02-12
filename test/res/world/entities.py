@@ -2,7 +2,6 @@ from collections import namedtuple
 
 from crystals.world.entity import *
 
-
 # Define entity base class
 entity = namedtuple('entity', 'name walkable image actions')
 
@@ -29,11 +28,14 @@ class RedRoom:
     vwall = vwall._replace(image=vwall.image + 'blue.png')
     hwall = hwall._replace(image=hwall.image + 'blue.png')
 
-    troll = entity(
-        'troll', False, 'troll.png', (
+    class troll:
+        id = 'troll'
+        name = 'troll'
+        walkable = False
+        image = 'troll.png'
+        actions = (
             Alert('I like shorts'),
-            UpdatePlot('CheckTroll')))
-
+            UpdatePlot('CheckTroll'))
 
 class BlueRoom:
 

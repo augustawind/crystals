@@ -1,9 +1,12 @@
 from random import randint
 from itertools import repeat
 
-def push_player(wmode):
+def troll_push_player(wmode):
     xstep, ystep = wmode.player.facing
-    wmode.step_player(xstep * -1, ystep * -1)
+    xstep *= -1
+    ystep *= -1
+    wmode.step_player(xstep, ystep)
+    wmode.world.step_entity('troll', xstep, ystep)
 
 TRIGGERS = {
-    ('CheckTroll',): (push_player, {})}
+    ('CheckTroll',): (troll_push_player, {})}

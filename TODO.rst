@@ -4,10 +4,11 @@ CRY§TAL§ TODO
     * Extend the game's infobox.
         * Text that, after wrapping, doesn't fit vertically prompts the
           user to scroll by pressing space.
-    * Rewrite rooms so that they're indexed like room[y][x][z] instead of
-      room[z][y][x].
-    * Rewrite portals so that there are simply to dicts mapping dest name
-      strings to coordinate 2-tuples and vice versa.
+    * Add functionality for accessing specific entities.
+    * Change entities file to employ direct instantiation of world.Entity
+      for entity definitions.
+        * Change Entity to class to take an image name instead of an image,
+          and have the initializer load the image.
     * Implement complex interactions between PC and NPCs.
         * Actions can be executed in a given order, a given number of
           times each.

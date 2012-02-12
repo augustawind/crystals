@@ -34,7 +34,10 @@ def load_entity(obj, imgloader):
     """
     image = imgloader.image(obj.image)
     _scale_image(image, TILE_SIZE, TILE_SIZE)
-    return Entity(obj.name, obj.walkable, image, actions=obj.actions)
+    id = obj.id if hasattr(obj, 'id') else None
+    entity = Entity(obj.name, obj.walkable, image, actions=obj.actions,
+                    id=id)
+    return entity
 
 
 def load_room(name, atlas, entities, imgloader):
@@ -56,7 +59,7 @@ def load_room(name, atlas, entities, imgloader):
                     entity = load_entity(attrobj, imgloader)
                 grid[-1][-1].append(entity)
 
-    return Room(name, pyglet.graphics.Batch(), grid)
+    return Room(name, grid)
 
 
 def load_portals(atlas):

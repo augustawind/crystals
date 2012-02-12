@@ -50,8 +50,10 @@ class WorldMode(GameMode):
         self.world = world
         self.player = player
         self.plot = plot
+        self.batch = pyglet.graphics.Batch()
         plot.app = self
-        self.batch = self.world.focus.batch
+
+        self.world.set_focus(batch=self.batch)
         
         tf_padding = 10
         tf_x = tf_y = tf_padding
@@ -83,11 +85,6 @@ class WorldMode(GameMode):
             'UpdatePlot': (self.plot,),
         }
 
-    def set_focus(self, room_name):
-        """Set the room with name `room_name` as the focus."""
-        self.world.set_focus(room_name)
-        self.batch = self.world.focus.batch
-
     def step_player(self, xstep, ystep):
         """Step the player (`xstep`, `ystep`) tiles from her current
         position.
@@ -111,7 +108,7 @@ class WorldMode(GameMode):
         self.world.portal_entity(self.player, x, y)
         from_room = self.world.focus.name
         dest = self.world.portals_xy2dest[from_room][(x, y)]
-        self.set_focus(dest)
+        self.world.set_focus(dest)
 
     def interact(self):
         """If an interactable entity is in front of the player, make
