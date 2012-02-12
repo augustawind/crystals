@@ -2,19 +2,35 @@ from collections import namedtuple
 
 from crystals.world.entity import *
 
-# Define entity base class
-entity = namedtuple('entity', 'name walkable image actions')
-
 # Define the player entity
-PLAYER = entity('player', False, 'human-peasant.png', [])
+PLAYER = Entity('player', False, 'human-peasant.png')
+
 
 # Define some template entities
-rfloor = entity('rough surface', True, 'floor-a-', [])
-sfloor = entity('smooth surface', True, 'floor-b-', [])
+class Rfloor(Entity):
 
-wall = entity('wall', False, [], [])
-vwall = wall._replace(image='wall-vert-')
-hwall = wall._replace(image='wall-horiz-')
+    def __init__(self, imgend, actions=[]):
+        Entity.__init__(
+            self, 'rough surface', True, 'floor-a-' + imgend, actions=actions)
+
+class Sfloor(Entity):
+
+    def __init__(self, imgend, actions=[]):
+        Entity.__init__(
+            self, 'smooth surface', True, 'floor-b-' + imgend, actions=actions)
+
+class Vwall(Entity):
+
+    def __init__(self, imgend, actions=[]):
+        Entity.__init__(
+            self, 'wall', False, 'wall-vert-' + imgend, actions=actions)
+
+class Hwall(Entity):
+
+    def __init__(self, imgend, actions=[]):
+        Entity.__init__(
+            self, 'wall', False, 'wall-horiz-' + imgend, actions=actions)
+
 
 # Define entities for each room
 # ----------------------------------------------------------------------
@@ -23,24 +39,24 @@ class RedRoom:
 
     ALL = ['rfloor', 'sfloor', 'vwall', 'hwall']
 
-    rfloor = rfloor._replace(image=rfloor.image + 'red.png')
-    sfloor = sfloor._replace(image=sfloor.image + 'red.png')
-    vwall = vwall._replace(image=vwall.image + 'blue.png')
-    hwall = hwall._replace(image=hwall.image + 'blue.png')
+    rfloor = Rfloor('red.png')
+    sfloor = Sfloor('red.png')
+    vwall = Vwall('blue.png')
+    hwall = Hwall('blue.png')
 
-    class troll:
-        id = 'troll'
-        name = 'troll'
-        walkable = False
-        image = 'troll.png'
-        actions = (
+    troll = Entity(
+        id='troll',
+        name='troll',
+        walkable=False,
+        image='troll.png',
+        actions=(
             Alert('I like shorts'),
-            UpdatePlot('CheckTroll'))
+            UpdatePlot('CheckTroll')))
 
 class BlueRoom:
 
     ALL = ['sfloor', 'vwall', 'hwall']
 
-    sfloor = sfloor._replace(image='tree-dead.png')
-    vwall = vwall._replace(image=vwall.image + 'blue.png')
-    hwall = hwall._replace(image=hwall.image + 'blue.png')
+    sfloor = Entity('smooth surface', True, 'tree-dead.png')
+    vwall = Vwall('blue.png')
+    hwall = Hwall('blue.png')

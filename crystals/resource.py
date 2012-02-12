@@ -14,23 +14,13 @@ IGNORE_CHAR = '.' # atlas char that represents empty space
 glEnable(GL_TEXTURE_2D)
 
 
-def _scale_texture(texture, width, height):
-    """Scale `texture` to `width` by `height`, keeping pixel sharpness."""
+def prepare_sprite(sprite):
+    """Prepare a sprite for the game."""
+    texture = sprite.image
     glBindTexture(GL_TEXTURE_2D, texture.id)
-    texture.width = width
-    texture.height = height
+    texture.width = TILE_SIZE
+    texture.height = TILE_SIZE
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST)
-
-
-def load_entity(obj):
-    """Return an Entity instance, given an object whose attributes
-    describe it.
-    """
-    id = obj.id if hasattr(obj, 'id') else None
-    entity = Entity(obj.name, obj.walkable, obj.image, actions=obj.actions,
-                    id=id)
-    _scale_texture(entity.image, TILE_SIZE, TILE_SIZE)
-    return entity
 
 
 def load_room(name, atlas, entities):
@@ -48,8 +38,8 @@ def load_room(name, atlas, entities):
                 if char == IGNORE_CHAR:
                     entity = None
                 else:
-                    attrobj = getattr(entities, atlas.key[char])
-                    entity = load_entity(attrobj)
+                    entity = getattr(entities, atlas.key[char])
+                    prepare_sprite(entity)
                 grid[-1][-1].append(entity)
 
     return Room(name, grid)
@@ -111,12 +101,12 @@ def load_world(world_path, img_path):
     # Make world
     world = World(rooms, portals, atlas.START[0])
 
-    # Make player character and add to world
-    player = load_entity(entities.PLAYER)
+    # Add player character to world
+    prepare_sprite(entities.PLAYER)
     rname, rz, ry, rx = atlas.START
-    world.add_entity(player, rx, ry, rz, rname)
+    world.add_entity(entities.PLAYER, rx, ry, rz, rname)
 
-    return world, player
+    return world, entities.PLAYER
 
 
 def load_plot(plot_path):

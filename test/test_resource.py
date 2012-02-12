@@ -5,32 +5,19 @@ import pyglet
 from nose.tools import *
 
 from crystals import resource
-from crystals.world import Room, World, Entity
+from crystals.world import Room, World, Entity, TILE_SIZE
 from test.util import *
 
 
-def TestScaleImage_ValidParamsGiven_ScaleImage():
-    img = pyglet.resource.image('cow.png')
-    texture = img.get_texture()
+def TestPrepareEntity_ValidParamsGiven_ScaleImage():
+    entity = Entity('cow', False, 'cow.png')
 
-    assert texture.width != 13
-    assert texture.height != 13
-    resource._scale_texture(img, 13, 13)
-    assert texture.width == 13
-    assert texture.height == 13
-
-
-def TestLoadEntity_ValidArgsGiven_ReturnExpectedEntity():
-    class AnEntity:
-        name = 'guido'
-        walkable = False
-        image = 'human-peasant.png'
-        actions = None
-    entity = resource.load_entity(AnEntity)
-
-    assert entity.name == AnEntity.name
-    assert entity.walkable == AnEntity.walkable
-    assert entity.actions is None
+    image = entity.image
+    assert image.width != TILE_SIZE
+    assert image.height != TILE_SIZE
+    resource.prepare_sprite(entity)
+    assert image.width == TILE_SIZE
+    assert image.height == TILE_SIZE
 
 
 def check_room(room, atlas, entities):
@@ -67,21 +54,18 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
                 'oo@',
                 '@oo']]
     class entities:
-        class floor:
-            name = 'floor'
-            walkable = True
-            image = 'floor-a-red.png'
-            actions = None
-        class cow:
-            name = 'cow'
-            walkable = False
-            image = 'cow.png'
-            actions = None
-        class sack:
-            name = 'sack'
-            walkable = True
-            image = 'sack.png'
-            actions = None
+        floor = Entity(
+            name = 'floor',
+            walkable = True,
+            image = 'floor-a-red.png')
+        cow = Entity(
+            name = 'cow',
+            walkable = False,
+            image = 'cow.png')
+        sack = Entity(
+            name = 'sack',
+            walkable = True,
+            image = 'sack.png')
 
     room = resource.load_room(name, atlas, entities)
     check_room(room, atlas, entities)
@@ -102,21 +86,18 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
                 'o' + resource.IGNORE_CHAR + '@',
                 '@oo']]
     class entities:
-        class floor:
-            name = 'floor'
-            walkable = True
-            image = 'floor-a-red.png'
-            actions = None
-        class cow:
-            name = 'cow'
-            walkable = False
-            image = 'cow.png'
-            actions = None
-        class sack:
-            name = 'sack'
-            walkable = True
-            image = 'sack.png'
-            actions = None
+        floor = Entity(
+            name = 'floor',
+            walkable = True,
+            image = 'floor-a-red.png')
+        cow = Entity(
+            name = 'cow',
+            walkable = False,
+            image = 'cow.png')
+        sack = Entity(
+            name = 'sack',
+            walkable = True,
+            image = 'sack.png')
 
     room = resource.load_room(name, atlas, entities)
     assert room[1][1][1] is None
