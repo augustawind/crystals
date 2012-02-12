@@ -11,10 +11,6 @@ ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels
 
 
-class WorldError(Exception):
-    pass
-
-
 class Room(list):
 
     def __init__(self, name, grid):
@@ -22,6 +18,7 @@ class Room(list):
         self.name = name
         self.batch = None
 
+        # Index unique entities by instance attribute `id`
         self.uniques = {}
         for entity, x, y, z in self._iter_entities():
             if entity.id:
@@ -108,6 +105,9 @@ class World(dict):
         return self._portals_xy2dest
 
     def set_focus(self, room=''):
+        """Set the focus to room with name `room`, setting its batch to
+        self.batch and updating its entities.
+        """
         if self.focus:
             self.focus.batch = None
             self.focus.update()

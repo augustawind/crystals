@@ -55,11 +55,6 @@ class WorldTestCase(object):
             yield room
 
 
-@raises(world.WorldError)
-def TestWorldError():
-    raise world.WorldError()
-
-
 class TestRoom(WorldTestCase):
 
     def TestInit_UniquesIndexed(self):
