@@ -5,9 +5,6 @@ CRY§TAL§ TODO
         * Text that, after wrapping, doesn't fit vertically prompts the
           user to scroll by pressing space.
 
-    * Change entities file to employ direct instantiation of world.Entity
-      for entity definitions.
-
     * Implement complex interactions between PC and NPCs.
         * Actions can be executed in a given order, a given number of
           times each.
