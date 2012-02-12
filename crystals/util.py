@@ -2,9 +2,9 @@
 
 
 def coroutine(func):
-    """A wrapper for generator functions that makes them act like coroutines.
+    """A wrapper for generator functions that starts them automatically.
 
-    Return a function that acts like generator function `func` with
+    Return a function that calls generator function `func` with
     the given args, but intercepts the returned generator and calls its
     `next` method before returning it to the caller.
 

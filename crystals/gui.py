@@ -62,7 +62,7 @@ class Menu(object):
                  italic=False, color=COLOR_WHITE):
         self.batch = batch
         self.functions = functions
-        self.selection = -1
+        self.selection = None
 
         self.box = Box(x, y, height, batch, color, show_box)
 
@@ -96,6 +96,8 @@ class Menu(object):
                 halign='center', multiline=False, batch=batch))
             self.labels[-1].content_valign = 'center'
 
+        self.select_item(0)
+
     def hit_test(self, x, y, box):
         """Return True if (x, y) is within the bounds of box, else False."""
         if (box.x <= x < box.x + box.width and
@@ -106,13 +108,20 @@ class Menu(object):
     def select_item(self, i):
         """Deselect the currently selected menu item, then select the
         menu item at index i, displaying its border.
+
+        If i is None, just deselect the current menu item.
         """
         if i == self.selection:
             return
+        if i is None:
+            self.deselect()
+            return
+        if i < 0:
+            i = len(self.boxes) - i
+
         self.deselect()
-        if i != -1:
-            self.boxes[i].show()
-            self.selection = i
+        self.boxes[i].show()
+        self.selection = i
     
     def select_next(self):
         """Select the next menu item in sequence.
@@ -140,9 +149,9 @@ class Menu(object):
         """Deselect the current menu item if it is currently selected,
         else do nothing.
         """
-        if self.selection != -1 and self.boxes[self.selection].visible:
+        if self.selection is not None and self.boxes[self.selection].visible:
             self.boxes[self.selection].hide()
-            self.selection = -1
+            self.selection = None
 
     # event handlers ---------------------------------------------------
     def on_mouse_motion(self, x, y, dx, dy):
@@ -160,7 +169,7 @@ class Menu(object):
         """On a left mouse release, if a button is currently selected,
         execute that button's corresponding function.
         """
-        if self.selection != -1 and button == mouse.LEFT:
+        if self.selection is not None and button == mouse.LEFT:
             self.functions[self.selection]()
 
 

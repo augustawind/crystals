@@ -1,9 +1,9 @@
-"""keeping track of and responding to the game state"""
+"""implementation of plot mechanics, the higher powers driving the game"""
 from crystals.util import coroutine
 
 
 class GameOver(BaseException):
-    """Raised by a plot generator when the game is over."""
+    """Raised when the game is over."""
 
 
 def _format_triggers(triggers):
@@ -52,7 +52,7 @@ def plot(triggers):
     while triggers:
         # Get state updates
         updates = (yield)
-        if not updates:
+        if updates is None:
             continue
 
         # Update state

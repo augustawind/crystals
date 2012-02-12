@@ -72,7 +72,7 @@ class TestMenu(PygletTestCase):
         assert isinstance(self.menu, gui.Menu)
         assert self.menu.batch == self.batch
         assert self.menu.functions == self.functions
-        assert self.menu.selection == -1
+        assert self.menu.selection == 0
         assert isinstance(self.menu.box, gui.Box)
 
     def TestInit_AllBoxesInheritFromGuiBoxClass(self):
@@ -151,7 +151,7 @@ class TestMenu(PygletTestCase):
     def TestDeselect_ItemSelected_DeselectItem(self):
         self.menu.select_item(1)
         self.menu.deselect()
-        assert self.menu.selection == -1
+        assert self.menu.selection == None
 
     def _iter_box_data(self):
         return iter((box, box.x, box.y) for box in self.menu.boxes)
@@ -175,7 +175,7 @@ class TestMenu(PygletTestCase):
         for dx, dy in self._iter_directions():
             self.menu.on_mouse_motion(self.menu.boxes[-1].width * 2,
                                       self.menu.boxes[-1].y * 2, dx, dy)
-            assert self.menu.selection == -1
+            assert self.menu.selection == None
 
     def TestOnMouseRelelase_ItemSelected_CallItemFunction(self):
         for i in xrange(len(self.functions)):
@@ -184,7 +184,7 @@ class TestMenu(PygletTestCase):
             assert self.test_number == i
 
     def TestOnMouseRelease_NoItemSelected_DontCallItemFunction(self):
-        self.menu.select_item(-1)
+        self.menu.select_item(None)
         self.menu.on_mouse_release(0, 0, mouse.LEFT, 0)
         assert self.test_number is None
 

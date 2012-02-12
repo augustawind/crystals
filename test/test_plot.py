@@ -28,6 +28,7 @@ class TestOldplot():
         assert self.dummy == 1
         plt.send('State5')
         assert self.dummy == 1
+
         try:
             plt.send('State4')
         except plot.GameOver:
