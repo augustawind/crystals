@@ -2,6 +2,7 @@ from functools import partial
 
 from crystals.world.entity import *
 
+
 # Define the player entity
 PLAYER = partial(Entity, 'player', False, 'human-peasant.png')
 

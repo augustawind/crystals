@@ -47,8 +47,9 @@ class TestWorldMode(WorldTestCase):
                 yield
         plot = mockplot()
         plot.next()
+        plot_state = set()
         self.wmode = game.WorldMode(self.window, self.world_, self.player,
-                                    plot)
+                                    plot, plot_state)
 
 
     def TestInit(self):

@@ -12,9 +12,9 @@ def _format_triggers(triggers):
 
 
 @coroutine
-def plot(triggers):
-    """Return a plot generator, given dict `triggers` containing
-    structured plot information.
+def plot(state, triggers):
+    """Return a plot generator, given an initial state set and a
+    mapping of functions to potential state elements.
 
     `triggers` must be a dictionary where each key is an arbitrary-
     length tuple of unique plot state identifiers, and each value is
@@ -37,14 +37,13 @@ def plot(triggers):
     their conditions have been met. Calls to `next` or `send(None)` are
     ignored.
 
-    For each trigger at the top level whose condtions have been met,
+    For each trigger at the top level whose conditions have been met,
     the corresp. function is called with the controlling application
     as its sole argument. That entry is then deleted except for nested
     entries, which are moved up a level. Once the triggers are exhausted,
     GameOver is raised.
     """
     triggers = _format_triggers(triggers)
-    state = set()
 
     app = (yield)
     assert app

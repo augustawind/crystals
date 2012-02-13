@@ -115,4 +115,6 @@ def load_plot(plot_path):
     triggers = __import__('plot').TRIGGERS
     sys.path.remove(plot_path)
 
-    return plot(triggers)
+    state = set()
+
+    return plot(state, triggers), state

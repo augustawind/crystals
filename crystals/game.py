@@ -50,11 +50,12 @@ class MainMenu(GameMode, gui.Menu):
 class WorldMode(GameMode):
     """Game mode where the player explores the game world."""
 
-    def __init__(self, window, world, player, plot):
+    def __init__(self, window, world, player, plot, plot_state):
         GameMode.__init__(self, window)
         self.world = world
         self.player = player
         self.plot = plot
+        self.plot_state = plot_state
         self.plot.send(self)
 
         self.batch = pyglet.graphics.Batch()
@@ -165,6 +166,6 @@ class Game(object):
         self.window.clear()
 
         world, player = resource.load_world(WORLD_PATH, IMG_PATH)
-        plot = resource.load_plot(PLOT_PATH)
-        self.wmode = WorldMode(self.window, world, player, plot)
+        plot, pstate = resource.load_plot(PLOT_PATH)
+        self.wmode = WorldMode(self.window, world, player, plot, pstate)
         self.wmode.activate()

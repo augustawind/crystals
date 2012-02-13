@@ -37,8 +37,8 @@ Implement complex interactions between PC and NPCs
 ..................................................
     * Actions can be executed in a given order, a given number of
       times each.
-    * 'RequireState' action ends action sequence if given plot state
-      is not found True.
+    * 'RequireState' action moves execution back to the previous action
+      if given plot state is not found True.
     * Write class Interaction in world.entity to coordinate actions.
       
 Prepare and send the game to Julian Wass
