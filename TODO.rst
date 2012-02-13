@@ -41,7 +41,21 @@ Implement complex interactions between PC and NPCs
       times each.
     * 'RequireState' action moves execution back to the previous action
       if given plot state is not found True.
+        * This would allow for indefinite repetition of the same action.
     * Write class Interaction in world.entity to coordinate actions.
+        * Constructor takes two arguments, on_engage and on_step,
+          which specify the actions to execute when engaged with from
+          an adjacent entity and when stepped upon, respectively.
+            * Each argument is a list of actions. When the corresp.
+              call is made, the next action in the list will be executed.
+            * Methods engage(actor, reciever) and step(actor, reciever)
+              are responsible for executing the actions.
+    * Change world.Entity argument 'actions' to 'interaction', which
+      takes an Interaction object.
+    * (Eventually) write a factory function IndexedInteraction which
+      takes a list of indices for each action list and executes the
+      actions in the indexed order. This would make it easy to repeat
+      actions.
       
 Prepare and send the game to Julian Wass
 ........................................

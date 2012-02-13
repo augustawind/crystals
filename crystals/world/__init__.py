@@ -1,14 +1,36 @@
 """creation and mutation of the game world"""
+import pyglet
 from pyglet.graphics import OrderedGroup
 
-import entity
-from entity import Entity
-
-__all__ = ['Room', 'World', 'entity', 'Entity', 'action']
+__all__ = ['Room', 'World', 'Entity', 'action']
 
 TILE_SIZE = 24 # Width and height of each tile, in pixels
 ORIGIN_X = 10  # X and Y coordinates of the bottom left corner
 ORIGIN_Y = 124 # of room display, in pixels
+
+
+class Entity(pyglet.sprite.Sprite):
+    """A tangible thing in the game world."""
+
+    def __init__(self, name, walkable, image, facing=(0, -1), actions=[], 
+                 id=None):
+        image = pyglet.resource.image(image)
+        super(Entity, self).__init__(image)
+
+        self.name = name
+        self.walkable = walkable
+        self._facing = facing
+        self.actions = actions
+        self.id = id
+
+    @property
+    def facing(self):
+        return self._facing
+    
+    @facing.setter
+    def facing(self, xy):
+        x, y = xy
+        self._facing = (x, y)
 
 
 class Room(list):

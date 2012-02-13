@@ -8,6 +8,11 @@ from crystals import world
 from test.util import *
 
 
+def TestEntity():
+    entity_ = world.Entity('an entity', True, 'sack.png', facing=(0, 1),
+                            actions=[])
+
+
 class MockEntity(pyglet.sprite.Sprite):
 
     def __init__(self, name='entity', walkable=True, actions=[]):

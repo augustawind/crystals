@@ -1,6 +1,7 @@
 from functools import partial
 
-from crystals.world.entity import *
+from crystals.world import Entity
+from crystals.world.action import *
 
 
 # Define the player entity

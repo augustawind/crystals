@@ -4,7 +4,6 @@ from pyglet.window import key
 from crystals import game
 from crystals import gui
 from crystals import world
-from crystals.world import entity
 from test.util import *
 from test.test_world import WorldTestCase
 
@@ -38,7 +37,7 @@ class TestWorldMode(WorldTestCase):
 
         self.world_ = world.World(self.rooms, self.portals,
                                   self.room2.name)
-        self.player = entity.Entity(
+        self.player = world.Entity(
             'player', False, 'cow.png', facing=(0, -1))
         self.world_.add_entity(self.player, 1, 1, 1)
 
