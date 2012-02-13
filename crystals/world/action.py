@@ -21,6 +21,19 @@ class Action(object):
         """
 
 
+class ActionSequence(Action):
+    """Executes multiple actions "at once", one after the other in a given
+    sequence.
+    """
+
+    def __init__(self, *actions):
+        self.actions = actions
+
+    def __call__(self, entity, *allargs):
+        for action, args in zip(self.actions, allargs):
+            action(entity, *args)
+
+
 class ActionIter(Action):
     """Executes actions in a sequence, executing the next action each
     time the ActionIter instance is called.
@@ -36,42 +49,40 @@ class ActionIter(Action):
 
     def _iter_actions(self):
         for action in self.actions:
-            args = (yield)
-            action(*args)
+            entity, args = (yield)
+            action(entity, *args)
 
         while True:
-            args = (yield)
-            self.actions[-1](*args)
+            entity, args = (yield)
+            self.actions[-1](entity, *args)
 
-    def __call__(self, *args):
-        self._iter.send(args)
+    def __call__(self, entity, *args):
+        self._iter.send((entity, args))
 
 
 class UpdatePlot(Action):
-    """Action which updates a Plot instance."""
+    """Sends a given object to a given generator."""
 
     def __init__(self, updates):
         self.updates = updates
 
     def __call__(self, entity, plt):
-        """Send plot generator `plt` self.updates."""
         plt.send(self.updates)
 
 
 class Alert(Action):
-    """Action which writes given text to a given output stream."""
+    """Writes given text to a given output stream."""
     
     def __init__(self, text):
         self.text = text
 
     def __call__(self, entity, output):
-        """Write the text to the given output stream."""
         output.write(self.text)
 
 
 class Talk(Action):
-    """Action which writes given text to a given output stream,
-    prepended by the name of the acting entity.
+    """Writes given text to a given output stream, prepended by the name
+    of the acting entity.
     """
 
     sep = ': '
@@ -80,9 +91,6 @@ class Talk(Action):
         self.text = text
 
     def __call__(self, entity, output):
-        """Write the text to the given output stream, prepended by the
-        entity's name plus class attribute `sep`.
-        """
         output.write(entity.name + self.sep + self.text)
     
 

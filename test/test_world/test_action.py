@@ -14,7 +14,7 @@ class DummyAction(action.Action):
     def __init__(self):
         self.value = 0
 
-    def __call__(self):
+    def __call__(self, entity):
         self.value = 1
 
 
@@ -33,13 +33,22 @@ def TestActionIter():
     action2 = DummyAction()
     actioniter = action.ActionIter(action1, action2)
 
-    actioniter()
+    actioniter(None)
     assert action1.value == 1
     assert action2.value == 0
-    actioniter()
+    actioniter(None)
     assert action2.value == 1
     assert action1.value == 1
 
+
+def TestActionSequence():
+    action1 = DummyAction()
+    action2 = DummyAction()
+    actseq = action.ActionSequence(action1, action2)
+
+    actseq(None, (), ())
+    assert action1.value == 1
+    assert action2.value == 1
 
 
 class TestUpdatePlot(object):
@@ -100,4 +109,3 @@ class TestTalk(object):
         output = _OutputStream()
         talk(entity_, output)
         assert output.last == entity_.name + talk.sep + text
-
