@@ -9,7 +9,6 @@ class RedRoom:
         '-': 'hwall',
         ',': 'rfloor',
         '+': 'sfloor',
-
         'T': 'troll',}
     map = [
         [

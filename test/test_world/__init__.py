@@ -10,18 +10,18 @@ from test.util import *
 
 def TestEntity():
     entity_ = world.Entity('an entity', True, 'sack.png', facing=(0, 1),
-                            actions=[])
+                            action=[])
 
 
 class MockEntity(pyglet.sprite.Sprite):
 
-    def __init__(self, name='entity', walkable=True, actions=[]):
+    def __init__(self, name='entity', walkable=True, action=None):
         pyglet.sprite.Sprite.__init__(
             self, pyglet.resource.image('cow.png'),
             batch=pyglet.graphics.Batch())
         self.name = name
         self.walkable = walkable
-        self.actions = actions
+        self.action = action
         self.id = id(self)
 
 

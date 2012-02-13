@@ -123,10 +123,24 @@ class WorldMode(GameMode):
         x += self.player.facing[0]
         y += self.player.facing[1]
         for entity in self.world.focus[y][x]:
-            if entity:
-                for action in entity.actions:
-                    args = self.action_args[type(action).__name__]
+            if not entity:
+                continue
+            action = entity.action
+            if not action:
+                continue
+
+            key = str(action)
+            if key == 'ActionSequence':
+                for action in action.actions:
+                    args = self.action_args[str(action)]
                     action(entity, *args)
+                continue
+            if key == 'ActionIter':
+                args = self.action_args[str(action.next_action)]
+            else:
+                args = self.action_args[str(action)]
+            action(entity, *args)
+
 
     def on_key_press(self, key, modifiers):
         """Process user input."""

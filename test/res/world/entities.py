@@ -11,32 +11,31 @@ PLAYER = partial(Entity, 'player', False, 'human-peasant.png')
 # Define some template entities
 class Rfloor(Entity):
 
-    def __init__(self, imgend, actions=[]):
+    def __init__(self, imgend, action=[]):
         Entity.__init__(
-            self, 'rough surface', True, 'floor-a-' + imgend, actions=actions)
+            self, 'rough surface', True, 'floor-a-' + imgend, action=action)
 
 class Sfloor(Entity):
 
-    def __init__(self, imgend, actions=[]):
+    def __init__(self, imgend, action=[]):
         Entity.__init__(
-            self, 'smooth surface', True, 'floor-b-' + imgend, actions=actions)
+            self, 'smooth surface', True, 'floor-b-' + imgend, action=action)
 
 class Vwall(Entity):
 
-    def __init__(self, imgend, actions=[]):
+    def __init__(self, imgend, action=[]):
         Entity.__init__(
-            self, 'wall', False, 'wall-vert-' + imgend, actions=actions)
+            self, 'wall', False, 'wall-vert-' + imgend, action=action)
 
 class Hwall(Entity):
 
-    def __init__(self, imgend, actions=[]):
+    def __init__(self, imgend, action=[]):
         Entity.__init__(
-            self, 'wall', False, 'wall-horiz-' + imgend, actions=actions)
+            self, 'wall', False, 'wall-horiz-' + imgend, action=action)
 
 
 # Define entities for each room
 # ----------------------------------------------------------------------
-
 class RedRoom:
 
     ALL = ['rfloor', 'sfloor', 'vwall', 'hwall']
@@ -51,9 +50,10 @@ class RedRoom:
         name='troll',
         walkable=False,
         image='troll.png',
-        actions=(
-            Alert('I like shorts'),
-            UpdatePlot('CheckTroll')))
+        action=(
+            ActionIter(
+                Alert('I like shorts'),
+                UpdatePlot('CheckTroll'))))
 
 class BlueRoom:
 

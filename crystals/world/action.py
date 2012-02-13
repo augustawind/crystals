@@ -1,5 +1,6 @@
-"""the component parts of a world"""
+"""actions tied to entities"""
 import abc
+from itertools import izip_longest
 
 
 class Action(object):
@@ -9,6 +10,9 @@ class Action(object):
 
     def __init__(self, *args, **kwargs):
         """Initialize the action, given its arguments."""
+
+    def __str__(self):
+        return self.__class__.__name__
 
     @abc.abstractmethod
     def __call__(self, entity, *args):
@@ -20,7 +24,6 @@ class Action(object):
         does so.
         """
 
-
 class ActionSequence(Action):
     """Executes multiple actions "at once", one after the other in a given
     sequence.
@@ -30,7 +33,7 @@ class ActionSequence(Action):
         self.actions = actions
 
     def __call__(self, entity, *allargs):
-        for action, args in zip(self.actions, allargs):
+        for action, args in izip_longest(self.actions, allargs, fillvalue=()):
             action(entity, *args)
 
 
@@ -44,13 +47,19 @@ class ActionIter(Action):
 
     def __init__(self, *actions):
         self.actions = actions
+        self._index = 0
         self._iter = self._iter_actions()
         next(self._iter)
 
+    @property
+    def next_action(self):
+        return self.actions[self._index]
+
     def _iter_actions(self):
-        for action in self.actions:
+        for action in self.actions[:-1]:
             entity, args = (yield)
             action(entity, *args)
+            self._index += 1
 
         while True:
             entity, args = (yield)

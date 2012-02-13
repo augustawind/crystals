@@ -46,7 +46,7 @@ def TestActionSequence():
     action2 = DummyAction()
     actseq = action.ActionSequence(action1, action2)
 
-    actseq(None, (), ())
+    actseq(None)
     assert action1.value == 1
     assert action2.value == 1
 
