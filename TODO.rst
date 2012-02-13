@@ -10,12 +10,15 @@ Reexamine unit tests
     * Convert test classes with methods to functions anywhere this
       would make things clearer.
     * Decide on testing practices and stick with them:
-        * Test class definitions follow the following format::
+        * Test class definitions serve as semantic wrappers for test
+          definitions, and follow the following format::
 
+            [@with_setup({setup_func[,{teardown_func}])]
             def Test{Object}([bases...]):
                 {test definitions}
 
-        * Test function definitions follow the following format::
+        * Test definitions are always functions or methods of test
+          classes, and follow the following format::
 
             def Test{Callable}_{Condition}_{ExpectedResult}([self]):
                 {test body}

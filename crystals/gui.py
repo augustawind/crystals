@@ -173,22 +173,26 @@ class Menu(object):
             self.functions[self.selection]()
 
 
-class TextFeed(object):
-    """A box that can output text."""
+class InfoBox(object):
+    """A box that can output text in a scrolling manner."""
+    
+    style = dict(line_spacing=24, font_name='monospace', font_size=16,
+                 color=COLOR_WHITE, wrap=True)
 
     def __init__(self, x, y, width, height, batch, show_box=False,
-                 padding=10, style=dict(
-                    line_spacing=24, font_name='monospace', font_size=16,
-                    bold=False, italic=False, color=COLOR_WHITE)):
+                 padding=10, style={}):
         self.batch = batch
+
+        self.style = self.style.copy()
+        self.style.update(style)
 
         layout_x = x + padding
         layout_y = y + padding
         layout_width = width - (padding * 2)
         layout_height = height - (padding * 2)
 
-        self.document = pyglet.text.document.FormattedDocument('\n')
-        self.document.set_paragraph_style(0, 1, style)
+        self.document = pyglet.text.document.UnformattedDocument(' ')
+        self.document.set_paragraph_style(0, 1, self.style)
         self.layout = pyglet.text.layout.IncrementalTextLayout(
             self.document, layout_width, layout_height, multiline=True,
             batch=batch)

@@ -62,16 +62,14 @@ class WorldMode(GameMode):
         self.world.batch = self.batch
         self.world.set_focus()
         
-        tf_padding = 10
-        tf_x = tf_y = tf_padding
-        tf_width = window.width - (tf_padding * 2)
-        tf_height = 100
-        tf_style = dict(
-            wrap=True, font_size=10, line_spacing=20, color=gui.COLOR_WHITE,
-            font_name='monospace')
-        self.infobox = gui.TextFeed(
-            tf_x, tf_y, tf_width, tf_height, self.batch, show_box=True,
-            style=tf_style)
+        ib_padding = 10
+        ib_x = ib_y = ib_padding
+        ib_width = window.width - (ib_padding * 2)
+        ib_height = 100
+        ib_style = dict(font_size=10, line_spacing=20)
+        self.infobox = gui.InfoBox(
+            ib_x, ib_y, ib_width, ib_height, self.batch, show_box=True,
+            style=ib_style)
 
         # Define possible user inputs and their effects.
         # Values are each a tuple of a callable followed optionally by 
