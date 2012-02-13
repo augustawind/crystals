@@ -1,7 +1,7 @@
 from functools import partial
 
 from crystals.world import Entity
-from crystals.world.action import *
+from actions import *
 
 
 # Define the player entity
@@ -38,8 +38,6 @@ class Hwall(Entity):
 # ----------------------------------------------------------------------
 class RedRoom:
 
-    ALL = ['rfloor', 'sfloor', 'vwall', 'hwall']
-
     rfloor = partial(Rfloor, 'red.png')
     sfloor = partial(Sfloor, 'red.png')
     vwall = partial(Vwall, 'blue.png')
@@ -50,14 +48,9 @@ class RedRoom:
         name='troll',
         walkable=False,
         image='troll.png',
-        action=(
-            ActionIter(
-                Alert('I like shorts'),
-                UpdatePlot('CheckTroll'))))
+        action=troll_action)
 
 class BlueRoom:
-
-    ALL = ['sfloor', 'vwall', 'hwall']
 
     sfloor = partial(Entity, 'smooth surface', True, 'tree-dead.png')
     vwall = partial(Vwall, 'blue.png')

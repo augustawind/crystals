@@ -92,7 +92,7 @@ def load_world(world_path, img_path):
     # Make rooms and portals
     rooms = {}
     portals = {}
-    for rname in atlas.ALL:
+    for rname in atlas.ROOMS:
         ratlas = getattr(atlas, rname)
         rentities = getattr(entities, rname)
         rooms[rname] = load_room(rname, ratlas, rentities)

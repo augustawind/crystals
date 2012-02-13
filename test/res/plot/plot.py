@@ -1,11 +1,4 @@
-from random import randint
-from itertools import repeat
-
-from state import *
-
-
 STATE = ()
-
 
 # trigger functions
 # ----------------------------------------------------------------------

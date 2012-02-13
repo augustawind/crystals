@@ -1,4 +1,4 @@
-ALL = ['RedRoom', 'BlueRoom']
+ROOMS = ['RedRoom', 'BlueRoom']
 START = ('RedRoom', 1, 2, 2)
 
 
