@@ -13,7 +13,6 @@ Reexamine unit tests
         * Test class definitions serve as semantic wrappers for test
           definitions, and follow the following format::
 
-            [@with_setup({setup_func[,{teardown_func}])]
             def Test{Object}([bases...]):
                 {test definitions}
 
