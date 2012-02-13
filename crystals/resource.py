@@ -5,7 +5,7 @@ import sys
 import pyglet
 from pyglet.gl import *
 
-from crystals.plot import plot
+from crystals import plot
 from crystals.world import Room, World, Entity, TILE_SIZE
 
 PLAYER_CHAR = '@' # atlas char that represents the player
@@ -117,4 +117,4 @@ def load_plot(plot_path):
 
     state = set()
 
-    return plot(state, triggers), state
+    return plot.plot(state, triggers), state

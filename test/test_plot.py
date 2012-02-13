@@ -3,7 +3,7 @@ from functools import partial
 from crystals import plot
 
 
-class TestOldplot():
+class TestPlot():
 
     def TestEverything(self):
         self.dummy = -1
