@@ -9,6 +9,11 @@ WORLD_PATH = RES_PATH + '/world'
 PLOT_PATH = RES_PATH + '/plot'
 IMG_PATH = RES_PATH + '/img'
 
+pyglet.resource.path = [
+    IMG_PATH + '/terrain', IMG_PATH + '/item', IMG_PATH + '/character']
+pyglet.resource._default_loader._script_home = '.'
+pyglet.resource.reindex()
+
 
 class PygletTestCase(object):
 
