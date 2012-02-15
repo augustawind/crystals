@@ -1,7 +1,7 @@
 CRY§TAL§ TODO
 =============
 
-Rewrite crystals.resource module - BRAINSTORM
+Restructure crystals.resource module - BRAINSTORM
 .............................................
 
     * ``crystals.loader`` -- Loads bundled images and API scripts
@@ -13,12 +13,14 @@ Rewrite crystals.resource module - BRAINSTORM
 Convert classes to module namespaces (where possible)
 .....................................................
 
-* Restructure package crystals.app:
-    
-    * ``crystals.app`` -- Package root; contains the MainMenu object
+    * Restructure package crystals.app:
+        
+        * ``crystals.app`` -- Gamemode objects
 
-    * ``crystals.app.worldmode`` -- All attributes and methods from
-      crystals.app.WorldMode will be adapted to this module object
+        * ``crystals.app.worldmode`` -- All attributes and methods from
+          crystals.app.WorldMode will be adapted to this module object
+
+    * Adapt ``crystals.game.Game`` to a module namespace.
 
 Reexamine unit tests
 ....................

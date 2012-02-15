@@ -1,4 +1,4 @@
-from crystals.scripthelpers import *
+from crystals.api.action import *
 
 
 troll_action = ActionIter(

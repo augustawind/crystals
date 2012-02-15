@@ -5,9 +5,9 @@ import pyglet
 from pyglet.window import key
 
 from crystals import gui
-from crystals import resource
-from crystals.app import *
-from crystals.plot import GameOver
+from crystals import loader
+from crystals.api.plot import GameOver
+from crystals.engine import *
 
 RES_PATH = 'res' # default path to variable game resources
 WORLD_PATH = RES_PATH + '/world' # default path to variable world scripts
@@ -46,7 +46,7 @@ class Game(object):
         self.window.pop_handlers()
         self.window.clear()
 
-        world, player = resource.load_world(WORLD_PATH, IMG_PATH)
-        plot, pstate = resource.load_plot(PLOT_PATH)
+        world, player = loader.load_world(WORLD_PATH, IMG_PATH)
+        plot, pstate = loader.load_plot(PLOT_PATH)
         self.wmode = WorldMode(self.window, world, player, plot, pstate)
         self.wmode.activate()

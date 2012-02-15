@@ -1,6 +1,6 @@
 from functools import partial
 
-from crystals import plot
+from crystals.api import plot
 
 
 class TestPlot():

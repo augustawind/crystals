@@ -1,7 +1,7 @@
 import pyglet
 from pyglet.window import key
 
-from crystals import app
+from crystals import engine
 from crystals import gui
 from crystals import world
 from crystals.test.test_world import WorldTestCase
@@ -10,13 +10,13 @@ from crystals.test.util import *
 
 def TestGameMode():
     window = pyglet.window.Window()
-    gamemode = app.GameMode(window)
+    gamemode = engine.GameMode(window)
 
 
 def TestMainMenu():
     window = pyglet.window.Window()
     new_game = lambda: None
-    mm = app.MainMenu(window, new_game)
+    mm = engine.MainMenu(window, new_game)
 
 
 class TestWorldMode(WorldTestCase):
@@ -47,7 +47,7 @@ class TestWorldMode(WorldTestCase):
         plot = mockplot()
         plot.next()
         plot_state = set()
-        self.wmode = app.WorldMode(self.window, self.world_, self.player,
+        self.wmode = engine.WorldMode(self.window, self.world_, self.player,
                                     plot, plot_state)
 
 

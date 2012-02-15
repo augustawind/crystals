@@ -1,6 +1,4 @@
-"""implementation of plot mechanics, the higher powers driving the game"""
-from crystals.util import coroutine
-
+"""implementation of plot mechanics"""
 
 class GameOver(BaseException):
     """Raised when the game is over."""
@@ -11,7 +9,15 @@ def _format_triggers(triggers):
                 for k, v in triggers.iteritems())
 
 
-@coroutine
+def _coroutine(func):
+    def start(*args, **kwargs):
+        cr = func(*args, **kwargs)
+        cr.next()
+        return cr 
+    return start
+
+
+@_coroutine
 def plot(state, triggers):
     """Return a plot generator, given an initial state set and a
     mapping of functions to potential state elements.

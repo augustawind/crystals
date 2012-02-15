@@ -5,7 +5,7 @@ from functools import partial
 import pyglet
 from nose.tools import *
 
-from crystals import resource
+from crystals import loader
 from crystals.world import Room, World, Entity, TILE_SIZE
 from crystals.test.util import *
 
@@ -16,7 +16,7 @@ def TestPrepareEntity_ValidParamsGiven_ScaleImage():
     image = entity.image
     assert image.width != TILE_SIZE
     assert image.height != TILE_SIZE
-    resource.prepare_sprite(entity)
+    loader.prepare_sprite(entity)
     assert image.width == TILE_SIZE
     assert image.height == TILE_SIZE
 
@@ -29,7 +29,7 @@ def check_room(room, atlas, entities):
             for x in xrange(len(atlas.map[z][ay])):
                 char = atlas.map[z][ay][x]
 
-                if char == resource.IGNORE_CHAR:
+                if char == loader.IGNORE_CHAR:
                     assert room[ry][x][z] is None
                     continue
 
@@ -67,7 +67,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharNotInMap_ReturnExpectedRoom():
             walkable = True,
             image = 'sack.png')
 
-    room = resource.load_room(name, atlas, entities)
+    room = loader.load_room(name, atlas, entities)
     check_room(room, atlas, entities)
 
 
@@ -83,7 +83,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
                 ],
             [
                 'o@o',
-                'o' + resource.IGNORE_CHAR + '@',
+                'o' + loader.IGNORE_CHAR + '@',
                 '@oo']]
     class entities:
         floor = partial(Entity, 
@@ -99,7 +99,7 @@ def TestLoadRoom_ValidArgsGiven_IgnoreCharInZLevel1_ReturnExpectedRoom():
             walkable = True,
             image = 'sack.png')
 
-    room = resource.load_room(name, atlas, entities)
+    room = loader.load_room(name, atlas, entities)
     assert room[1][1][1] is None
     check_room(room, atlas, entities)
 
@@ -111,13 +111,13 @@ def TestLoadPortals_LoadExpectedPortals():
             '..2',
             '.1.',
             '...']
-    portals = resource.load_portals(atlas)
+    portals = loader.load_portals(atlas)
 
     assert portals == {'Room1': (1, 1), 'Room2': (2, 0)}
 
 
 def TestLoadWorld_ReturnExpectedWorld():
-    world, player = resource.load_world(WORLD_PATH, IMG_PATH)
+    world, player = loader.load_world(WORLD_PATH, IMG_PATH)
 
     assert isinstance(world, World)
     assert len(world) is 2
@@ -139,7 +139,7 @@ def TestLoadWorld_ReturnExpectedWorld():
 
 
 def TestLoadWorld_ReturnExpectedPlayerAtExpectedCoords():
-    world, player = resource.load_world(WORLD_PATH, IMG_PATH)
+    world, player = loader.load_world(WORLD_PATH, IMG_PATH)
 
     assert isinstance(player, Entity)
     assert player.name == 'player'
@@ -151,4 +151,4 @@ def TestLoadWorld_ReturnExpectedPlayerAtExpectedCoords():
 
 
 def TestLoadPlot():
-    resource.load_plot(PLOT_PATH)
+    loader.load_plot(PLOT_PATH)

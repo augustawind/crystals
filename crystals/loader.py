@@ -5,7 +5,7 @@ import sys
 import pyglet
 from pyglet.gl import *
 
-from crystals import plot
+from crystals.api import plot
 from crystals.world import Room, World, Entity, TILE_SIZE
 
 PLAYER_CHAR = '@' # atlas char that represents the player
