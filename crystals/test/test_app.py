@@ -1,22 +1,22 @@
 import pyglet
 from pyglet.window import key
 
-from crystals import game
+from crystals import app
 from crystals import gui
 from crystals import world
-from test.util import *
-from test.test_world import WorldTestCase
+from crystals.test.test_world import WorldTestCase
+from crystals.test.util import *
 
 
 def TestGameMode():
     window = pyglet.window.Window()
-    gamemode = game.GameMode(window)
+    gamemode = app.GameMode(window)
 
 
 def TestMainMenu():
     window = pyglet.window.Window()
     new_game = lambda: None
-    mm = game.MainMenu(window, new_game)
+    mm = app.MainMenu(window, new_game)
 
 
 class TestWorldMode(WorldTestCase):
@@ -47,7 +47,7 @@ class TestWorldMode(WorldTestCase):
         plot = mockplot()
         plot.next()
         plot_state = set()
-        self.wmode = game.WorldMode(self.window, self.world_, self.player,
+        self.wmode = app.WorldMode(self.window, self.world_, self.player,
                                     plot, plot_state)
 
 
@@ -96,17 +96,3 @@ class TestWorldMode(WorldTestCase):
             x, y, z = self.world_.focus.get_coords(self.wmode.player)
             self.wmode.on_key_press(mvkey, 0)
             assert self.room2[y][x][z] == self.player
-
-
-class TestGame(object):
-
-    def TestInit(self):
-        game_ = game.Game()
-
-    def TestNewGame_LoadWorldMode(self):
-        game_ = game.Game()
-        def on_draw():
-            pass
-        game_.window.push_handlers(on_draw)
-        game_.new_game()
-        assert isinstance(game_.wmode, game.WorldMode)

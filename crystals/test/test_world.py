@@ -5,7 +5,7 @@ import pyglet
 from nose.tools import *
 
 from crystals import world
-from test.util import *
+from crystals.test.util import *
 
 
 def TestEntity():

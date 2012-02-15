@@ -7,7 +7,7 @@ from nose.tools import *
 
 from crystals import resource
 from crystals.world import Room, World, Entity, TILE_SIZE
-from test.util import *
+from crystals.test.util import *
 
 
 def TestPrepareEntity_ValidParamsGiven_ScaleImage():

@@ -1,8 +1,28 @@
 CRY§TAL§ TODO
 =============
 
+Rewrite crystals.resource module - BRAINSTORM
+.............................................
+
+    * ``crystals.loader`` -- Loads bundled images and API scripts
+    * ``api.action`` -- API for defining entity actions
+    * ``api.entity`` -- API for defining entities
+    * ``api.world`` -- API for defining the world
+    * ``api.plot`` -- API for defining the plot sequence
+
+Convert classes to module namespaces (where possible)
+.....................................................
+
+* Restructure package crystals.app:
+    
+    * ``crystals.app`` -- Package root; contains the MainMenu object
+
+    * ``crystals.app.worldmode`` -- All attributes and methods from
+      crystals.app.WorldMode will be adapted to this module object
+
 Reexamine unit tests
-...............
+....................
+
     * Use mocks for EVERYTHING except the object being tested,
       pyglet objects, and builtins/stdlib.
     * Disentangle tests from each other, making them true "unit"
@@ -10,6 +30,7 @@ Reexamine unit tests
     * Convert test classes with methods to functions anywhere this
       would make things clearer.
     * Decide on testing practices and stick with them:
+
         * Test class definitions serve as semantic wrappers for test
           definitions, and follow the following format::
 
@@ -43,6 +64,7 @@ Implement complex interactions between PC and NPCs
       if given plot state is not found True.
         * This would allow for indefinite repetition of the same action.
     * Write class Interaction in world.entity to coordinate actions.
+
         * Constructor takes two arguments, on_engage and on_step,
           which specify the actions to execute when engaged with from
           an adjacent entity and when stepped upon, respectively.
@@ -50,6 +72,7 @@ Implement complex interactions between PC and NPCs
               call is made, the next action in the list will be executed.
             * Methods engage(actor, reciever) and step(actor, reciever)
               are responsible for executing the actions.
+
     * Change world.Entity argument 'actions' to 'interaction', which
       takes an Interaction object.
     * (Eventually) write a factory function IndexedInteraction which
@@ -90,6 +113,7 @@ Implement visual effects
       to a particular frame.
     * Entities visually rotate to match the direction of their last
       movement.
+
         * Most will only have right and left rotations.
         * The player and party members will have all four directions.
 

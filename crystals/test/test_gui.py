@@ -6,7 +6,7 @@ from pyglet.graphics.vertexdomain import VertexList
 from pyglet.window import mouse
 from nose.tools import *
 
-from test.util import *
+from crystals.test.util import *
 from crystals import gui
 from crystals.world import TILE_SIZE
 

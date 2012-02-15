@@ -4,7 +4,7 @@ import os
 
 import pyglet
 
-RES_PATH = 'test/res'
+RES_PATH = 'crystals/test/res'
 WORLD_PATH = RES_PATH + '/world'
 PLOT_PATH = RES_PATH + '/plot'
 IMG_PATH = RES_PATH + '/img'

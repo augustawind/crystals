@@ -12,7 +12,7 @@ ORIGIN_Y = 124 # of room display, in pixels
 class Entity(pyglet.sprite.Sprite):
     """A tangible thing in the game world."""
 
-    def __init__(self, name, walkable, image, facing=(0, -1), action=None, 
+    def __init__(self, name, walkable, image, action=None, facing=(0, -1),  
                  id=None):
         image = pyglet.resource.image(image)
         super(Entity, self).__init__(image)
